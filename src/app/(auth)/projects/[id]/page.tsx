@@ -5,7 +5,7 @@ import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import { Separator } from "@/components/ui/separator";
 import { ProjectStatusBadge } from "@/components/features/projects/ProjectStatusBadge";
-import { mockProjects } from "@/lib/utils/mockData";
+import { getProjectById } from "@/lib/supabase/queries/projects";
 import { formatDate, formatBudget, formatDeadlineDays } from "@/lib/utils/format";
 
 interface ProjectDetailPageProps {
@@ -16,11 +16,13 @@ export default async function ProjectDetailPage({
   params,
 }: ProjectDetailPageProps) {
   const { id } = await params;
-  const project = mockProjects.find((p) => p.id === id);
+  const result = await getProjectById(id);
 
-  if (!project) {
+  if (!result) {
     notFound();
   }
+
+  const { data: project } = result;
 
   const workTypeLabel =
     project.workType === "remote"

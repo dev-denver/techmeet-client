@@ -2,10 +2,24 @@ import { ProfileHeader } from "@/components/features/profile/ProfileHeader";
 import { AvailabilityToggle } from "@/components/features/profile/AvailabilityToggle";
 import { CareerSection } from "@/components/features/profile/CareerSection";
 import { TechStackSection } from "@/components/features/profile/TechStackSection";
-import { mockProfile } from "@/lib/utils/mockData";
+import { getProfile } from "@/lib/supabase/queries/profile";
+import { Card, CardContent } from "@/components/ui/card";
 
-export default function ProfilePage() {
-  const profile = mockProfile;
+export default async function ProfilePage() {
+  const result = await getProfile();
+  const profile = result?.data;
+
+  if (!profile) {
+    return (
+      <div className="p-4">
+        <Card>
+          <CardContent className="p-6 text-center text-sm text-muted-foreground">
+            프로필 정보를 불러올 수 없습니다.
+          </CardContent>
+        </Card>
+      </div>
+    );
+  }
 
   return (
     <div className="pb-4">

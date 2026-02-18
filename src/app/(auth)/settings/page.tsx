@@ -1,10 +1,11 @@
 import { ChevronRight, LogOut, Shield, Info } from "lucide-react";
 import { Separator } from "@/components/ui/separator";
 import { NotificationSettings } from "@/components/features/settings/NotificationSettings";
-import { mockProfile } from "@/lib/utils/mockData";
+import { getProfile } from "@/lib/supabase/queries/profile";
 
-export default function SettingsPage() {
-  const profile = mockProfile;
+export default async function SettingsPage() {
+  const result = await getProfile();
+  const profile = result?.data;
 
   return (
     <div className="pb-4">
@@ -16,15 +17,15 @@ export default function SettingsPage() {
         <div className="space-y-1">
           <div className="flex items-center justify-between py-2">
             <span className="text-sm text-muted-foreground">이름</span>
-            <span className="text-sm font-medium">{profile.name}</span>
+            <span className="text-sm font-medium">{profile?.name ?? "-"}</span>
           </div>
           <div className="flex items-center justify-between py-2">
             <span className="text-sm text-muted-foreground">이메일</span>
-            <span className="text-sm font-medium">{profile.email}</span>
+            <span className="text-sm font-medium">{profile?.email ?? "-"}</span>
           </div>
           <div className="flex items-center justify-between py-2">
             <span className="text-sm text-muted-foreground">카카오 ID</span>
-            <span className="text-sm font-medium">{profile.kakaoId ?? "-"}</span>
+            <span className="text-sm font-medium">{profile?.kakaoId ?? "-"}</span>
           </div>
         </div>
       </div>

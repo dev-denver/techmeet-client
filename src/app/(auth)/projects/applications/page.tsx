@@ -1,5 +1,5 @@
 import { ApplicationCard } from "@/components/features/projects/ApplicationCard";
-import { mockApplications } from "@/lib/utils/mockData";
+import { getApplications } from "@/lib/supabase/queries/applications";
 
 const statusOrder = [
   "interview",
@@ -10,16 +10,16 @@ const statusOrder = [
   "withdrawn",
 ];
 
-export default function ApplicationsPage() {
-  const sorted = [...mockApplications].sort(
+export default async function ApplicationsPage() {
+  const { data: applications, total } = await getApplications();
+
+  const sorted = [...applications].sort(
     (a, b) => statusOrder.indexOf(a.status) - statusOrder.indexOf(b.status)
   );
 
   return (
     <div className="p-4 space-y-4">
-      <p className="text-sm text-muted-foreground">
-        총 {mockApplications.length}건 지원
-      </p>
+      <p className="text-sm text-muted-foreground">총 {total}건 지원</p>
       {sorted.length > 0 ? (
         <div className="space-y-3">
           {sorted.map((app) => (
