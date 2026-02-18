@@ -11,12 +11,7 @@ import {
   mockNotices,
 } from "@/lib/utils/mockData";
 import { formatDate } from "@/lib/utils/format";
-
-const availabilityConfig = {
-  available: { label: "투입 가능", className: "bg-green-100 text-green-700 border-green-200" },
-  partial: { label: "일부 가능", className: "bg-yellow-100 text-yellow-700 border-yellow-200" },
-  unavailable: { label: "투입 불가", className: "bg-red-100 text-red-600 border-red-200" },
-};
+import { AVAILABILITY_STATUS_CONFIG } from "@/lib/constants";
 
 export default function HomePage() {
   const profile = mockProfile;
@@ -24,7 +19,7 @@ export default function HomePage() {
   const recentProjects = mockProjects
     .filter((p) => p.status === "recruiting")
     .slice(0, 3);
-  const availConfig = availabilityConfig[profile.availabilityStatus];
+  const availConfig = AVAILABILITY_STATUS_CONFIG[profile.availabilityStatus];
 
   return (
     <div className="space-y-6 p-4">
@@ -89,7 +84,7 @@ export default function HomePage() {
         <div className="space-y-2">
           {mockNotices.map((notice) => (
             <Card key={notice.id} className="hover:shadow-md transition-shadow cursor-pointer">
-              <CardContent className="p-4">
+              <CardContent>
                 <div className="flex items-start gap-2">
                   {notice.isImportant && (
                     <Bell className="h-4 w-4 text-orange-500 shrink-0 mt-0.5" />

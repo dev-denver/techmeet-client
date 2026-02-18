@@ -3,14 +3,7 @@
 import { useSearchParams, useRouter } from "next/navigation";
 import { useEffect, useState, Suspense } from "react";
 import { Eye, EyeOff } from "lucide-react";
-import { validatePassword, validatePhone } from "@/lib/utils/validation";
-
-function formatPhone(value: string): string {
-  const digits = value.replace(/\D/g, "");
-  if (digits.length <= 3) return digits;
-  if (digits.length <= 7) return `${digits.slice(0, 3)}-${digits.slice(3)}`;
-  return `${digits.slice(0, 3)}-${digits.slice(3, 7)}-${digits.slice(7, 11)}`;
-}
+import { validatePassword, validatePhone, formatPhone } from "@/lib/utils/validation";
 
 function PasswordStrength({ password }: { password: string }) {
   if (!password) return null;

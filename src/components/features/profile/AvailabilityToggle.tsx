@@ -2,25 +2,12 @@
 
 import { useState } from "react";
 import { cn } from "@/lib/utils/cn";
+import { AVAILABILITY_TOGGLE_CONFIG } from "@/lib/constants";
 import type { AvailabilityStatus } from "@/types";
 
-const options: { value: AvailabilityStatus; label: string; className: string }[] = [
-  {
-    value: "available",
-    label: "투입 가능",
-    className: "bg-green-500 text-white",
-  },
-  {
-    value: "partial",
-    label: "일부 가능",
-    className: "bg-yellow-400 text-yellow-900",
-  },
-  {
-    value: "unavailable",
-    label: "투입 불가",
-    className: "bg-red-500 text-white",
-  },
-];
+const options = (Object.entries(AVAILABILITY_TOGGLE_CONFIG) as [AvailabilityStatus, { label: string; className: string }][]).map(
+  ([value, config]) => ({ value, ...config })
+);
 
 interface AvailabilityToggleProps {
   initialStatus: AvailabilityStatus;
@@ -38,7 +25,7 @@ export function AvailabilityToggle({ initialStatus }: AvailabilityToggleProps) {
             key={option.value}
             onClick={() => setStatus(option.value)}
             className={cn(
-              "flex-1 py-2 px-3 rounded-lg text-sm font-medium transition-all",
+              "flex-1 py-2 px-3 rounded-lg text-sm font-medium transition-all focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2",
               status === option.value
                 ? option.className
                 : "bg-secondary text-secondary-foreground hover:bg-secondary/80"

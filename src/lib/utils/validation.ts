@@ -24,6 +24,17 @@ export function validatePhone(phone: string): boolean {
   return /^010-\d{4}-\d{4}$/.test(phone);
 }
 
+export function validateEmail(email: string): boolean {
+  return /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email);
+}
+
+export function formatPhone(value: string): string {
+  const digits = value.replace(/\D/g, "");
+  if (digits.length <= 3) return digits;
+  if (digits.length <= 7) return `${digits.slice(0, 3)}-${digits.slice(3)}`;
+  return `${digits.slice(0, 3)}-${digits.slice(3, 7)}-${digits.slice(7, 11)}`;
+}
+
 export function validateAge(age: number): boolean {
   return Number.isInteger(age) && age >= 1 && age <= 99;
 }

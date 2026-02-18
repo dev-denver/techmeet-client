@@ -3,7 +3,7 @@ import { MapPin, Clock, Users } from "lucide-react";
 import { Card, CardContent } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { ProjectStatusBadge } from "./ProjectStatusBadge";
-import { formatBudget, formatDeadlineDays } from "@/lib/utils/format";
+import { formatBudget, formatDeadlineDays, getDeadlineDays } from "@/lib/utils/format";
 import type { Project } from "@/types";
 
 interface ProjectCardProps {
@@ -12,15 +12,16 @@ interface ProjectCardProps {
 
 export function ProjectCard({ project }: ProjectCardProps) {
   const deadlineText = formatDeadlineDays(project.deadline);
+  const deadlineDays = getDeadlineDays(project.deadline);
   const isUrgent =
     project.status === "recruiting" &&
-    deadlineText !== "마감" &&
-    parseInt(deadlineText) <= 7;
+    deadlineDays !== null &&
+    deadlineDays <= 7;
 
   return (
     <Link href={`/projects/${project.id}`}>
       <Card className="hover:shadow-md transition-shadow cursor-pointer">
-        <CardContent className="p-4 space-y-3">
+        <CardContent className="space-y-3">
           {/* 헤더: 상태 + 마감 */}
           <div className="flex items-center justify-between">
             <ProjectStatusBadge status={project.status} />

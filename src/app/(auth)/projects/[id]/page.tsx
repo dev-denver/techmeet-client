@@ -130,7 +130,7 @@ export default async function ProjectDetailPage({
       {/* 지원 마감 */}
       <div className="p-4 border-b">
         <Card className="bg-zinc-50">
-          <CardContent className="p-4 flex items-center justify-between">
+          <CardContent className="flex items-center justify-between">
             <div>
               <p className="text-xs text-muted-foreground">지원 마감일</p>
               <p className="font-semibold text-sm">{formatDate(project.deadline)}</p>

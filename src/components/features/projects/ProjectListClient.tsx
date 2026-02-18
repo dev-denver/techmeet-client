@@ -3,16 +3,14 @@
 import { useState } from "react";
 import { ProjectFilters } from "./ProjectFilters";
 import { ProjectCard } from "./ProjectCard";
-import type { Project, ProjectStatus } from "@/types";
-
-type FilterValue = "all" | ProjectStatus;
+import type { Project, ProjectFilterValue } from "@/types";
 
 interface ProjectListClientProps {
   projects: Project[];
 }
 
 export function ProjectListClient({ projects }: ProjectListClientProps) {
-  const [filter, setFilter] = useState<FilterValue>("all");
+  const [filter, setFilter] = useState<ProjectFilterValue>("all");
 
   const filtered =
     filter === "all" ? projects : projects.filter((p) => p.status === filter);

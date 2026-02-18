@@ -1,4 +1,4 @@
-import type { Project, Application, FreelancerProfile } from "@/types";
+import type { Project, Application, FreelancerProfile, Notice } from "@/types";
 
 export const mockProjects: Project[] = [
   {
@@ -211,7 +211,7 @@ export const mockProfile: FreelancerProfile = {
   updatedAt: "2026-02-01T10:00:00Z",
 };
 
-export const mockNotices = [
+export const mockNotices: Notice[] = [
   {
     id: "notice-001",
     title: "2026년 2월 신규 프리랜서 모집 안내",

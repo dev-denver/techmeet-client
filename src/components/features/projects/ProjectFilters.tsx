@@ -2,11 +2,9 @@
 
 import { useState } from "react";
 import { cn } from "@/lib/utils/cn";
-import type { ProjectStatus } from "@/types";
+import type { ProjectFilterValue } from "@/types";
 
-type FilterValue = "all" | ProjectStatus;
-
-const filters: { value: FilterValue; label: string }[] = [
+const filters: { value: ProjectFilterValue; label: string }[] = [
   { value: "all", label: "전체" },
   { value: "recruiting", label: "모집중" },
   { value: "in_progress", label: "진행중" },
@@ -14,13 +12,13 @@ const filters: { value: FilterValue; label: string }[] = [
 ];
 
 interface ProjectFiltersProps {
-  onFilterChange: (value: FilterValue) => void;
+  onFilterChange: (value: ProjectFilterValue) => void;
 }
 
 export function ProjectFilters({ onFilterChange }: ProjectFiltersProps) {
-  const [active, setActive] = useState<FilterValue>("all");
+  const [active, setActive] = useState<ProjectFilterValue>("all");
 
-  const handleChange = (value: FilterValue) => {
+  const handleChange = (value: ProjectFilterValue) => {
     setActive(value);
     onFilterChange(value);
   };
@@ -32,7 +30,7 @@ export function ProjectFilters({ onFilterChange }: ProjectFiltersProps) {
           key={value}
           onClick={() => handleChange(value)}
           className={cn(
-            "shrink-0 px-4 py-2 rounded-full text-sm font-medium transition-colors",
+            "shrink-0 px-4 py-2 rounded-full text-sm font-medium transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2",
             active === value
               ? "bg-primary text-primary-foreground"
               : "bg-secondary text-secondary-foreground hover:bg-secondary/80"

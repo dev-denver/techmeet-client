@@ -15,7 +15,7 @@ export function ProfileHeader({ profile }: ProfileHeaderProps) {
     <div className="flex items-center gap-4 p-4 border-b">
       <Avatar className="h-16 w-16">
         {profile.avatarUrl && <AvatarImage src={profile.avatarUrl} alt={profile.name} />}
-        <AvatarFallback className="text-lg font-semibold bg-zinc-200">
+        <AvatarFallback className="text-lg font-semibold bg-muted">
           {initials}
         </AvatarFallback>
       </Avatar>

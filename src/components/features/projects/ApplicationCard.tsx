@@ -2,37 +2,8 @@ import Link from "next/link";
 import { Card, CardContent } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { formatDate } from "@/lib/utils/format";
-import type { Application, ApplicationStatus } from "@/types";
-
-const statusConfig: Record<
-  ApplicationStatus,
-  { label: string; className: string }
-> = {
-  pending: {
-    label: "검토 대기",
-    className: "bg-zinc-100 text-zinc-600 border-zinc-200",
-  },
-  reviewing: {
-    label: "검토중",
-    className: "bg-blue-100 text-blue-700 border-blue-200",
-  },
-  interview: {
-    label: "면접 예정",
-    className: "bg-purple-100 text-purple-700 border-purple-200",
-  },
-  accepted: {
-    label: "합격",
-    className: "bg-green-100 text-green-700 border-green-200",
-  },
-  rejected: {
-    label: "불합격",
-    className: "bg-red-100 text-red-600 border-red-200",
-  },
-  withdrawn: {
-    label: "취소",
-    className: "bg-zinc-100 text-zinc-500 border-zinc-200",
-  },
-};
+import { APPLICATION_STATUS_CONFIG } from "@/lib/constants";
+import type { Application } from "@/types";
 
 interface ApplicationCardProps {
   application: Application;
@@ -43,13 +14,13 @@ export function ApplicationCard({
   application,
   compact = false,
 }: ApplicationCardProps) {
-  const config = statusConfig[application.status];
+  const config = APPLICATION_STATUS_CONFIG[application.status];
 
   if (compact) {
     return (
       <Link href={`/projects/${application.projectId}`}>
         <Card className="hover:shadow-md transition-shadow cursor-pointer min-w-[200px] max-w-[220px]">
-          <CardContent className="p-4 space-y-2">
+          <CardContent className="space-y-2">
             <Badge variant="outline" className={config.className}>
               {config.label}
             </Badge>
@@ -68,7 +39,7 @@ export function ApplicationCard({
   return (
     <Link href={`/projects/${application.projectId}`}>
       <Card className="hover:shadow-md transition-shadow cursor-pointer">
-        <CardContent className="p-4 space-y-3">
+        <CardContent className="space-y-3">
           <div className="flex items-start justify-between gap-2">
             <h3 className="font-semibold text-sm leading-snug line-clamp-2 flex-1">
               {application.projectTitle}

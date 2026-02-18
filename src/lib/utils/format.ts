@@ -1,5 +1,13 @@
-export function formatDate(dateString: string): string {
+function parseDate(dateString: string): Date {
   const date = new Date(dateString);
+  if (isNaN(date.getTime())) {
+    throw new Error(`Invalid date string: "${dateString}"`);
+  }
+  return date;
+}
+
+export function formatDate(dateString: string): string {
+  const date = parseDate(dateString);
   return date.toLocaleDateString("ko-KR", {
     year: "numeric",
     month: "long",
@@ -8,7 +16,7 @@ export function formatDate(dateString: string): string {
 }
 
 export function formatShortDate(dateString: string): string {
-  const date = new Date(dateString);
+  const date = parseDate(dateString);
   return date.toLocaleDateString("ko-KR", {
     month: "short",
     day: "numeric",
@@ -19,16 +27,21 @@ export function formatBudget(min: number, max: number): string {
   return `월 ${min.toLocaleString()}만원 ~ ${max.toLocaleString()}만원`;
 }
 
-export function formatDeadlineDays(deadline: string): string {
+export function getDeadlineDays(deadline: string): number | null {
+  const deadlineDate = parseDate(deadline);
   const now = new Date();
-  const deadlineDate = new Date(deadline);
   const diffMs = deadlineDate.getTime() - now.getTime();
   const diffDays = Math.ceil(diffMs / (1000 * 60 * 60 * 24));
+  if (diffDays < 0) return null;
+  return diffDays;
+}
 
-  if (diffDays < 0) return "마감";
-  if (diffDays === 0) return "오늘 마감";
-  if (diffDays === 1) return "내일 마감";
-  return `${diffDays}일 후 마감`;
+export function formatDeadlineDays(deadline: string): string {
+  const days = getDeadlineDays(deadline);
+  if (days === null) return "마감";
+  if (days === 0) return "오늘 마감";
+  if (days === 1) return "내일 마감";
+  return `${days}일 후 마감`;
 }
 
 export function formatMonthYear(dateString: string): string {

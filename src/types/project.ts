@@ -4,6 +4,8 @@ export type ProjectType = "web" | "mobile" | "backend" | "fullstack" | "data" | 
 
 export type WorkType = "remote" | "onsite" | "hybrid";
 
+export type ProjectFilterValue = "all" | ProjectStatus;
+
 export interface Project {
   id: string;
   title: string;
