@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
-import bcrypt from "bcryptjs";
+import { createServerClient } from "@supabase/ssr";
+import { publicEnv } from "@/lib/config/env";
 
 export async function POST(request: NextRequest) {
   const body = await request.json() as { email?: unknown; password?: unknown };
@@ -12,28 +13,33 @@ export async function POST(request: NextRequest) {
     );
   }
 
-  // TODO: Supabase에서 이메일로 유저 조회
-  // const user = await supabase.from("users").select("*").eq("email", email).single();
-  type UserRow = { id: string; email: string; password_hash: string };
-  const user: UserRow | null = null as UserRow | null;
+  const supabaseResponse = NextResponse.json({ success: true });
 
-  if (!user) {
+  const supabase = createServerClient(
+    publicEnv.supabaseUrl,
+    publicEnv.supabaseAnonKey,
+    {
+      cookies: {
+        getAll() {
+          return request.cookies.getAll();
+        },
+        setAll(cookiesToSet) {
+          cookiesToSet.forEach(({ name, value, options }) => {
+            supabaseResponse.cookies.set(name, value, options);
+          });
+        },
+      },
+    }
+  );
+
+  const { error } = await supabase.auth.signInWithPassword({ email, password });
+
+  if (error) {
     return NextResponse.json(
       { error: "이메일 또는 비밀번호가 올바르지 않습니다" },
       { status: 401 }
     );
   }
 
-  const passwordMatch = await bcrypt.compare(password, user.password_hash);
-  if (!passwordMatch) {
-    return NextResponse.json(
-      { error: "이메일 또는 비밀번호가 올바르지 않습니다" },
-      { status: 401 }
-    );
-  }
-
-  // TODO: Supabase Auth 세션 발급
-  // await supabase.auth.setSession(...)
-
-  return NextResponse.json({ success: true });
+  return supabaseResponse;
 }

@@ -8,6 +8,7 @@ import { publicEnv } from "@/lib/config/env";
 const KAKAO_ERROR_MESSAGES: Record<string, string> = {
   email_required: "이메일 제공에 동의해주셔야 로그인이 가능합니다",
   kakao_api_error: "카카오 로그인 처리 중 오류가 발생했습니다",
+  session_error: "로그인 세션 생성에 실패했습니다. 다시 시도해주세요",
   missing_code: "잘못된 접근입니다",
 };
 

@@ -1,7 +1,24 @@
-// TODO: Supabase 서버 클라이언트 초기화 (추후 구현)
-// import { createServerClient } from "@supabase/ssr";
+import { createServerClient as createSSRServerClient } from "@supabase/ssr";
+import { cookies } from "next/headers";
+import { publicEnv } from "@/lib/config/env";
 
-export function createServerClient() {
-  // TODO: 실제 Supabase 서버 클라이언트로 교체
-  throw new Error("Supabase server client not yet configured");
+export async function createServerClient() {
+  const cookieStore = await cookies();
+
+  return createSSRServerClient(publicEnv.supabaseUrl, publicEnv.supabaseAnonKey, {
+    cookies: {
+      getAll() {
+        return cookieStore.getAll();
+      },
+      setAll(cookiesToSet) {
+        try {
+          cookiesToSet.forEach(({ name, value, options }) => {
+            cookieStore.set(name, value, options);
+          });
+        } catch {
+          // Server Component에서 쿠키 설정은 무시 가능
+        }
+      },
+    },
+  });
 }

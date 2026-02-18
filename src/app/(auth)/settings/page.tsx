@@ -1,6 +1,7 @@
-import { ChevronRight, LogOut, Shield, Info } from "lucide-react";
+import { ChevronRight, Shield, Info } from "lucide-react";
 import { Separator } from "@/components/ui/separator";
 import { NotificationSettings } from "@/components/features/settings/NotificationSettings";
+import { LogoutButton } from "@/components/features/settings/LogoutButton";
 import { getProfile } from "@/lib/supabase/queries/profile";
 
 export default async function SettingsPage() {
@@ -69,10 +70,7 @@ export default async function SettingsPage() {
 
       {/* 로그아웃 */}
       <div className="p-4">
-        <button className="flex items-center gap-2 text-red-500 text-sm font-medium hover:opacity-70 transition-opacity w-full py-2">
-          <LogOut className="h-4 w-4" />
-          로그아웃
-        </button>
+        <LogoutButton />
       </div>
     </div>
   );
