@@ -1,20 +1,35 @@
 "use client";
 
 import { MessageSquare, Eye, EyeOff } from "lucide-react";
-import { useState } from "react";
-import { useRouter } from "next/navigation";
+import { useState, Suspense } from "react";
+import { useRouter, useSearchParams } from "next/navigation";
+import { publicEnv } from "@/lib/config/env";
 
-export default function LoginPage() {
+const KAKAO_ERROR_MESSAGES: Record<string, string> = {
+  email_required: "이메일 제공에 동의해주셔야 로그인이 가능합니다",
+  kakao_api_error: "카카오 로그인 처리 중 오류가 발생했습니다",
+  missing_code: "잘못된 접근입니다",
+};
+
+function LoginForm() {
   const router = useRouter();
+  const searchParams = useSearchParams();
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [showPassword, setShowPassword] = useState(false);
   const [error, setError] = useState("");
   const [isLoading, setIsLoading] = useState(false);
 
+  const kakaoError = searchParams.get("error");
+  const kakaoErrorMessage = kakaoError ? (KAKAO_ERROR_MESSAGES[kakaoError] ?? "로그인 중 오류가 발생했습니다") : null;
+
   function handleKakaoLogin() {
-    // TODO: 카카오 OAuth 로그인 구현
-    // window.location.href = `https://kauth.kakao.com/oauth/authorize?client_id=${process.env.NEXT_PUBLIC_KAKAO_REST_API_KEY}&redirect_uri=${process.env.NEXT_PUBLIC_KAKAO_REDIRECT_URI}&response_type=code`;
+    const kakaoAuthUrl =
+      `https://kauth.kakao.com/oauth/authorize` +
+      `?client_id=${publicEnv.kakaoRestApiKey}` +
+      `&redirect_uri=${encodeURIComponent(publicEnv.kakaoRedirectUri)}` +
+      `&response_type=code`;
+    window.location.href = kakaoAuthUrl;
   }
 
   async function handleEmailLogin(e: React.FormEvent) {
@@ -71,6 +86,13 @@ export default function LoginPage() {
           </div>
 
           <div className="w-full flex flex-col gap-4">
+            {/* 카카오 에러 메시지 */}
+            {kakaoErrorMessage && (
+              <p className="text-sm text-red-500 text-center bg-red-50 rounded-lg px-4 py-3">
+                {kakaoErrorMessage}
+              </p>
+            )}
+
             {/* 카카오 로그인 버튼 */}
             <button
               className="flex w-full items-center justify-center gap-3 rounded-xl px-6 py-4 text-[15px] font-semibold text-[#3C1E1E] transition-opacity hover:opacity-90 active:opacity-80"
@@ -141,5 +163,13 @@ export default function LoginPage() {
         </p>
       </div>
     </div>
+  );
+}
+
+export default function LoginPage() {
+  return (
+    <Suspense fallback={null}>
+      <LoginForm />
+    </Suspense>
   );
 }
