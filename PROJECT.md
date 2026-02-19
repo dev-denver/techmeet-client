@@ -69,7 +69,7 @@ src/
 │   ├── layout/                     # TopBar, BottomNavigation
 │   └── features/
 │       ├── projects/               # ProjectCard, ProjectStatusBadge, ApplicationCard, ProjectListClient, ProjectFilters
-│       ├── profile/                # ProfileHeader, AvailabilityToggle, TechStackSection, CareerSection
+│       ├── profile/                # ProfileHeader, AvailabilityToggle, TechStackSection, CareerSection (조회만, 편집 UI 없음)
 │       └── settings/               # NotificationSettings, LogoutButton
 ├── lib/
 │   ├── api/                        # 클라이언트 API 래퍼 함수 (apiFetch)
@@ -241,30 +241,41 @@ created_at   timestamptz
 
 ### 프로젝트
 - [x] 프로젝트 목록 조회 (필터: 전체/모집중/진행중/완료)
-- [x] 프로젝트 상세 페이지
+- [x] 프로젝트 상세 페이지 (기본 정보, 기술 스택, 자격 요건, 마감일 표시)
 - [x] 프로젝트 상태 배지
+- [x] 지원하기 버튼 UI (모집중일 때만 활성화) — 실제 폼 제출 미구현
 
 ### 지원
 - [x] 내 신청 내역 조회
 - [x] 신청 상태별 정렬
+- [x] ApplicationCard compact 모드 (홈 화면 수평 스크롤)
 
 ### 프로필
 - [x] 프로필 헤더 (이름, 한줄소개, 경력연수)
 - [x] 투입 가능 상태 토글 (API 연동 완료)
 - [x] 기술 스택 표시
-- [x] 경력 타임라인 표시
+- [x] 경력 타임라인 표시 (조회만)
+- [x] 자기 소개 표시
 - [x] 내 정보 수정 (/settings/profile)
 
 ### 설정
+- [x] 계정 정보 표시 (이름, 이메일, 카카오 ID)
 - [x] 알림 설정 토글 (API 연동 완료)
 - [x] 내 정보 수정 링크
 - [x] 회원 탈퇴 UI 및 API
 
+### 홈
+- [x] 인사 배너 (이름, 투입 가능 상태 배지)
+- [x] 내 신청 현황 (최근 3건, 전체보기 링크)
+- [x] 최근 프로젝트 (모집중 3건, 전체보기 링크)
+- [x] 공지사항 목록 (중요 표시 포함)
+
 ### UI/UX
 - [x] TopBar (뒤로가기, 스크롤 시 햄버거 메뉴)
 - [x] BottomNavigation (홈/프로젝트/내정보/설정)
-- [x] 모든 페이지 로딩 스켈레톤 (loading.tsx)
+- [x] 모든 (auth) 페이지 로딩 스켈레톤 (loading.tsx)
 - [x] 모바일 고정 폭 (max-w-[430px])
+- [x] 수평 스크롤 (-mx-4 px-4 + scrollbar-none) 패턴
 
 ---
 
@@ -272,25 +283,33 @@ created_at   timestamptz
 
 ### 높은 우선순위
 
-- [ ] **지원하기 기능 완성**: 프로젝트 상세 페이지에서 실제로 지원 폼 제출 (cover_letter, expected_rate 입력)
-- [ ] **카카오 알림톡 연동**: `lib/kakao/alimtalk.ts` 구현 필요
-  - 신규 프로젝트 등록 시 → 대상 프리랜서 전체 알림톡 발송
-  - 지원 상태 변경 시 → 해당 프리랜서에게 알림톡 발송
-  - 알림톡 API 제공사 선택 필요 (솔라피, 카카오 비즈니스, 쿨SMS 등)
-- [ ] **경력 추가/수정/삭제 UI**: CareerSection에 편집 기능 없음, 현재 DB에만 API 존재
-- [ ] **지원 취소 기능**: ApplicationCard에 취소 버튼 추가 (withdraw API는 구현됨)
-- [ ] **탈퇴 회원 미들웨어 처리**: account_status = 'withdrawn'인 경우 로그인 차단 또는 안내 페이지
+- [ ] **지원하기 기능 완성**: 프로젝트 상세 페이지에서 실제로 지원 폼 제출
+  - cover_letter(지원 동기), expected_rate(희망 단가) 입력 폼 필요
+  - POST /api/applications API는 구현됨, UI만 없음
+- [ ] **카카오 알림톡 연동**: `lib/kakao/alimtalk.ts` 현재 console.log 스텁 상태
+  - 알림톡 API 제공사 계약 필요 (NHN Cloud, 솔라피, 쿨SMS 등)
+  - 신규 프로젝트 등록 시 → 대상 프리랜서 전체 발송
+  - 지원 상태 변경 시 → 해당 프리랜서에게 발송
+  - 템플릿 코드 `NEW_PROJECT_NOTIFY`는 제공업체 승인 후 교체 필요
+- [ ] **경력 추가/수정/삭제 UI**: CareerSection은 조회만 가능
+  - CRUD API 라우트는 구현됨 (`/api/profile/careers`, `/api/profile/careers/[id]`)
+  - 편집 UI 컴포넌트 추가 필요
+- [ ] **지원 취소 기능**: ApplicationCard에 취소 버튼 추가
+  - DELETE /api/applications/[id] API는 구현됨
+- [ ] **탈퇴 회원 미들웨어 처리**: account_status = 'withdrawn'인 경우 로그인 차단
+  - 현재 탈퇴 후 재로그인 시 홈으로 진입 가능한 상태
 
 ### 중간 우선순위
 
-- [ ] **공지사항 상세 페이지**: 현재 목록에서 내용을 카드에 표시하지만 상세 페이지 없음
+- [ ] **설정 > 개인정보/이용약관 링크 연결**: 설정 페이지의 개인정보처리방침/이용약관 버튼이 `<button>` 태그로만 존재, `/privacy`, `/terms` 링크 미연결
+- [ ] **공지사항 상세 페이지**: 홈에서 카드로만 표시, 상세 페이지(`/notices/[id]`) 없음
 - [ ] **프로필 사진 업로드**: Supabase Storage 연동 필요
-- [ ] **프로젝트 무한 스크롤/페이지네이션**: 현재 pageSize=20 고정 (전체 로드)
-- [ ] **비밀번호 변경**: 설정에서 비밀번호 변경 기능
+- [ ] **프로젝트 무한 스크롤/페이지네이션**: 현재 pageSize=20 고정
+- [ ] **비밀번호 변경**: 이메일 로그인 계정용 비밀번호 변경 기능
 
 ### 낮은 우선순위
 
-- [ ] **다크 모드 토글**: globals.css에 `.dark` CSS 변수 정의됨, UI 미구현
+- [ ] **다크 모드 토글**: globals.css에 `.dark` CSS 변수 정의됨, 토글 UI 미구현
 - [ ] **푸시 알림 (PWA)**: Web Push 알림 추가 고려
 - [ ] **에러 바운더리**: 페이지별 error.tsx 추가
 
