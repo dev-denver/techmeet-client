@@ -15,6 +15,24 @@ interface AvailabilityToggleProps {
 
 export function AvailabilityToggle({ initialStatus }: AvailabilityToggleProps) {
   const [status, setStatus] = useState<AvailabilityStatus>(initialStatus);
+  const [isUpdating, setIsUpdating] = useState(false);
+
+  async function handleChange(newStatus: AvailabilityStatus) {
+    if (newStatus === status || isUpdating) return;
+    setStatus(newStatus);
+    setIsUpdating(true);
+    try {
+      await fetch("/api/profile/availability", {
+        method: "PUT",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ status: newStatus }),
+      });
+    } catch {
+      setStatus(status);
+    } finally {
+      setIsUpdating(false);
+    }
+  }
 
   return (
     <div className="p-4 border-b space-y-3">
@@ -23,9 +41,10 @@ export function AvailabilityToggle({ initialStatus }: AvailabilityToggleProps) {
         {options.map((option) => (
           <button
             key={option.value}
-            onClick={() => setStatus(option.value)}
+            onClick={() => handleChange(option.value)}
+            disabled={isUpdating}
             className={cn(
-              "flex-1 py-2 px-3 rounded-lg text-sm font-medium transition-all focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2",
+              "flex-1 py-2 px-3 rounded-lg text-sm font-medium transition-all focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:opacity-60",
               status === option.value
                 ? option.className
                 : "bg-secondary text-secondary-foreground hover:bg-secondary/80"

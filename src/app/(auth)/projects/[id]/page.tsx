@@ -6,7 +6,7 @@ import { Card, CardContent } from "@/components/ui/card";
 import { Separator } from "@/components/ui/separator";
 import { ProjectStatusBadge } from "@/components/features/projects/ProjectStatusBadge";
 import { getProjectById } from "@/lib/supabase/queries/projects";
-import { formatDate, formatBudget, formatDeadlineDays } from "@/lib/utils/format";
+import { formatDate, formatBudget, formatDeadlineDays, formatWorkType } from "@/lib/utils/format";
 
 interface ProjectDetailPageProps {
   params: Promise<{ id: string }>;
@@ -23,13 +23,6 @@ export default async function ProjectDetailPage({
   }
 
   const { data: project } = result;
-
-  const workTypeLabel =
-    project.workType === "remote"
-      ? "원격"
-      : project.workType === "onsite"
-        ? "현장"
-        : "하이브리드";
 
   return (
     <div className="pb-6">
@@ -64,7 +57,7 @@ export default async function ProjectDetailPage({
             <Clock className="h-4 w-4 text-muted-foreground shrink-0" />
             <div>
               <p className="text-xs text-muted-foreground">근무 형태</p>
-              <p className="font-medium text-xs">{workTypeLabel}</p>
+              <p className="font-medium text-xs">{formatWorkType(project.workType)}</p>
             </div>
           </div>
           <div className="flex items-center gap-2 text-sm">

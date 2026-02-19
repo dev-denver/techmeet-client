@@ -1,4 +1,5 @@
-import { ChevronRight, Shield, Info } from "lucide-react";
+import Link from "next/link";
+import { ChevronRight, Shield, Info, UserCog, UserX } from "lucide-react";
 import { Separator } from "@/components/ui/separator";
 import { NotificationSettings } from "@/components/features/settings/NotificationSettings";
 import { LogoutButton } from "@/components/features/settings/LogoutButton";
@@ -28,6 +29,16 @@ export default async function SettingsPage() {
             <span className="text-sm text-muted-foreground">카카오 ID</span>
             <span className="text-sm font-medium">{profile?.kakaoId ?? "-"}</span>
           </div>
+          <Link
+            href="/settings/profile"
+            className="flex items-center justify-between w-full py-2 hover:opacity-70 transition-opacity"
+          >
+            <span className="flex items-center gap-2 text-sm">
+              <UserCog className="h-4 w-4 text-muted-foreground" />
+              내 정보 수정
+            </span>
+            <ChevronRight className="h-4 w-4 text-muted-foreground" />
+          </Link>
         </div>
       </div>
 
@@ -68,9 +79,16 @@ export default async function SettingsPage() {
 
       <Separator />
 
-      {/* 로그아웃 */}
-      <div className="p-4">
+      {/* 로그아웃 + 회원탈퇴 */}
+      <div className="p-4 space-y-3">
         <LogoutButton />
+        <Link
+          href="/settings/withdraw"
+          className="flex w-full items-center justify-center rounded-xl border border-red-200 py-2.5 text-sm text-red-500 hover:bg-red-50 transition-colors"
+        >
+          <UserX className="h-4 w-4 mr-2" />
+          회원 탈퇴
+        </Link>
       </div>
     </div>
   );

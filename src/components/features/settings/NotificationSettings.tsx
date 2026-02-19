@@ -1,21 +1,24 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { cn } from "@/lib/utils/cn";
+import type { NotificationSettings as NotificationSettingsType } from "@/types";
 
 interface ToggleProps {
   checked: boolean;
   onChange: (val: boolean) => void;
+  disabled?: boolean;
 }
 
-function Toggle({ checked, onChange }: ToggleProps) {
+function Toggle({ checked, onChange, disabled }: ToggleProps) {
   return (
     <button
       role="switch"
       aria-checked={checked}
       onClick={() => onChange(!checked)}
+      disabled={disabled}
       className={cn(
-        "relative inline-flex h-6 w-11 shrink-0 cursor-pointer rounded-full border-2 border-transparent transition-colors duration-200 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2",
+        "relative inline-flex h-6 w-11 shrink-0 cursor-pointer rounded-full border-2 border-transparent transition-colors duration-200 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:opacity-50",
         checked ? "bg-primary" : "bg-zinc-200"
       )}
     >
@@ -29,13 +32,13 @@ function Toggle({ checked, onChange }: ToggleProps) {
   );
 }
 
-interface NotificationSetting {
-  id: string;
+interface NotificationSettingItem {
+  id: keyof NotificationSettingsType;
   label: string;
   description: string;
 }
 
-const notificationSettings: NotificationSetting[] = [
+const notificationItems: NotificationSettingItem[] = [
   {
     id: "new_project",
     label: "신규 프로젝트 알림",
@@ -54,32 +57,54 @@ const notificationSettings: NotificationSetting[] = [
 ];
 
 export function NotificationSettings() {
-  const [settings, setSettings] = useState<Record<string, boolean>>({
+  const [settings, setSettings] = useState<NotificationSettingsType>({
     new_project: true,
     application_update: true,
     marketing: false,
   });
+  const [isSaving, setIsSaving] = useState(false);
 
-  const handleChange = (id: string, value: boolean) => {
-    setSettings((prev) => ({ ...prev, [id]: value }));
-  };
+  useEffect(() => {
+    fetch("/api/settings/notifications")
+      .then((res) => res.json() as Promise<{ data: NotificationSettingsType }>)
+      .then(({ data }) => setSettings(data))
+      .catch(() => {});
+  }, []);
+
+  async function handleChange(id: keyof NotificationSettingsType, value: boolean) {
+    const prev = settings;
+    setSettings((s) => ({ ...s, [id]: value }));
+    setIsSaving(true);
+    try {
+      await fetch("/api/settings/notifications", {
+        method: "PUT",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ [id]: value }),
+      });
+    } catch {
+      setSettings(prev);
+    } finally {
+      setIsSaving(false);
+    }
+  }
 
   return (
     <div className="space-y-0">
-      {notificationSettings.map((setting) => (
+      {notificationItems.map((item) => (
         <div
-          key={setting.id}
+          key={item.id}
           className="flex items-center justify-between p-4 border-b"
         >
           <div className="flex-1 pr-4">
-            <p className="text-sm font-medium">{setting.label}</p>
+            <p className="text-sm font-medium">{item.label}</p>
             <p className="text-xs text-muted-foreground mt-0.5">
-              {setting.description}
+              {item.description}
             </p>
           </div>
           <Toggle
-            checked={settings[setting.id] ?? false}
-            onChange={(val) => handleChange(setting.id, val)}
+            checked={settings[item.id]}
+            onChange={(val) => handleChange(item.id, val)}
+            disabled={isSaving}
           />
         </div>
       ))}

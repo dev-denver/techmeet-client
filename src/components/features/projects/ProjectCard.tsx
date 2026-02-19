@@ -3,7 +3,7 @@ import { MapPin, Clock, Users } from "lucide-react";
 import { Card, CardContent } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { ProjectStatusBadge } from "./ProjectStatusBadge";
-import { formatBudget, formatDeadlineDays, getDeadlineDays } from "@/lib/utils/format";
+import { formatBudget, formatDeadlineDays, getDeadlineDays, formatWorkType } from "@/lib/utils/format";
 import type { Project } from "@/types";
 
 interface ProjectCardProps {
@@ -73,11 +73,7 @@ export function ProjectCard({ project }: ProjectCardProps) {
             )}
             <span className="flex items-center gap-1">
               <Clock className="h-3 w-3" />
-              {project.workType === "remote"
-                ? "원격"
-                : project.workType === "onsite"
-                  ? "현장"
-                  : "하이브리드"}
+              {formatWorkType(project.workType)}
             </span>
             <span className="flex items-center gap-1">
               <Users className="h-3 w-3" />

@@ -24,7 +24,7 @@ export interface SignupRequest {
   email: string;
   password: string;
   name: string;
-  age: number;
+  birthDate: string;
   phone: string;
   kakaoId: string;
 }

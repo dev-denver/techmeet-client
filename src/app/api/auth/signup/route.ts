@@ -15,6 +15,9 @@ export async function POST(request: NextRequest) {
   };
 
   const { email, password, name, birth_date, phone, kakaoId } = body;
+  const agreeMarketing = typeof (body as { agree_marketing?: unknown }).agree_marketing === "boolean"
+    ? (body as { agree_marketing: boolean }).agree_marketing
+    : false;
 
   if (
     typeof email !== "string" ||
@@ -89,6 +92,8 @@ export async function POST(request: NextRequest) {
       .update({
         phone,
         kakao_id: typeof kakaoId === "string" ? kakaoId : null,
+        notification_marketing: agreeMarketing,
+        account_status: "active",
       })
       .eq("id", data.user.id);
 

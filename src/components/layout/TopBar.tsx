@@ -11,6 +11,8 @@ const pageTitles: Record<string, string> = {
   "/projects/applications": "내 신청 내역",
   "/profile": "내 정보",
   "/settings": "설정",
+  "/settings/profile": "내 정보 수정",
+  "/settings/withdraw": "회원 탈퇴",
 };
 
 function getTitle(pathname: string): string {
@@ -22,11 +24,13 @@ function getTitle(pathname: string): string {
 }
 
 function isDetailPage(pathname: string): boolean {
-  return (
-    pathname.startsWith("/projects/") &&
-    pathname !== "/projects" &&
-    pathname !== "/projects/applications"
-  );
+  if (pathname.startsWith("/projects/") && pathname !== "/projects" && pathname !== "/projects/applications") {
+    return true;
+  }
+  if (pathname === "/settings/profile" || pathname === "/settings/withdraw") {
+    return true;
+  }
+  return false;
 }
 
 export function TopBar() {

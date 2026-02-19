@@ -1,5 +1,6 @@
 "use client";
 
+import Link from "next/link";
 import { useSearchParams, useRouter } from "next/navigation";
 import { useEffect, useState, Suspense } from "react";
 import { Eye, EyeOff } from "lucide-react";
@@ -72,6 +73,10 @@ function SignupForm() {
   const [phone, setPhone] = useState("");
   const [showPassword, setShowPassword] = useState(false);
   const [showPasswordConfirm, setShowPasswordConfirm] = useState(false);
+  const [agreeTerms, setAgreeTerms] = useState(false);
+  const [agreePrivacy, setAgreePrivacy] = useState(false);
+  const [agreeAge, setAgreeAge] = useState(false);
+  const [agreeMarketing, setAgreeMarketing] = useState(false);
   const [error, setError] = useState("");
   const [isLoading, setIsLoading] = useState(false);
 
@@ -104,6 +109,21 @@ function SignupForm() {
       return;
     }
 
+    if (!agreeAge) {
+      setError("만 14세 이상만 가입할 수 있습니다.");
+      return;
+    }
+
+    if (!agreeTerms) {
+      setError("이용약관에 동의해주세요.");
+      return;
+    }
+
+    if (!agreePrivacy) {
+      setError("개인정보 처리방침에 동의해주세요.");
+      return;
+    }
+
     setIsLoading(true);
     try {
       const res = await fetch("/api/auth/signup", {
@@ -116,6 +136,7 @@ function SignupForm() {
           birth_date: birthDate,
           phone,
           kakaoId,
+          agree_marketing: agreeMarketing,
         }),
       });
 
@@ -232,6 +253,89 @@ function SignupForm() {
           maxLength={13}
           className="w-full rounded-lg border border-zinc-200 bg-white px-3 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-zinc-900"
         />
+      </div>
+
+      {/* 약관 동의 */}
+      <div className="space-y-3 pt-1">
+        <p className="text-sm font-medium text-zinc-700">약관 동의</p>
+
+        {/* 전체 동의 */}
+        <label className="flex items-center gap-3 cursor-pointer p-3 bg-zinc-50 rounded-lg">
+          <input
+            type="checkbox"
+            checked={agreeAge && agreeTerms && agreePrivacy && agreeMarketing}
+            onChange={(e) => {
+              setAgreeAge(e.target.checked);
+              setAgreeTerms(e.target.checked);
+              setAgreePrivacy(e.target.checked);
+              setAgreeMarketing(e.target.checked);
+            }}
+            className="h-4 w-4 rounded border-zinc-300 accent-zinc-900"
+          />
+          <span className="text-sm font-semibold text-zinc-800">전체 동의</span>
+        </label>
+
+        <div className="space-y-2 pl-1">
+          {/* 만 14세 이상 */}
+          <label className="flex items-center gap-3 cursor-pointer">
+            <input
+              type="checkbox"
+              checked={agreeAge}
+              onChange={(e) => setAgreeAge(e.target.checked)}
+              className="h-4 w-4 rounded border-zinc-300 accent-zinc-900"
+            />
+            <span className="text-sm text-zinc-700">
+              <span className="text-red-500">[필수]</span> 만 14세 이상입니다
+            </span>
+          </label>
+
+          {/* 이용약관 */}
+          <label className="flex items-center gap-3 cursor-pointer">
+            <input
+              type="checkbox"
+              checked={agreeTerms}
+              onChange={(e) => setAgreeTerms(e.target.checked)}
+              className="h-4 w-4 rounded border-zinc-300 accent-zinc-900"
+            />
+            <span className="text-sm text-zinc-700 flex items-center gap-1">
+              <span className="text-red-500">[필수]</span>
+              <Link href="/terms" target="_blank" className="underline underline-offset-2 hover:text-zinc-900">
+                이용약관
+              </Link>
+              에 동의합니다
+            </span>
+          </label>
+
+          {/* 개인정보 처리방침 */}
+          <label className="flex items-center gap-3 cursor-pointer">
+            <input
+              type="checkbox"
+              checked={agreePrivacy}
+              onChange={(e) => setAgreePrivacy(e.target.checked)}
+              className="h-4 w-4 rounded border-zinc-300 accent-zinc-900"
+            />
+            <span className="text-sm text-zinc-700 flex items-center gap-1">
+              <span className="text-red-500">[필수]</span>
+              <Link href="/privacy" target="_blank" className="underline underline-offset-2 hover:text-zinc-900">
+                개인정보 처리방침
+              </Link>
+              에 동의합니다
+            </span>
+          </label>
+
+          {/* 마케팅 수신 */}
+          <label className="flex items-center gap-3 cursor-pointer">
+            <input
+              type="checkbox"
+              checked={agreeMarketing}
+              onChange={(e) => setAgreeMarketing(e.target.checked)}
+              className="h-4 w-4 rounded border-zinc-300 accent-zinc-900"
+            />
+            <span className="text-sm text-zinc-700">
+              <span className="text-zinc-400">[선택]</span> 마케팅 정보 수신에 동의합니다
+            </span>
+          </label>
+        </div>
       </div>
 
       {/* 에러 메시지 */}
