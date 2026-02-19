@@ -19,6 +19,7 @@ function LoginForm() {
   const [password, setPassword] = useState("");
   const [showPassword, setShowPassword] = useState(false);
   const [error, setError] = useState("");
+  const [withdrawnEmail, setWithdrawnEmail] = useState<string | null>(null);
   const [isLoading, setIsLoading] = useState(false);
 
   const kakaoError = searchParams.get("error");
@@ -45,8 +46,12 @@ function LoginForm() {
         body: JSON.stringify({ email, password }),
       });
 
-      const data = await res.json() as { success?: boolean; error?: string };
+      const data = await res.json() as { success?: boolean; error?: string; code?: string };
       if (!res.ok) {
+        if (res.status === 403 && data.code === "withdrawn") {
+          setWithdrawnEmail(email);
+          return;
+        }
         setError(data.error ?? "로그인 중 오류가 발생했습니다");
         return;
       }
@@ -141,6 +146,19 @@ function LoginForm() {
 
               {error && (
                 <p className="text-sm text-red-500 text-center">{error}</p>
+              )}
+
+              {withdrawnEmail && (
+                <div className="text-sm text-center bg-red-50 rounded-lg px-4 py-3 space-y-2">
+                  <p className="text-red-600 font-medium">탈퇴한 계정입니다.</p>
+                  <button
+                    type="button"
+                    onClick={() => router.push(`/signup?email=${encodeURIComponent(withdrawnEmail)}&reactivate=true`)}
+                    className="text-zinc-800 underline underline-offset-2 font-semibold"
+                  >
+                    재가입하기
+                  </button>
+                </div>
               )}
 
               <button

@@ -45,7 +45,7 @@ export async function GET(request: NextRequest) {
     // Step 3: DB에서 kakao_id로 기존 유저 조회
     const { data: profile, error: profileError } = await supabaseAdmin
       .from("profiles")
-      .select("id, email")
+      .select("id, email, account_status")
       .eq("kakao_id", kakaoId)
       .single();
 
@@ -56,6 +56,16 @@ export async function GET(request: NextRequest) {
     });
 
     if (profile) {
+      // 탈퇴 회원 → 재가입 페이지로
+      if (profile.account_status === "withdrawn") {
+        const reactivateUrl = new URL("/signup", request.url);
+        reactivateUrl.searchParams.set("email", profile.email);
+        reactivateUrl.searchParams.set("name", name ?? "");
+        reactivateUrl.searchParams.set("kakao_id", kakaoId);
+        reactivateUrl.searchParams.set("reactivate", "true");
+        return NextResponse.redirect(reactivateUrl);
+      }
+
       // 기존 유저: 매직 링크 생성 (이메일 발송 없음)
       const { data: linkData, error: linkError } =
         await supabaseAdmin.auth.admin.generateLink({

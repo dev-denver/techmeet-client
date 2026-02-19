@@ -59,12 +59,13 @@ function SignupForm() {
   const email = searchParams.get("email") ?? "";
   const name = searchParams.get("name") ?? "";
   const kakaoId = searchParams.get("kakao_id") ?? "";
+  const reactivate = searchParams.get("reactivate") === "true";
 
   useEffect(() => {
-    if (!email || !kakaoId) {
+    if (!email || (!kakaoId && !reactivate)) {
       router.replace("/login");
     }
-  }, [email, kakaoId, router]);
+  }, [email, kakaoId, reactivate, router]);
 
   const [formName, setFormName] = useState(name);
   const [password, setPassword] = useState("");
@@ -80,7 +81,7 @@ function SignupForm() {
   const [error, setError] = useState("");
   const [isLoading, setIsLoading] = useState(false);
 
-  if (!email || !kakaoId) {
+  if (!email || (!kakaoId && !reactivate)) {
     return null;
   }
 
@@ -137,6 +138,7 @@ function SignupForm() {
           phone,
           kakaoId,
           agree_marketing: agreeMarketing,
+          reactivate,
         }),
       });
 
@@ -156,6 +158,13 @@ function SignupForm() {
 
   return (
     <form onSubmit={handleSubmit} className="flex flex-col gap-4">
+      {/* 재가입 안내 배너 */}
+      {reactivate && (
+        <div className="bg-amber-50 border border-amber-200 rounded-lg px-4 py-3 text-sm text-amber-800">
+          이전에 탈퇴하신 계정입니다. 아래 정보를 입력하고 재가입을 완료해주세요.
+        </div>
+      )}
+
       {/* 이메일 */}
       <div className="flex flex-col gap-1.5">
         <label className="text-sm font-medium text-zinc-700">이메일</label>
@@ -165,7 +174,9 @@ function SignupForm() {
           disabled
           className="w-full rounded-lg border border-zinc-200 bg-zinc-50 px-3 py-2.5 text-sm text-zinc-500 cursor-not-allowed"
         />
-        <p className="text-xs text-zinc-400">카카오 계정 이메일로 고정됩니다</p>
+        <p className="text-xs text-zinc-400">
+          {reactivate ? "이전에 사용하던 이메일로 고정됩니다" : "카카오 계정 이메일로 고정됩니다"}
+        </p>
       </div>
 
       {/* 이름 */}
@@ -348,7 +359,7 @@ function SignupForm() {
         disabled={isLoading}
         className="mt-2 w-full rounded-xl bg-zinc-900 py-3.5 text-[15px] font-semibold text-white transition-opacity hover:opacity-90 active:opacity-80 disabled:opacity-50"
       >
-        {isLoading ? "가입 중..." : "회원가입 완료"}
+        {isLoading ? "처리 중..." : reactivate ? "재가입 완료" : "회원가입 완료"}
       </button>
     </form>
   );
@@ -365,9 +376,6 @@ export default function SignupPage() {
           </div>
           <div className="text-center">
             <h1 className="text-xl font-bold tracking-tight">회원가입</h1>
-            <p className="text-sm text-muted-foreground mt-1">
-              카카오 계정으로 가입하고 있습니다
-            </p>
           </div>
         </div>
 

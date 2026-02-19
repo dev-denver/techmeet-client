@@ -1,8 +1,9 @@
 import { NextRequest, NextResponse } from "next/server";
 import { createServerClient } from "@supabase/ssr";
+import { createClient } from "@supabase/supabase-js";
 import { validatePassword, validatePhone, validateBirthDate } from "@/lib/utils/validation";
 import { type CookieOptions } from "@supabase/ssr";
-import { publicEnv } from "@/lib/config/env";
+import { publicEnv, serverEnv } from "@/lib/config/env";
 
 export async function POST(request: NextRequest) {
   const body = await request.json() as {
@@ -12,12 +13,14 @@ export async function POST(request: NextRequest) {
     birth_date?: unknown;
     phone?: unknown;
     kakaoId?: unknown;
+    reactivate?: unknown;
   };
 
   const { email, password, name, birth_date, phone, kakaoId } = body;
   const agreeMarketing = typeof (body as { agree_marketing?: unknown }).agree_marketing === "boolean"
     ? (body as { agree_marketing: boolean }).agree_marketing
     : false;
+  const reactivate = body.reactivate === true;
 
   if (
     typeof email !== "string" ||
@@ -69,6 +72,66 @@ export async function POST(request: NextRequest) {
       },
     }
   );
+
+  if (reactivate) {
+    const supabaseAdmin = createClient(
+      publicEnv.supabaseUrl,
+      serverEnv.supabaseServiceRoleKey,
+      { auth: { autoRefreshToken: false, persistSession: false } }
+    );
+
+    const { data: existingProfile } = await supabaseAdmin
+      .from("profiles")
+      .select("id, account_status")
+      .eq("email", email)
+      .single();
+
+    if (!existingProfile || existingProfile.account_status !== "withdrawn") {
+      return NextResponse.json({ error: "재가입할 수 없는 계정입니다." }, { status: 400 });
+    }
+
+    const { error: updateAuthError } = await supabaseAdmin.auth.admin.updateUserById(
+      existingProfile.id,
+      {
+        password: password as string,
+        ban_duration: "none",
+        user_metadata: { name, phone, birth_date },
+      }
+    );
+
+    if (updateAuthError) {
+      console.error("[재가입] auth user 복원 실패:", updateAuthError);
+      return NextResponse.json({ error: "재가입 처리에 실패했습니다." }, { status: 500 });
+    }
+
+    const { error: profileError } = await supabaseAdmin
+      .from("profiles")
+      .update({
+        account_status: "active",
+        withdrawn_at: null,
+        phone,
+        kakao_id: typeof kakaoId === "string" && kakaoId ? kakaoId : null,
+        notification_marketing: agreeMarketing,
+      })
+      .eq("id", existingProfile.id);
+
+    if (profileError) {
+      console.error("[재가입] profiles 복원 실패:", profileError);
+      return NextResponse.json({ error: "프로필 복원에 실패했습니다." }, { status: 500 });
+    }
+
+    const { error: signInError } = await supabase.auth.signInWithPassword({
+      email: email as string,
+      password: password as string,
+    });
+
+    if (signInError) {
+      console.error("[재가입] 로그인 실패:", signInError);
+      return NextResponse.json({ error: "로그인에 실패했습니다." }, { status: 500 });
+    }
+
+    return supabaseResponse;
+  }
 
   const { data, error } = await supabase.auth.signUp({
     email,

@@ -58,7 +58,7 @@ export default function WithdrawPage() {
           </li>
           <li className="flex items-start gap-2">
             <span className="text-red-400 mt-0.5 shrink-0">•</span>
-            <span>재가입을 원할 경우 담당 매니저에게 문의해주세요.</span>
+            <span>탈퇴 후 서비스에서 직접 재가입하실 수 있습니다.</span>
           </li>
         </ul>
       </div>
