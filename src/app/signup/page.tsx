@@ -3,7 +3,7 @@
 import { useSearchParams, useRouter } from "next/navigation";
 import { useEffect, useState, Suspense } from "react";
 import { Eye, EyeOff } from "lucide-react";
-import { validatePassword, validatePhone, formatPhone } from "@/lib/utils/validation";
+import { validatePassword, validatePhone, validateBirthDate, formatPhone } from "@/lib/utils/validation";
 
 function PasswordStrength({ password }: { password: string }) {
   if (!password) return null;
@@ -60,22 +60,22 @@ function SignupForm() {
   const kakaoId = searchParams.get("kakao_id") ?? "";
 
   useEffect(() => {
-    if (!email || !name || !kakaoId) {
+    if (!email || !kakaoId) {
       router.replace("/login");
     }
-  }, [email, name, kakaoId, router]);
+  }, [email, kakaoId, router]);
 
   const [formName, setFormName] = useState(name);
   const [password, setPassword] = useState("");
   const [passwordConfirm, setPasswordConfirm] = useState("");
-  const [age, setAge] = useState("");
+  const [birthDate, setBirthDate] = useState("");
   const [phone, setPhone] = useState("");
   const [showPassword, setShowPassword] = useState(false);
   const [showPasswordConfirm, setShowPasswordConfirm] = useState(false);
   const [error, setError] = useState("");
   const [isLoading, setIsLoading] = useState(false);
 
-  if (!email || !name || !kakaoId) {
+  if (!email || !kakaoId) {
     return null;
   }
 
@@ -94,9 +94,8 @@ function SignupForm() {
       return;
     }
 
-    const ageNum = parseInt(age, 10);
-    if (isNaN(ageNum) || ageNum < 1 || ageNum > 99) {
-      setError("올바른 나이를 입력해주세요 (1~99)");
+    if (!birthDate || !validateBirthDate(birthDate)) {
+      setError("올바른 생년월일을 입력해주세요");
       return;
     }
 
@@ -114,7 +113,7 @@ function SignupForm() {
           email,
           password,
           name: formName,
-          age: ageNum,
+          birth_date: birthDate,
           phone,
           kakaoId,
         }),
@@ -208,17 +207,15 @@ function SignupForm() {
         )}
       </div>
 
-      {/* 나이 */}
+      {/* 생년월일 */}
       <div className="flex flex-col gap-1.5">
-        <label className="text-sm font-medium text-zinc-700">나이</label>
+        <label className="text-sm font-medium text-zinc-700">생년월일</label>
         <input
-          type="number"
-          value={age}
-          onChange={(e) => setAge(e.target.value)}
+          type="date"
+          value={birthDate}
+          onChange={(e) => setBirthDate(e.target.value)}
           required
-          min={1}
-          max={99}
-          placeholder="나이를 입력해주세요"
+          max={new Date().toISOString().split("T")[0]}
           className="w-full rounded-lg border border-zinc-200 bg-white px-3 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-zinc-900"
         />
       </div>

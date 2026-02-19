@@ -35,6 +35,10 @@ export function formatPhone(value: string): string {
   return `${digits.slice(0, 3)}-${digits.slice(3, 7)}-${digits.slice(7, 11)}`;
 }
 
-export function validateAge(age: number): boolean {
-  return Number.isInteger(age) && age >= 1 && age <= 99;
+export function validateBirthDate(birthDate: string): boolean {
+  const date = new Date(birthDate);
+  if (isNaN(date.getTime())) return false;
+  const today = new Date();
+  today.setHours(0, 0, 0, 0);
+  return date < today;
 }

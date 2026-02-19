@@ -1,4 +1,4 @@
-import { createServerClient } from "@supabase/ssr";
+import { createServerClient, type CookieOptions } from "@supabase/ssr";
 import { createClient } from "@supabase/supabase-js";
 import { NextRequest, NextResponse } from "next/server";
 import { serverEnv, publicEnv } from "@/lib/config/env";
@@ -61,15 +61,14 @@ export async function GET(request: NextRequest) {
         await supabaseAdmin.auth.admin.generateLink({
           type: "magiclink",
           email: profile.email,
-          options: { shouldCreateUser: false },
         });
 
       console.log("[카카오 콜백] Step 4: generateLink", {
-        hasTokenHash: !!linkData?.properties?.token_hash,
+        hasTokenHash: !!linkData?.properties?.hashed_token,
         error: linkError?.message,
       });
 
-      if (linkError || !linkData?.properties?.token_hash) {
+      if (linkError || !linkData?.properties?.hashed_token) {
         console.error("[카카오 콜백] Step 4 실패: generateLink 오류", linkError);
         return NextResponse.redirect(
           new URL("/login?error=session_error", request.url)
@@ -87,9 +86,9 @@ export async function GET(request: NextRequest) {
             getAll() {
               return request.cookies.getAll();
             },
-            setAll(cookiesToSet) {
+            setAll(cookiesToSet: { name: string; value: string; options: CookieOptions }[]) {
               cookiesToSet.forEach(({ name, value, options }) => {
-                redirectResponse.cookies.set(name, value, options);
+                redirectResponse.cookies.set(name, value, options as Parameters<typeof redirectResponse.cookies.set>[2]);
               });
             },
           },
@@ -97,7 +96,7 @@ export async function GET(request: NextRequest) {
       );
 
       const { data: sessionData, error: verifyError } = await supabase.auth.verifyOtp({
-        token_hash: linkData.properties.token_hash,
+        token_hash: linkData.properties.hashed_token,
         type: "magiclink",
       });
 

@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
 import { createServerClient } from "@supabase/ssr";
-import { validatePassword, validatePhone, validateAge } from "@/lib/utils/validation";
+import { validatePassword, validatePhone, validateBirthDate } from "@/lib/utils/validation";
+import { type CookieOptions } from "@supabase/ssr";
 import { publicEnv } from "@/lib/config/env";
 
 export async function POST(request: NextRequest) {
@@ -8,18 +9,18 @@ export async function POST(request: NextRequest) {
     email?: unknown;
     password?: unknown;
     name?: unknown;
-    age?: unknown;
+    birth_date?: unknown;
     phone?: unknown;
     kakaoId?: unknown;
   };
 
-  const { email, password, name, age, phone, kakaoId } = body;
+  const { email, password, name, birth_date, phone, kakaoId } = body;
 
   if (
     typeof email !== "string" ||
     typeof password !== "string" ||
     typeof name !== "string" ||
-    typeof age !== "number" ||
+    typeof birth_date !== "string" ||
     typeof phone !== "string"
   ) {
     return NextResponse.json(
@@ -40,9 +41,9 @@ export async function POST(request: NextRequest) {
     );
   }
 
-  if (!validateAge(age)) {
+  if (!validateBirthDate(birth_date)) {
     return NextResponse.json(
-      { error: "올바른 나이를 입력해주세요 (1~99)" },
+      { error: "올바른 생년월일을 입력해주세요" },
       { status: 400 }
     );
   }
@@ -57,9 +58,9 @@ export async function POST(request: NextRequest) {
         getAll() {
           return request.cookies.getAll();
         },
-        setAll(cookiesToSet) {
+        setAll(cookiesToSet: { name: string; value: string; options: CookieOptions }[]) {
           cookiesToSet.forEach(({ name: cookieName, value, options }) => {
-            supabaseResponse.cookies.set(cookieName, value, options);
+            supabaseResponse.cookies.set(cookieName, value, options as Parameters<typeof supabaseResponse.cookies.set>[2]);
           });
         },
       },
@@ -70,7 +71,7 @@ export async function POST(request: NextRequest) {
     email,
     password,
     options: {
-      data: { name, phone, age },
+      data: { name, phone, birth_date },
     },
   });
 

@@ -1,4 +1,4 @@
-import { createServerClient as createSSRServerClient } from "@supabase/ssr";
+import { createServerClient as createSSRServerClient, type CookieOptions } from "@supabase/ssr";
 import { cookies } from "next/headers";
 import { publicEnv } from "@/lib/config/env";
 
@@ -10,10 +10,10 @@ export async function createServerClient() {
       getAll() {
         return cookieStore.getAll();
       },
-      setAll(cookiesToSet) {
+      setAll(cookiesToSet: { name: string; value: string; options: CookieOptions }[]) {
         try {
           cookiesToSet.forEach(({ name, value, options }) => {
-            cookieStore.set(name, value, options);
+            cookieStore.set(name, value, options as Parameters<typeof cookieStore.set>[2]);
           });
         } catch {
           // Server Component에서 쿠키 설정은 무시 가능
