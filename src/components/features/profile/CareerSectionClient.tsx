@@ -5,6 +5,7 @@ import { useRouter } from "next/navigation";
 import { Plus, Pencil, Trash2, X, Check } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
+import { CareerTimelineDot } from "@/components/features/profile/CareerTimelineDot";
 import { formatMonthYear } from "@/lib/utils/format";
 import type { Career, AddCareerRequest } from "@/types";
 
@@ -203,16 +204,10 @@ export function CareerSectionClient({ careers }: CareerSectionClientProps) {
             return (
               <div key={career.id} className="relative flex gap-4">
                 {/* 타임라인 선 */}
-                <div className="flex flex-col items-center">
-                  <div
-                    className={`w-2.5 h-2.5 rounded-full mt-1 shrink-0 ${
-                      career.isCurrent ? "bg-primary" : "bg-zinc-300"
-                    }`}
-                  />
-                  {idx < careers.length - 1 && (
-                    <div className="w-0.5 flex-1 bg-zinc-200 mt-1" />
-                  )}
-                </div>
+                <CareerTimelineDot
+                  isCurrent={career.isCurrent}
+                  isLast={idx === careers.length - 1}
+                />
 
                 {/* 내용 */}
                 <div className="flex-1 pb-4 space-y-1.5">
@@ -346,7 +341,7 @@ function CareerForm({
             value={form.company}
             onChange={(e) => onUpdate("company", e.target.value)}
             placeholder="테크밋"
-            className="w-full rounded-lg border border-zinc-200 bg-white px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-zinc-900"
+            className="w-full rounded-lg border border-zinc-200 bg-white px-3 py-2 text-sm focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2"
           />
         </div>
         <div className="space-y-1">
@@ -356,7 +351,7 @@ function CareerForm({
             value={form.role}
             onChange={(e) => onUpdate("role", e.target.value)}
             placeholder="프론트엔드 개발자"
-            className="w-full rounded-lg border border-zinc-200 bg-white px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-zinc-900"
+            className="w-full rounded-lg border border-zinc-200 bg-white px-3 py-2 text-sm focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2"
           />
         </div>
       </div>
@@ -368,7 +363,7 @@ function CareerForm({
             type="month"
             value={form.startDate ? form.startDate.slice(0, 7) : ""}
             onChange={(e) => onUpdate("startDate", `${e.target.value}-01`)}
-            className="w-full rounded-lg border border-zinc-200 bg-white px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-zinc-900"
+            className="w-full rounded-lg border border-zinc-200 bg-white px-3 py-2 text-sm focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2"
           />
         </div>
         <div className="space-y-1">
@@ -378,7 +373,7 @@ function CareerForm({
             value={form.endDate ? form.endDate.slice(0, 7) : ""}
             disabled={form.isCurrent}
             onChange={(e) => onUpdate("endDate", `${e.target.value}-01`)}
-            className="w-full rounded-lg border border-zinc-200 bg-white px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-zinc-900 disabled:opacity-50"
+            className="w-full rounded-lg border border-zinc-200 bg-white px-3 py-2 text-sm focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:opacity-50"
           />
         </div>
       </div>
@@ -400,7 +395,7 @@ function CareerForm({
           onChange={(e) => onUpdate("description", e.target.value)}
           placeholder="담당한 업무와 성과를 간략히 적어주세요"
           rows={3}
-          className="w-full rounded-lg border border-zinc-200 bg-white px-3 py-2 text-sm resize-none focus:outline-none focus:ring-2 focus:ring-zinc-900"
+          className="w-full rounded-lg border border-zinc-200 bg-white px-3 py-2 text-sm resize-none focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2"
         />
       </div>
 
@@ -411,7 +406,7 @@ function CareerForm({
           value={form.techStackInput}
           onChange={(e) => onUpdate("techStackInput", e.target.value)}
           placeholder="React, TypeScript, Node.js"
-          className="w-full rounded-lg border border-zinc-200 bg-white px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-zinc-900"
+          className="w-full rounded-lg border border-zinc-200 bg-white px-3 py-2 text-sm focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2"
         />
       </div>
 

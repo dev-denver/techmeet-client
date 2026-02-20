@@ -33,6 +33,15 @@ function mapRowToApplication(row: ApplicationRow): Application {
   };
 }
 
+const statusOrder: string[] = [
+  ApplicationStatus.Interview,
+  ApplicationStatus.Reviewing,
+  ApplicationStatus.Pending,
+  ApplicationStatus.Accepted,
+  ApplicationStatus.Rejected,
+  ApplicationStatus.Withdrawn,
+];
+
 export async function getApplications(): Promise<GetApplicationsResponse> {
   const supabase = await createServerClient();
 
@@ -50,8 +59,13 @@ export async function getApplications(): Promise<GetApplicationsResponse> {
     return { data: [], total: 0, page: 1, pageSize: 20 };
   }
 
+  const applications = (data as ApplicationRow[]).map(mapRowToApplication);
+  applications.sort(
+    (a, b) => statusOrder.indexOf(a.status) - statusOrder.indexOf(b.status)
+  );
+
   return {
-    data: (data as ApplicationRow[]).map(mapRowToApplication),
+    data: applications,
     total: count ?? 0,
     page: 1,
     pageSize: 20,

@@ -40,7 +40,7 @@ export async function GET(request: NextRequest) {
     .from("profiles")
     .select("id, name, phone")
     .or(`name.ilike.%${q}%,phone.ilike.%${q}%`)
-    .eq("account_status", AccountStatus.Active)
+    .not("account_status", "eq", AccountStatus.Withdrawn)
     .limit(10);
 
   if (currentUserId) {

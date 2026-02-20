@@ -145,7 +145,7 @@ export async function POST(request: NextRequest) {
   });
 
   if (error) {
-    if (error.message.includes("already registered")) {
+    if (error.status === 422 || error.message.includes("already registered")) {
       return NextResponse.json({ error: "이미 사용 중인 이메일입니다" }, { status: 409 });
     }
     return NextResponse.json({ error: "회원가입에 실패했습니다" }, { status: 500 });

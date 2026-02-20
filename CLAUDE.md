@@ -100,16 +100,37 @@
 - `{도메인}{역할}` 패턴: `ProjectCard`, `ProjectStatusBadge`, `ApplicationCard`
 - features 디렉토리 내 도메인별 분리: `projects/`, `profile/`, `settings/`
 
+## Enum 패턴
+
+- `as const` 객체 + `typeof` 타입 추출 방식 사용
+- 예시: `AvailabilityStatus`, `AccountStatus`, `ProjectStatus`, `ApplicationStatus`
+- 패턴: `export const Foo = { A: "a", B: "b" } as const;` → `export type Foo = typeof Foo[keyof typeof Foo];`
+- API route에서 enum 값 검증 시 `new Set(Object.values(Enum))` 활용
+
+## API Route 보안 패턴
+
+- 모든 인증 필요 API route는 핸들러 최상단에서 `createServerClient()` → `getUser()` → 미인증 시 401 반환
+- query 함수 내부의 auth 체크는 방어적 레이어 (API route 레벨 체크가 우선)
+- enum 값 입력은 API route에서 유효성 검증 후 query 함수에 전달
+
 ## 에러 처리 패턴
 
 - 날짜 유틸: 내부 `parseDate` 헬퍼가 잘못된 날짜 시 Error throw
-- API 라우트: try-catch + NextResponse.json({ error }) 형태
+- API 라우트: try-catch + NextResponse.json({ error }) 형태, 미인증 → 401, 잘못된 입력 → 400
 - 클라이언트 폼: useState로 error 메시지 관리, 제출 시 검증
+- 클라이언트 데이터 로드 실패: loadError state + 에러 메시지 UI 표시
 
 ## 폼 검증 패턴
 
 - 클라이언트: 제출 전 `validation.ts` 함수로 검증 → 에러 메시지 표시
 - 서버: API 라우트에서 동일 검증 재실행 (이중 검증)
+
+## BottomSheet 패턴
+
+- 하단에서 올라오는 모달 → `src/components/ui/bottom-sheet.tsx` 사용
+- Props: `{ open, onClose, hasBottomNav?, children }`
+- BottomNavigation 위에 표시 필요 시 `hasBottomNav={true}` (pb-16 추가)
+- 내부 컨텐츠는 children으로 전달, 패딩/레이아웃은 children 내부에서 처리
 
 ## 수평 스크롤 패턴
 
@@ -126,6 +147,18 @@
 
 - CSS custom properties로 `.dark` 클래스 기반 정의됨
 - 현재 미사용 상태 (토글 UI 미구현)
+
+## 환경변수 관리
+
+- `lib/config/env.ts`에서 getter 기반 lazy validation으로 타입 안전 접근
+- `publicEnv`: 클라이언트/서버 모두 사용 (`NEXT_PUBLIC_` 접두사)
+- `serverEnv`: 서버 전용 (`SUPABASE_SERVICE_ROLE_KEY` 등)
+
+## 공통 컴포넌트
+
+- `TechStackInput` (`components/features/profile/`): 기술 스택 입력 (Enter/추가 버튼, 태그 삭제)
+- `CareerTimelineDot` (`components/features/profile/`): 경력 타임라인 dot + line
+- `BottomSheet` (`components/ui/`): 하단 모달 오버레이
 
 ## 중요 사항
 

@@ -3,6 +3,7 @@
 import { useState } from "react";
 import { useRouter } from "next/navigation";
 import { Button } from "@/components/ui/button";
+import { BottomSheet } from "@/components/ui/bottom-sheet";
 
 interface ApplyButtonProps {
   projectId: string;
@@ -69,11 +70,8 @@ export function ApplyButton({ projectId }: ApplyButtonProps) {
   }
 
   return (
-    <div className="fixed inset-0 z-50 flex items-end justify-center bg-black/50">
-      <div
-        className="w-full max-w-[430px] rounded-t-2xl bg-white p-6 space-y-4"
-        onClick={(e) => e.stopPropagation()}
-      >
+    <BottomSheet open={open} onClose={() => setOpen(false)}>
+      <div className="p-6 space-y-4">
         <div className="flex items-center justify-between">
           <h2 className="text-lg font-bold">지원하기</h2>
           <button
@@ -95,7 +93,7 @@ export function ApplyButton({ projectId }: ApplyButtonProps) {
               onChange={(e) => setCoverLetter(e.target.value)}
               placeholder="해당 프로젝트에 지원하는 이유와 관련 경험을 간략히 적어주세요"
               rows={5}
-              className="w-full rounded-lg border border-zinc-200 bg-white px-3 py-2.5 text-sm resize-none focus:outline-none focus:ring-2 focus:ring-zinc-900"
+              className="w-full rounded-lg border border-zinc-200 bg-white px-3 py-2.5 text-sm resize-none focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2"
             />
           </div>
 
@@ -110,7 +108,7 @@ export function ApplyButton({ projectId }: ApplyButtonProps) {
                 onChange={(e) => setExpectedRate(e.target.value)}
                 placeholder="예: 600"
                 min={1}
-                className="w-full rounded-lg border border-zinc-200 bg-white px-3 py-2.5 pr-16 text-sm focus:outline-none focus:ring-2 focus:ring-zinc-900"
+                className="w-full rounded-lg border border-zinc-200 bg-white px-3 py-2.5 pr-16 text-sm focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2"
               />
               <span className="absolute right-3 top-1/2 -translate-y-1/2 text-sm text-muted-foreground">
                 만원/월
@@ -131,6 +129,6 @@ export function ApplyButton({ projectId }: ApplyButtonProps) {
           </Button>
         </form>
       </div>
-    </div>
+    </BottomSheet>
   );
 }

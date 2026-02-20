@@ -27,10 +27,16 @@ export async function GET() {
       return NextResponse.json({ data: defaultSettings });
     }
 
+    const row = data as {
+      notification_new_project: boolean | null;
+      notification_application_update: boolean | null;
+      notification_marketing: boolean | null;
+    };
+
     const settings: NotificationSettings = {
-      new_project: (data as { notification_new_project: boolean }).notification_new_project ?? true,
-      application_update: (data as { notification_application_update: boolean }).notification_application_update ?? true,
-      marketing: (data as { notification_marketing: boolean }).notification_marketing ?? false,
+      new_project: row.notification_new_project ?? true,
+      application_update: row.notification_application_update ?? true,
+      marketing: row.notification_marketing ?? false,
     };
 
     return NextResponse.json({ data: settings });

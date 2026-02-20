@@ -78,9 +78,10 @@ export async function getProfile(): Promise<GetProfileResponse | null> {
   const { data: { user } } = await supabase.auth.getUser();
   if (!user) return null;
 
+  // 1단계: 기본 프로필 + careers
   const { data, error } = await supabase
     .from("profiles")
-    .select("*, careers(*), referrer:profiles!referrer_id(name)")
+    .select("*, careers(*)")
     .eq("id", user.id)
     .single();
 
@@ -89,7 +90,20 @@ export async function getProfile(): Promise<GetProfileResponse | null> {
     return null;
   }
 
-  return { data: mapRowToProfile(data as ProfileRow) };
+  const row = data as ProfileRow;
+
+  // 2단계: referrer 이름 (referrer_id가 있을 때만, 컬럼 미존재 시 무시)
+  let referrerName: string | undefined;
+  if (row.referrer_id) {
+    const { data: referrer } = await supabase
+      .from("profiles")
+      .select("name")
+      .eq("id", row.referrer_id)
+      .single();
+    referrerName = referrer?.name ?? undefined;
+  }
+
+  return { data: mapRowToProfile({ ...row, referrer: referrerName ? { name: referrerName } : null }) };
 }
 
 export async function updateProfile(payload: UpdateProfileRequest): Promise<void> {

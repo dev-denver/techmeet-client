@@ -14,6 +14,7 @@ export function LogoutButton() {
       await fetch("/api/auth/logout", { method: "POST" });
       router.replace("/login");
     } catch {
+      alert("로그아웃에 실패했습니다");
       setIsLoading(false);
     }
   }

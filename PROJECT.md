@@ -1,7 +1,7 @@
 # 테크밋 프리랜서 앱 - 개발 문서
 
 > 이 문서는 개발 환경이 바뀌어도 어디까지 개발됐는지 파악하고 이어서 개발할 수 있도록 작성된 문서입니다.
-> 마지막 업데이트: 2026-02-20
+> 마지막 업데이트: 2026-02-21
 
 ---
 
@@ -73,14 +73,16 @@ src/
 │   ├── terms/page.tsx              # 이용약관 (공개)
 │   └── privacy/page.tsx           # 개인정보 처리방침 (공개)
 ├── components/
-│   ├── ui/                         # shadcn/ui 기반 (avatar, badge, button, card, separator, skeleton)
+│   ├── ui/                         # shadcn/ui 기반 (avatar, badge, button, card, separator, skeleton, bottom-sheet)
 │   ├── layout/                     # TopBar, BottomNavigation
 │   └── features/
 │       ├── projects/               # ProjectCard, ProjectStatusBadge, ApplicationCard,
 │       │                           # ProjectListClient (더보기 페이지네이션), ProjectFilters,
-│       │                           # ApplyButton (지원 폼), CareerSectionClient (CRUD)
+│       │                           # ApplyButton (지원 폼 + BottomSheet)
 │       ├── profile/                # ProfileHeader, AvatarUpload, AvailabilityToggle,
-│       │                           # TechStackSection, CareerSectionClient
+│       │                           # TechStackSection, TechStackInput, CareerSection,
+│       │                           # CareerSectionClient (CRUD), CareerTimelineDot
+│       ├── referrer/               # ReferrerSection, ReferrerSearchModal (BottomSheet)
 │       └── settings/               # NotificationSettings, LogoutButton
 ├── lib/
 │   ├── supabase/                   # Supabase 클라이언트 + 서버사이드 쿼리
@@ -408,6 +410,7 @@ NEXT_PUBLIC_APP_ENV=development
 - [ ] `avatars` 버킷 RLS 정책 설정 (위 정책 참고)
 - [ ] `profiles.account_status` 컬럼 추가 (기존 rows default 'active')
 - [ ] `profiles.withdrawn_at` 컬럼 추가
+- [ ] `profiles.referrer_id` 컬럼 추가 (uuid, REFERENCES profiles(id) ON DELETE SET NULL)
 
 ---
 
@@ -419,6 +422,9 @@ NEXT_PUBLIC_APP_ENV=development
 4. **스크롤 감지**: `window`가 아닌 `<main>` 엘리먼트 기준 (`useScrolled` 훅)
 5. **공개 경로**: `/terms`, `/privacy`는 미들웨어에서 인증 없이 접근 가능
 6. **Storage 업로드**: API Route에서 처리 (클라이언트에서 직접 Supabase Storage 호출 금지)
+7. **API Route 인증**: 모든 인증 필요 API route 핸들러 최상단에서 `getUser()` → 미인증 시 401 반환
+8. **BottomSheet 사용**: 하단 모달 패턴은 `components/ui/bottom-sheet.tsx` 공통 컴포넌트 사용
+9. **focus-visible**: 커스텀 input/button에 `focus-visible:` 접두사 사용 (`focus:` 금지)
 
 ---
 

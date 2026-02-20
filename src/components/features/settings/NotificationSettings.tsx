@@ -63,12 +63,13 @@ export function NotificationSettings() {
     marketing: false,
   });
   const [isSaving, setIsSaving] = useState(false);
+  const [loadError, setLoadError] = useState(false);
 
   useEffect(() => {
     fetch("/api/settings/notifications")
       .then((res) => res.json() as Promise<{ data: NotificationSettingsType }>)
       .then(({ data }) => setSettings(data))
-      .catch(() => {});
+      .catch(() => setLoadError(true));
   }, []);
 
   async function handleChange(id: keyof NotificationSettingsType, value: boolean) {
@@ -86,6 +87,14 @@ export function NotificationSettings() {
     } finally {
       setIsSaving(false);
     }
+  }
+
+  if (loadError) {
+    return (
+      <p className="p-4 text-sm text-red-500">
+        알림 설정을 불러오지 못했습니다.
+      </p>
+    );
   }
 
   return (

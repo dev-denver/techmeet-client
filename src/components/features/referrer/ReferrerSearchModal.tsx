@@ -2,14 +2,16 @@
 
 import { useState } from "react";
 import { X, Search, Check } from "lucide-react";
+import { BottomSheet } from "@/components/ui/bottom-sheet";
 import type { ReferrerSearchResult } from "@/types/api";
 
 interface Props {
   onSelect: (referrer: ReferrerSearchResult) => void;
   onClose: () => void;
+  hasBottomNav?: boolean;
 }
 
-export function ReferrerSearchModal({ onSelect, onClose }: Props) {
+export function ReferrerSearchModal({ onSelect, onClose, hasBottomNav = false }: Props) {
   const [query, setQuery] = useState("");
   const [results, setResults] = useState<ReferrerSearchResult[]>([]);
   const [selected, setSelected] = useState<ReferrerSearchResult | null>(null);
@@ -50,11 +52,8 @@ export function ReferrerSearchModal({ onSelect, onClose }: Props) {
   }
 
   return (
-    <div
-      className="fixed inset-0 bg-black/50 z-50 flex items-end justify-center"
-      onClick={(e) => { if (e.target === e.currentTarget) onClose(); }}
-    >
-      <div className="w-full max-w-[430px] bg-white rounded-t-2xl p-4 pb-8 flex flex-col gap-4 max-h-[80vh]">
+    <BottomSheet open onClose={onClose} hasBottomNav={hasBottomNav}>
+      <div className="p-4 pb-8 flex flex-col gap-4 max-h-[80vh]">
         {/* 헤더 */}
         <div className="flex items-center justify-between">
           <h2 className="text-base font-semibold">추천인 검색</h2>
@@ -76,7 +75,7 @@ export function ReferrerSearchModal({ onSelect, onClose }: Props) {
             onChange={(e) => setQuery(e.target.value)}
             onKeyDown={(e) => { if (e.key === "Enter") { e.preventDefault(); void handleSearch(); } }}
             placeholder="이름 또는 010-XXXX-XXXX"
-            className="flex-1 rounded-lg border border-zinc-200 bg-white px-3 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-zinc-900"
+            className="flex-1 rounded-lg border border-zinc-200 bg-white px-3 py-2.5 text-sm focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2"
           />
           <button
             type="button"
@@ -136,6 +135,6 @@ export function ReferrerSearchModal({ onSelect, onClose }: Props) {
           선택 완료
         </button>
       </div>
-    </div>
+    </BottomSheet>
   );
 }

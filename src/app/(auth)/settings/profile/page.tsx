@@ -2,73 +2,10 @@
 
 import { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
-import { X } from "lucide-react";
 import { validatePhone, formatPhone } from "@/lib/utils/validation";
+import { TechStackInput } from "@/components/features/profile/TechStackInput";
+import { Skeleton } from "@/components/ui/skeleton";
 import type { FreelancerProfile } from "@/types";
-
-function TechStackInput({
-  value,
-  onChange,
-}: {
-  value: string[];
-  onChange: (v: string[]) => void;
-}) {
-  const [input, setInput] = useState("");
-
-  function addTech() {
-    const trimmed = input.trim();
-    if (trimmed && !value.includes(trimmed)) {
-      onChange([...value, trimmed]);
-    }
-    setInput("");
-  }
-
-  return (
-    <div className="space-y-2">
-      <div className="flex gap-2">
-        <input
-          type="text"
-          value={input}
-          onChange={(e) => setInput(e.target.value)}
-          onKeyDown={(e) => {
-            if (e.key === "Enter") {
-              e.preventDefault();
-              addTech();
-            }
-          }}
-          placeholder="기술 입력 후 Enter"
-          className="flex-1 rounded-lg border border-zinc-200 bg-white px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-zinc-900"
-        />
-        <button
-          type="button"
-          onClick={addTech}
-          className="px-3 py-2 rounded-lg bg-zinc-900 text-white text-sm font-medium"
-        >
-          추가
-        </button>
-      </div>
-      {value.length > 0 && (
-        <div className="flex flex-wrap gap-1.5">
-          {value.map((tech) => (
-            <span
-              key={tech}
-              className="flex items-center gap-1 px-2.5 py-1 bg-zinc-100 text-zinc-700 text-xs rounded-full"
-            >
-              {tech}
-              <button
-                type="button"
-                onClick={() => onChange(value.filter((t) => t !== tech))}
-                aria-label={`${tech} 삭제`}
-              >
-                <X className="h-3 w-3" />
-              </button>
-            </span>
-          ))}
-        </div>
-      )}
-    </div>
-  );
-}
 
 export default function EditProfilePage() {
   const router = useRouter();
@@ -136,8 +73,28 @@ export default function EditProfilePage() {
 
   if (isLoading) {
     return (
-      <div className="flex items-center justify-center h-48">
-        <p className="text-sm text-muted-foreground">불러오는 중...</p>
+      <div className="pb-8">
+        <div className="p-4 space-y-5">
+          {["이름", "휴대폰 번호", "한 줄 소개"].map((label) => (
+            <div key={label} className="flex flex-col gap-1.5">
+              <Skeleton className="h-4 w-16" />
+              <Skeleton className="h-10 w-full rounded-lg" />
+            </div>
+          ))}
+          <div className="flex flex-col gap-1.5">
+            <Skeleton className="h-4 w-16" />
+            <Skeleton className="h-10 w-24 rounded-lg" />
+          </div>
+          <div className="flex flex-col gap-1.5">
+            <Skeleton className="h-4 w-16" />
+            <Skeleton className="h-10 w-full rounded-lg" />
+          </div>
+          <div className="flex flex-col gap-1.5">
+            <Skeleton className="h-4 w-16" />
+            <Skeleton className="h-24 w-full rounded-lg" />
+          </div>
+          <Skeleton className="h-12 w-full rounded-xl" />
+        </div>
       </div>
     );
   }
@@ -153,7 +110,7 @@ export default function EditProfilePage() {
             value={name}
             onChange={(e) => setName(e.target.value)}
             required
-            className="w-full rounded-lg border border-zinc-200 bg-white px-3 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-zinc-900"
+            className="w-full rounded-lg border border-zinc-200 bg-white px-3 py-2.5 text-sm focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2"
           />
         </div>
 
@@ -166,7 +123,7 @@ export default function EditProfilePage() {
             onChange={(e) => setPhone(formatPhone(e.target.value))}
             placeholder="010-0000-0000"
             maxLength={13}
-            className="w-full rounded-lg border border-zinc-200 bg-white px-3 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-zinc-900"
+            className="w-full rounded-lg border border-zinc-200 bg-white px-3 py-2.5 text-sm focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2"
           />
         </div>
 
@@ -178,7 +135,7 @@ export default function EditProfilePage() {
             value={headline}
             onChange={(e) => setHeadline(e.target.value)}
             placeholder="ex) 5년차 React 프론트엔드 개발자"
-            className="w-full rounded-lg border border-zinc-200 bg-white px-3 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-zinc-900"
+            className="w-full rounded-lg border border-zinc-200 bg-white px-3 py-2.5 text-sm focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2"
           />
         </div>
 
@@ -192,7 +149,7 @@ export default function EditProfilePage() {
               onChange={(e) => setExperienceYears(Math.max(0, parseInt(e.target.value) || 0))}
               min={0}
               max={50}
-              className="w-24 rounded-lg border border-zinc-200 bg-white px-3 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-zinc-900"
+              className="w-24 rounded-lg border border-zinc-200 bg-white px-3 py-2.5 text-sm focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2"
             />
             <span className="text-sm text-zinc-600">년</span>
           </div>
@@ -212,7 +169,7 @@ export default function EditProfilePage() {
             onChange={(e) => setBio(e.target.value)}
             rows={4}
             placeholder="간단한 자기 소개를 작성해주세요"
-            className="w-full rounded-lg border border-zinc-200 bg-white px-3 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-zinc-900 resize-none"
+            className="w-full rounded-lg border border-zinc-200 bg-white px-3 py-2.5 text-sm focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 resize-none"
           />
         </div>
 

@@ -1,4 +1,5 @@
 import { NextRequest, NextResponse } from "next/server";
+import { createServerClient } from "@/lib/supabase/server";
 import { updateCareer, deleteCareer } from "@/lib/supabase/queries/profile";
 import type { UpdateCareerRequest } from "@/types";
 
@@ -8,6 +9,13 @@ interface RouteContext {
 
 export async function PUT(request: NextRequest, { params }: RouteContext) {
   try {
+    const supabase = await createServerClient();
+    const { data: { user } } = await supabase.auth.getUser();
+
+    if (!user) {
+      return NextResponse.json({ error: "인증이 필요합니다" }, { status: 401 });
+    }
+
     const { id } = await params;
     const body = (await request.json()) as UpdateCareerRequest;
     await updateCareer(id, body);
@@ -19,6 +27,13 @@ export async function PUT(request: NextRequest, { params }: RouteContext) {
 
 export async function DELETE(_request: NextRequest, { params }: RouteContext) {
   try {
+    const supabase = await createServerClient();
+    const { data: { user } } = await supabase.auth.getUser();
+
+    if (!user) {
+      return NextResponse.json({ error: "인증이 필요합니다" }, { status: 401 });
+    }
+
     const { id } = await params;
     await deleteCareer(id);
     return NextResponse.json({ success: true });

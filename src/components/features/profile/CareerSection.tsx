@@ -1,4 +1,5 @@
 import { Badge } from "@/components/ui/badge";
+import { CareerTimelineDot } from "@/components/features/profile/CareerTimelineDot";
 import { formatMonthYear } from "@/lib/utils/format";
 import type { Career } from "@/types";
 
@@ -14,16 +15,10 @@ export function CareerSection({ careers }: CareerSectionProps) {
         {careers.map((career, idx) => (
           <div key={career.id} className="relative flex gap-4">
             {/* 타임라인 선 */}
-            <div className="flex flex-col items-center">
-              <div
-                className={`w-2.5 h-2.5 rounded-full mt-1 shrink-0 ${
-                  career.isCurrent ? "bg-primary" : "bg-zinc-300"
-                }`}
-              />
-              {idx < careers.length - 1 && (
-                <div className="w-0.5 flex-1 bg-zinc-200 mt-1" />
-              )}
-            </div>
+            <CareerTimelineDot
+              isCurrent={career.isCurrent}
+              isLast={idx === careers.length - 1}
+            />
 
             {/* 내용 */}
             <div className="flex-1 pb-4 space-y-1.5">

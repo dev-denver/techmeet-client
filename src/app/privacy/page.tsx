@@ -67,7 +67,7 @@ export default function PrivacyPage() {
 
         <section>
           <h2 className="font-semibold text-base mb-2">제5조 (개인정보 처리 위탁)</h2>
-          <div className="overflow-x-auto">
+          <div className="overflow-x-auto -mx-4 px-4">
             <table className="w-full text-xs border-collapse border border-zinc-200 mt-2">
               <thead>
                 <tr className="bg-zinc-50">

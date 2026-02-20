@@ -3,7 +3,7 @@ import { NextResponse, type NextRequest } from "next/server";
 import { publicEnv } from "@/lib/config/env";
 import { AccountStatus } from "@/types";
 
-const PUBLIC_PATHS = ["/login", "/signup", "/terms", "/privacy", "/api/auth"];
+const PUBLIC_PATHS = ["/login", "/signup", "/terms", "/privacy", "/api/auth", "/api/profile/referrer/search"];
 
 function isPublicPath(pathname: string) {
   return PUBLIC_PATHS.some((p) => pathname.startsWith(p));

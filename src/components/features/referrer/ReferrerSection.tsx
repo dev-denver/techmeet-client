@@ -75,6 +75,7 @@ export function ReferrerSection({ currentReferrerName }: Props) {
         <ReferrerSearchModal
           onSelect={(referrer) => void handleSelect(referrer)}
           onClose={() => setShowModal(false)}
+          hasBottomNav
         />
       )}
     </>

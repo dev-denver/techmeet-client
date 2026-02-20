@@ -192,7 +192,7 @@ function SignupForm() {
           value={formName}
           onChange={(e) => setFormName(e.target.value)}
           required
-          className="w-full rounded-lg border border-zinc-200 bg-white px-3 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-zinc-900"
+          className="w-full rounded-lg border border-zinc-200 bg-white px-3 py-2.5 text-sm focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2"
         />
       </div>
 
@@ -206,7 +206,7 @@ function SignupForm() {
             onChange={(e) => setPassword(e.target.value)}
             required
             placeholder="영문 대소문자·숫자·특수문자 포함 8자 이상"
-            className="w-full rounded-lg border border-zinc-200 bg-white px-3 py-2.5 pr-10 text-sm focus:outline-none focus:ring-2 focus:ring-zinc-900"
+            className="w-full rounded-lg border border-zinc-200 bg-white px-3 py-2.5 pr-10 text-sm focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2"
           />
           <button
             type="button"
@@ -229,7 +229,7 @@ function SignupForm() {
             onChange={(e) => setPasswordConfirm(e.target.value)}
             required
             placeholder="비밀번호를 다시 입력해주세요"
-            className="w-full rounded-lg border border-zinc-200 bg-white px-3 py-2.5 pr-10 text-sm focus:outline-none focus:ring-2 focus:ring-zinc-900"
+            className="w-full rounded-lg border border-zinc-200 bg-white px-3 py-2.5 pr-10 text-sm focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2"
           />
           <button
             type="button"
@@ -253,7 +253,7 @@ function SignupForm() {
           onChange={(e) => setBirthDate(e.target.value)}
           required
           max={new Date().toISOString().split("T")[0]}
-          className="w-full rounded-lg border border-zinc-200 bg-white px-3 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-zinc-900"
+          className="w-full rounded-lg border border-zinc-200 bg-white px-3 py-2.5 text-sm focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2"
         />
       </div>
 
@@ -267,7 +267,7 @@ function SignupForm() {
           required
           placeholder="010-0000-0000"
           maxLength={13}
-          className="w-full rounded-lg border border-zinc-200 bg-white px-3 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-zinc-900"
+          className="w-full rounded-lg border border-zinc-200 bg-white px-3 py-2.5 text-sm focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2"
         />
       </div>
 
