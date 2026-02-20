@@ -1,4 +1,15 @@
-export type AvailabilityStatus = "available" | "partial" | "unavailable";
+export const AvailabilityStatus = {
+  Available: "available",
+  Partial: "partial",
+  Unavailable: "unavailable",
+} as const;
+export type AvailabilityStatus = typeof AvailabilityStatus[keyof typeof AvailabilityStatus];
+
+export const AccountStatus = {
+  Active: "active",
+  Withdrawn: "withdrawn",
+} as const;
+export type AccountStatus = typeof AccountStatus[keyof typeof AccountStatus];
 
 export interface Career {
   id: string;
@@ -24,6 +35,8 @@ export interface FreelancerProfile {
   availabilityStatus: AvailabilityStatus;
   experienceYears: number;
   kakaoId?: string;
+  referrerId?: string;
+  referrerName?: string;
   createdAt: string;
   updatedAt: string;
 }

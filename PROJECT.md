@@ -23,7 +23,7 @@
 | Styling | Tailwind CSS v4 + shadcn/ui | New York 스타일, Zinc 색상 |
 | Database | Supabase (PostgreSQL + Storage) | RLS 적용 권장 |
 | Auth | Supabase Auth + 카카오 OAuth | magic link 방식 세션 생성 |
-| 알림 | PWA Web Push (구현됨) + 카카오 알림톡 (미구현) | |
+| 알림 | 카카오 알림톡 (미구현) | |
 
 ---
 
@@ -46,12 +46,12 @@ src/
 │   │   ├── profile/                # 프로필 조회/수정 (GET, PUT)
 │   │   │   ├── avatar/             # 프로필 사진 업로드 (POST) → Supabase Storage
 │   │   │   ├── availability/       # 투입 가능 상태 변경 (PUT)
+│   │   │   ├── referrer/           # 추천인 등록 (POST)
+│   │   │   │   └── search/         # 추천인 검색 (GET, admin client)
 │   │   │   └── careers/            # 경력 목록/추가 (GET, POST)
 │   │   │       └── [id]/           # 경력 수정/삭제 (PUT, DELETE)
 │   │   ├── projects/               # 프로젝트 목록 조회 (GET, page/pageSize/status 지원)
 │   │   │   └── [id]/               # 프로젝트 상세 조회 (GET)
-│   │   ├── push/
-│   │   │   └── subscribe/          # 푸시 구독 저장/해제 (POST, DELETE)
 │   │   ├── notices/                # 공지사항 목록 조회 (GET)
 │   │   └── settings/notifications/ # 알림 설정 (GET, PUT)
 │   ├── (auth)/                     # 인증된 사용자용 (TopBar + BottomNav)
@@ -74,14 +74,14 @@ src/
 │   └── privacy/page.tsx           # 개인정보 처리방침 (공개)
 ├── components/
 │   ├── ui/                         # shadcn/ui 기반 (avatar, badge, button, card, separator, skeleton)
-│   ├── layout/                     # TopBar, BottomNavigation, ServiceWorkerRegistrar
+│   ├── layout/                     # TopBar, BottomNavigation
 │   └── features/
 │       ├── projects/               # ProjectCard, ProjectStatusBadge, ApplicationCard,
 │       │                           # ProjectListClient (더보기 페이지네이션), ProjectFilters,
 │       │                           # ApplyButton (지원 폼), CareerSectionClient (CRUD)
 │       ├── profile/                # ProfileHeader, AvatarUpload, AvailabilityToggle,
 │       │                           # TechStackSection, CareerSectionClient
-│       └── settings/               # NotificationSettings, PushNotificationToggle, LogoutButton
+│       └── settings/               # NotificationSettings, LogoutButton
 ├── lib/
 │   ├── supabase/                   # Supabase 클라이언트 + 서버사이드 쿼리
 │   │   ├── client.ts               # 브라우저용 클라이언트
@@ -99,8 +99,6 @@ src/
 │   └── index.ts                    # re-export
 ├── middleware.ts                   # 인증 미들웨어 (탈퇴 회원 차단 포함)
 └── public/
-    ├── manifest.json               # PWA 매니페스트
-    └── sw.js                       # Service Worker (푸시 알림 수신)
 ```
 
 ### 인증 플로우
@@ -151,20 +149,6 @@ src/
     → 클라이언트 화면 즉시 갱신
 ```
 
-### 푸시 알림 플로우
-
-```
-사용자가 푸시 알림 토글 ON (PushNotificationToggle 컴포넌트)
-    → Notification.requestPermission()
-    → navigator.serviceWorker.ready → pushManager.subscribe({ VAPID 공개키 })
-    → POST /api/push/subscribe → Supabase push_subscriptions 저장
-
-알림 발송 (admin 레포에서 처리):
-    → push_subscriptions 테이블 조회
-    → web-push 라이브러리로 각 endpoint에 발송
-    → Service Worker(sw.js) push 이벤트 수신 → showNotification()
-```
-
 ---
 
 ## 데이터베이스 스키마 (Supabase)
@@ -187,6 +171,7 @@ notification_application_update boolean DEFAULT true
 notification_marketing          boolean DEFAULT false
 account_status                  text  DEFAULT 'active'  -- 'active' | 'withdrawn'
 withdrawn_at                    timestamptz
+referrer_id                     uuid  REFERENCES profiles(id) ON DELETE SET NULL
 created_at                      timestamptz DEFAULT now()
 updated_at                      timestamptz DEFAULT now()
 ```
@@ -247,16 +232,6 @@ is_important boolean DEFAULT false
 created_at   timestamptz DEFAULT now()
 ```
 
-### push_subscriptions 테이블
-```sql
-id         uuid    PRIMARY KEY DEFAULT gen_random_uuid()
-user_id    uuid    REFERENCES profiles(id) ON DELETE CASCADE
-endpoint   text    NOT NULL UNIQUE
-p256dh     text    NOT NULL
-auth       text    NOT NULL
-created_at timestamptz DEFAULT now()
-```
-
 ---
 
 ## Supabase Storage 설정
@@ -307,8 +282,6 @@ USING (
 
 ### 알림
 - 카카오 알림톡: 미구현 (`lib/kakao/alimtalk.ts` 스텁 상태)
-- PWA 푸시 알림: 구현됨 (구독 관리, 수신 표시)
-  - 발송은 admin 레포에서 `push_subscriptions` 조회 후 `web-push` 패키지로 처리
 
 ### 회원 탈퇴 (소프트 탈퇴)
 - `profiles.account_status = 'withdrawn'`, `withdrawn_at` 기록
@@ -356,10 +329,17 @@ USING (
 ### 설정
 - [x] 계정 정보 표시 (이름, 이메일, 카카오 ID)
 - [x] 알림 설정 토글 (GET/PUT /api/settings/notifications)
-- [x] 푸시 알림 구독/해제 (PushNotificationToggle, /api/push/subscribe)
 - [x] 내 정보 수정 링크
 - [x] 개인정보 처리방침 / 이용약관 링크
 - [x] 회원 탈퇴 UI 및 API
+- [x] 추천인 등록 (미등록 시 등록 버튼 → 모달, 등록 후 이름 read-only 표시)
+
+### 추천인
+- [x] 회원가입 시 추천인 선택 (선택 사항, 이름/전화번호 검색)
+- [x] 설정 페이지에서 추후 등록 가능 (미등록 시)
+- [x] 추천인 1명 제한, 등록 후 클라이언트 변경 불가 (관리자만 변경)
+- [x] 전화번호 마스킹 (010-****-5678)
+- [x] API: GET /api/profile/referrer/search, POST /api/profile/referrer
 
 ### 홈
 - [x] 인사 배너 (이름, 투입 가능 상태 배지)
@@ -374,7 +354,6 @@ USING (
 - [x] 모든 (auth) 페이지 로딩 스켈레톤 (loading.tsx)
 - [x] 모바일 고정 폭 (max-w-[430px])
 - [x] 수평 스크롤 (-mx-4 px-4 + scrollbar-none) 패턴
-- [x] PWA 매니페스트 + Service Worker 등록
 
 ---
 
@@ -416,12 +395,6 @@ KAKAO_REDIRECT_URI=
 KAKAO_ALIMTALK_APP_KEY=
 KAKAO_ALIMTALK_SENDER_KEY=
 
-# Web Push (VAPID)
-# 키 생성: npx web-push generate-vapid-keys
-NEXT_PUBLIC_VAPID_PUBLIC_KEY=
-VAPID_PRIVATE_KEY=
-VAPID_EMAIL=mailto:admin@techmeet.kr
-
 # App
 NEXT_PUBLIC_APP_URL=
 NEXT_PUBLIC_APP_ENV=development
@@ -431,7 +404,6 @@ NEXT_PUBLIC_APP_ENV=development
 
 ## Supabase 신규 설정 체크리스트
 
-- [ ] `push_subscriptions` 테이블 생성 (위 스키마 참고)
 - [ ] `avatars` Storage 버킷 생성 (Public)
 - [ ] `avatars` 버킷 RLS 정책 설정 (위 정책 참고)
 - [ ] `profiles.account_status` 컬럼 추가 (기존 rows default 'active')
@@ -447,7 +419,6 @@ NEXT_PUBLIC_APP_ENV=development
 4. **스크롤 감지**: `window`가 아닌 `<main>` 엘리먼트 기준 (`useScrolled` 훅)
 5. **공개 경로**: `/terms`, `/privacy`는 미들웨어에서 인증 없이 접근 가능
 6. **Storage 업로드**: API Route에서 처리 (클라이언트에서 직접 Supabase Storage 호출 금지)
-7. **푸시 발송**: 이 레포는 구독 관리만. 실제 발송은 admin 레포에서 처리
 
 ---
 

@@ -1,5 +1,6 @@
 import { NextResponse } from "next/server";
 import { createServerClient } from "@/lib/supabase/server";
+import { AccountStatus } from "@/types";
 
 export async function POST() {
   try {
@@ -14,7 +15,7 @@ export async function POST() {
     const { error: profileError } = await supabase
       .from("profiles")
       .update({
-        account_status: "withdrawn",
+        account_status: AccountStatus.Withdrawn,
         withdrawn_at: new Date().toISOString(),
       })
       .eq("id", user.id);

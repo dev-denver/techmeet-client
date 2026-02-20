@@ -3,8 +3,10 @@
 import Link from "next/link";
 import { useSearchParams, useRouter } from "next/navigation";
 import { useEffect, useState, Suspense } from "react";
-import { Eye, EyeOff } from "lucide-react";
+import { Eye, EyeOff, X } from "lucide-react";
 import { validatePassword, validatePhone, validateBirthDate, formatPhone } from "@/lib/utils/validation";
+import { ReferrerSearchModal } from "@/components/features/referrer/ReferrerSearchModal";
+import type { ReferrerSearchResult } from "@/types/api";
 
 function PasswordStrength({ password }: { password: string }) {
   if (!password) return null;
@@ -78,6 +80,8 @@ function SignupForm() {
   const [agreePrivacy, setAgreePrivacy] = useState(false);
   const [agreeAge, setAgreeAge] = useState(false);
   const [agreeMarketing, setAgreeMarketing] = useState(false);
+  const [referrer, setReferrer] = useState<ReferrerSearchResult | null>(null);
+  const [showReferrerModal, setShowReferrerModal] = useState(false);
   const [error, setError] = useState("");
   const [isLoading, setIsLoading] = useState(false);
 
@@ -139,6 +143,7 @@ function SignupForm() {
           kakaoId,
           agree_marketing: agreeMarketing,
           reactivate,
+          referrer_id: referrer?.id ?? null,
         }),
       });
 
@@ -266,6 +271,37 @@ function SignupForm() {
         />
       </div>
 
+      {/* 추천인 */}
+      <div className="flex flex-col gap-1.5">
+        <label className="text-sm font-medium text-zinc-700">
+          추천인 <span className="text-zinc-400 font-normal">(선택)</span>
+        </label>
+        {referrer ? (
+          <div className="flex items-center justify-between rounded-lg border border-zinc-200 bg-zinc-50 px-3 py-2.5">
+            <div>
+              <p className="text-sm font-medium text-zinc-800">{referrer.name}</p>
+              <p className="text-xs text-zinc-400 mt-0.5">{referrer.maskedPhone}</p>
+            </div>
+            <button
+              type="button"
+              onClick={() => setReferrer(null)}
+              className="p-1 rounded-full hover:bg-zinc-200 transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
+              aria-label="추천인 제거"
+            >
+              <X className="h-4 w-4 text-zinc-500" />
+            </button>
+          </div>
+        ) : (
+          <button
+            type="button"
+            onClick={() => setShowReferrerModal(true)}
+            className="w-full rounded-lg border border-dashed border-zinc-300 bg-white px-3 py-2.5 text-sm text-zinc-500 hover:border-zinc-400 hover:text-zinc-700 transition-colors text-left"
+          >
+            + 추천인 추가
+          </button>
+        )}
+      </div>
+
       {/* 약관 동의 */}
       <div className="space-y-3 pt-1">
         <p className="text-sm font-medium text-zinc-700">약관 동의</p>
@@ -361,6 +397,13 @@ function SignupForm() {
       >
         {isLoading ? "처리 중..." : reactivate ? "재가입 완료" : "회원가입 완료"}
       </button>
+
+      {showReferrerModal && (
+        <ReferrerSearchModal
+          onSelect={(selected) => { setReferrer(selected); setShowReferrerModal(false); }}
+          onClose={() => setShowReferrerModal(false)}
+        />
+      )}
     </form>
   );
 }

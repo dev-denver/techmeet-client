@@ -8,6 +8,7 @@ import { ProjectStatusBadge } from "@/components/features/projects/ProjectStatus
 import { ApplyButton } from "@/components/features/projects/ApplyButton";
 import { getProjectById } from "@/lib/supabase/queries/projects";
 import { formatDate, formatBudget, formatDeadlineDays, formatWorkType } from "@/lib/utils/format";
+import { ProjectStatus } from "@/types";
 
 interface ProjectDetailPageProps {
   params: Promise<{ id: string }>;
@@ -31,7 +32,7 @@ export default async function ProjectDetailPage({
       <div className="p-4 space-y-3 border-b">
         <div className="flex items-center gap-2">
           <ProjectStatusBadge status={project.status} />
-          {project.status === "recruiting" && (
+          {project.status === ProjectStatus.Recruiting && (
             <span className="text-xs text-muted-foreground">
               {formatDeadlineDays(project.deadline)}
             </span>
@@ -142,11 +143,11 @@ export default async function ProjectDetailPage({
 
       {/* 지원하기 CTA */}
       <div className="p-4">
-        {project.status === "recruiting" ? (
+        {project.status === ProjectStatus.Recruiting ? (
           <ApplyButton projectId={project.id} />
         ) : (
           <Button className="w-full h-12 text-base font-semibold" disabled>
-            {project.status === "in_progress" ? "진행 중인 프로젝트" : "모집 종료"}
+            {project.status === ProjectStatus.InProgress ? "진행 중인 프로젝트" : "모집 종료"}
           </Button>
         )}
       </div>

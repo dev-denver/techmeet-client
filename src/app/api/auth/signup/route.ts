@@ -4,6 +4,7 @@ import { createClient } from "@supabase/supabase-js";
 import { validatePassword, validatePhone, validateBirthDate } from "@/lib/utils/validation";
 import { type CookieOptions } from "@supabase/ssr";
 import { publicEnv, serverEnv } from "@/lib/config/env";
+import { AccountStatus } from "@/types";
 
 export async function POST(request: NextRequest) {
   const body = await request.json() as {
@@ -14,9 +15,11 @@ export async function POST(request: NextRequest) {
     phone?: unknown;
     kakaoId?: unknown;
     reactivate?: unknown;
+    referrer_id?: unknown;
   };
 
   const { email, password, name, birth_date, phone, kakaoId } = body;
+  const referrerId = typeof body.referrer_id === "string" && body.referrer_id ? body.referrer_id : null;
   const agreeMarketing = typeof (body as { agree_marketing?: unknown }).agree_marketing === "boolean"
     ? (body as { agree_marketing: boolean }).agree_marketing
     : false;
@@ -86,7 +89,7 @@ export async function POST(request: NextRequest) {
       .eq("email", email)
       .single();
 
-    if (!existingProfile || existingProfile.account_status !== "withdrawn") {
+    if (!existingProfile || existingProfile.account_status !== AccountStatus.Withdrawn) {
       return NextResponse.json({ error: "재가입할 수 없는 계정입니다." }, { status: 400 });
     }
 
@@ -107,7 +110,7 @@ export async function POST(request: NextRequest) {
     const { error: profileError } = await supabaseAdmin
       .from("profiles")
       .update({
-        account_status: "active",
+        account_status: AccountStatus.Active,
         withdrawn_at: null,
         phone,
         kakao_id: typeof kakaoId === "string" && kakaoId ? kakaoId : null,
@@ -150,14 +153,17 @@ export async function POST(request: NextRequest) {
 
   // 추가 프로필 필드 업데이트 (phone, kakao_id)
   if (data.user) {
+    const profileUpdate: Record<string, unknown> = {
+      phone,
+      kakao_id: typeof kakaoId === "string" ? kakaoId : null,
+      notification_marketing: agreeMarketing,
+      account_status: AccountStatus.Active,
+    };
+    if (referrerId) profileUpdate.referrer_id = referrerId;
+
     const { error: updateError } = await supabase
       .from("profiles")
-      .update({
-        phone,
-        kakao_id: typeof kakaoId === "string" ? kakaoId : null,
-        notification_marketing: agreeMarketing,
-        account_status: "active",
-      })
+      .update(profileUpdate)
       .eq("id", data.user.id);
 
     if (updateError) {

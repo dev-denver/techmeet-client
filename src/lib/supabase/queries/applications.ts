@@ -1,5 +1,6 @@
 import { createServerClient } from "@/lib/supabase/server";
-import type { Application, ApplicationStatus } from "@/types";
+import { ApplicationStatus } from "@/types";
+import type { Application } from "@/types";
 import type {
   GetApplicationsResponse,
   CreateApplicationRequest,
@@ -89,7 +90,7 @@ export async function withdrawApplication(id: string): Promise<void> {
 
   const { error } = await supabase
     .from("applications")
-    .update({ status: "withdrawn" })
+    .update({ status: ApplicationStatus.Withdrawn })
     .eq("id", id)
     .eq("freelancer_id", user.id);
 

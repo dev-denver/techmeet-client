@@ -10,12 +10,13 @@ import { getProjects } from "@/lib/supabase/queries/projects";
 import { getNotices } from "@/lib/supabase/queries/notices";
 import { formatDate } from "@/lib/utils/format";
 import { AVAILABILITY_STATUS_CONFIG } from "@/lib/constants";
+import { ProjectStatus } from "@/types";
 
 export default async function HomePage() {
   const [profileResult, applicationsResult, projectsResult, noticesResult] = await Promise.all([
     getProfile(),
     getApplications(),
-    getProjects({ status: "recruiting" }),
+    getProjects({ status: ProjectStatus.Recruiting }),
     getNotices(),
   ]);
 

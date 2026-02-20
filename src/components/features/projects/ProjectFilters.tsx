@@ -2,13 +2,14 @@
 
 import { useState } from "react";
 import { cn } from "@/lib/utils/cn";
+import { ProjectStatus } from "@/types";
 import type { ProjectFilterValue } from "@/types";
 
 const filters: { value: ProjectFilterValue; label: string }[] = [
   { value: "all", label: "전체" },
-  { value: "recruiting", label: "모집중" },
-  { value: "in_progress", label: "진행중" },
-  { value: "completed", label: "완료" },
+  { value: ProjectStatus.Recruiting, label: "모집중" },
+  { value: ProjectStatus.InProgress, label: "진행중" },
+  { value: ProjectStatus.Completed, label: "완료" },
 ];
 
 interface ProjectFiltersProps {

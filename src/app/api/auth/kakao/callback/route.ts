@@ -3,6 +3,7 @@ import { createClient } from "@supabase/supabase-js";
 import { NextRequest, NextResponse } from "next/server";
 import { serverEnv, publicEnv } from "@/lib/config/env";
 import { exchangeCodeForToken, getKakaoUserInfo } from "@/lib/kakao/oauth";
+import { AccountStatus } from "@/types";
 
 export async function GET(request: NextRequest) {
   const { searchParams } = new URL(request.url);
@@ -57,7 +58,7 @@ export async function GET(request: NextRequest) {
 
     if (profile) {
       // 탈퇴 회원 → 재가입 페이지로
-      if (profile.account_status === "withdrawn") {
+      if (profile.account_status === AccountStatus.Withdrawn) {
         const reactivateUrl = new URL("/signup", request.url);
         reactivateUrl.searchParams.set("email", profile.email);
         reactivateUrl.searchParams.set("name", name ?? "");

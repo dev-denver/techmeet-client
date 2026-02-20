@@ -4,6 +4,7 @@ import { Card, CardContent } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { ProjectStatusBadge } from "./ProjectStatusBadge";
 import { formatBudget, formatDeadlineDays, getDeadlineDays, formatWorkType } from "@/lib/utils/format";
+import { ProjectStatus } from "@/types";
 import type { Project } from "@/types";
 
 interface ProjectCardProps {
@@ -14,7 +15,7 @@ export function ProjectCard({ project }: ProjectCardProps) {
   const deadlineText = formatDeadlineDays(project.deadline);
   const deadlineDays = getDeadlineDays(project.deadline);
   const isUrgent =
-    project.status === "recruiting" &&
+    project.status === ProjectStatus.Recruiting &&
     deadlineDays !== null &&
     deadlineDays <= 7;
 
@@ -25,7 +26,7 @@ export function ProjectCard({ project }: ProjectCardProps) {
           {/* 헤더: 상태 + 마감 */}
           <div className="flex items-center justify-between">
             <ProjectStatusBadge status={project.status} />
-            {project.status === "recruiting" && (
+            {project.status === ProjectStatus.Recruiting && (
               <span
                 className={`text-xs ${isUrgent ? "text-red-500 font-semibold" : "text-muted-foreground"}`}
               >

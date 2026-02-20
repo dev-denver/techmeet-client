@@ -1,6 +1,7 @@
 import { createServerClient, type CookieOptions } from "@supabase/ssr";
 import { NextResponse, type NextRequest } from "next/server";
 import { publicEnv } from "@/lib/config/env";
+import { AccountStatus } from "@/types";
 
 const PUBLIC_PATHS = ["/login", "/signup", "/terms", "/privacy", "/api/auth"];
 
@@ -55,11 +56,11 @@ export async function middleware(request: NextRequest) {
         .eq("id", user.id)
         .single();
 
-      if (profile?.account_status === "withdrawn") {
+      if (profile?.account_status === AccountStatus.Withdrawn) {
         await supabase.auth.signOut();
         const url = request.nextUrl.clone();
         url.pathname = "/login";
-        url.searchParams.set("error", "withdrawn");
+        url.searchParams.set("error", AccountStatus.Withdrawn);
         return NextResponse.redirect(url);
       }
     }

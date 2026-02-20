@@ -49,8 +49,10 @@ export function formatMonthYear(dateString: string): string {
   return `${year}년 ${month}월`;
 }
 
-export function formatWorkType(workType: string): string {
-  if (workType === "remote") return "원격";
-  if (workType === "onsite") return "현장";
+import { WorkType } from "@/types";
+
+export function formatWorkType(workType: WorkType): string {
+  if (workType === WorkType.Remote) return "원격";
+  if (workType === WorkType.Onsite) return "현장";
   return "하이브리드";
 }

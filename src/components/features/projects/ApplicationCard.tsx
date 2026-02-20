@@ -8,6 +8,7 @@ import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { formatDate } from "@/lib/utils/format";
 import { APPLICATION_STATUS_CONFIG } from "@/lib/constants";
+import { ApplicationStatus } from "@/types";
 import type { Application } from "@/types";
 
 interface ApplicationCardProps {
@@ -73,7 +74,7 @@ export function ApplicationCard({
     );
   }
 
-  const canCancel = application.status === "pending";
+  const canCancel = application.status === ApplicationStatus.Pending;
 
   return (
     <div className="relative">

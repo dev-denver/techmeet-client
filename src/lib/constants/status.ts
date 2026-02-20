@@ -1,4 +1,4 @@
-import type { ProjectStatus, ApplicationStatus, AvailabilityStatus } from "@/types";
+import { ProjectStatus, ApplicationStatus, AvailabilityStatus } from "@/types";
 
 interface StatusConfig {
   label: string;
@@ -6,76 +6,76 @@ interface StatusConfig {
 }
 
 export const PROJECT_STATUS_CONFIG: Record<ProjectStatus, StatusConfig> = {
-  recruiting: {
+  [ProjectStatus.Recruiting]: {
     label: "모집중",
     className: "bg-status-success/10 text-status-success border-status-success/20",
   },
-  in_progress: {
+  [ProjectStatus.InProgress]: {
     label: "진행중",
     className: "bg-status-info/10 text-status-info border-status-info/20",
   },
-  completed: {
+  [ProjectStatus.Completed]: {
     label: "완료",
     className: "bg-status-neutral/10 text-status-neutral border-status-neutral/20",
   },
-  cancelled: {
+  [ProjectStatus.Cancelled]: {
     label: "취소",
     className: "bg-status-danger/10 text-status-danger border-status-danger/20",
   },
 };
 
 export const APPLICATION_STATUS_CONFIG: Record<ApplicationStatus, StatusConfig> = {
-  pending: {
+  [ApplicationStatus.Pending]: {
     label: "검토 대기",
     className: "bg-status-neutral/10 text-status-neutral border-status-neutral/20",
   },
-  reviewing: {
+  [ApplicationStatus.Reviewing]: {
     label: "검토중",
     className: "bg-status-info/10 text-status-info border-status-info/20",
   },
-  interview: {
+  [ApplicationStatus.Interview]: {
     label: "면접 예정",
     className: "bg-status-purple/10 text-status-purple border-status-purple/20",
   },
-  accepted: {
+  [ApplicationStatus.Accepted]: {
     label: "합격",
     className: "bg-status-success/10 text-status-success border-status-success/20",
   },
-  rejected: {
+  [ApplicationStatus.Rejected]: {
     label: "불합격",
     className: "bg-status-danger/10 text-status-danger border-status-danger/20",
   },
-  withdrawn: {
+  [ApplicationStatus.Withdrawn]: {
     label: "취소",
     className: "bg-status-neutral/10 text-status-neutral/80 border-status-neutral/20",
   },
 };
 
 export const AVAILABILITY_STATUS_CONFIG: Record<AvailabilityStatus, StatusConfig> = {
-  available: {
+  [AvailabilityStatus.Available]: {
     label: "투입 가능",
     className: "bg-status-success/10 text-status-success border-status-success/20",
   },
-  partial: {
+  [AvailabilityStatus.Partial]: {
     label: "일부 가능",
     className: "bg-status-warning/10 text-status-warning border-status-warning/20",
   },
-  unavailable: {
+  [AvailabilityStatus.Unavailable]: {
     label: "투입 불가",
     className: "bg-status-danger/10 text-status-danger border-status-danger/20",
   },
 };
 
 export const AVAILABILITY_TOGGLE_CONFIG: Record<AvailabilityStatus, StatusConfig> = {
-  available: {
+  [AvailabilityStatus.Available]: {
     label: "투입 가능",
     className: "bg-status-success text-white",
   },
-  partial: {
+  [AvailabilityStatus.Partial]: {
     label: "일부 가능",
     className: "bg-status-warning text-yellow-900",
   },
-  unavailable: {
+  [AvailabilityStatus.Unavailable]: {
     label: "투입 불가",
     className: "bg-status-danger text-white",
   },

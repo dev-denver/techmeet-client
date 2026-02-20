@@ -31,6 +31,8 @@ interface ProfileRow {
   availability_status: AvailabilityStatus;
   experience_years: number;
   kakao_id: string | null;
+  referrer_id: string | null;
+  referrer: { name: string } | null;
   created_at: string;
   updated_at: string;
   careers: CareerRow[];
@@ -63,6 +65,8 @@ function mapRowToProfile(row: ProfileRow): FreelancerProfile {
     availabilityStatus: row.availability_status,
     experienceYears: row.experience_years,
     kakaoId: row.kakao_id ?? undefined,
+    referrerId: row.referrer_id ?? undefined,
+    referrerName: row.referrer?.name ?? undefined,
     createdAt: row.created_at,
     updatedAt: row.updated_at,
   };
@@ -76,7 +80,7 @@ export async function getProfile(): Promise<GetProfileResponse | null> {
 
   const { data, error } = await supabase
     .from("profiles")
-    .select("*, careers(*)")
+    .select("*, careers(*), referrer:profiles!referrer_id(name)")
     .eq("id", user.id)
     .single();
 

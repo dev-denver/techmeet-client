@@ -1,8 +1,28 @@
-export type ProjectStatus = "recruiting" | "in_progress" | "completed" | "cancelled";
+export const ProjectStatus = {
+  Recruiting: "recruiting",
+  InProgress: "in_progress",
+  Completed: "completed",
+  Cancelled: "cancelled",
+} as const;
+export type ProjectStatus = typeof ProjectStatus[keyof typeof ProjectStatus];
 
-export type ProjectType = "web" | "mobile" | "backend" | "fullstack" | "data" | "design" | "other";
+export const ProjectType = {
+  Web: "web",
+  Mobile: "mobile",
+  Backend: "backend",
+  Fullstack: "fullstack",
+  Data: "data",
+  Design: "design",
+  Other: "other",
+} as const;
+export type ProjectType = typeof ProjectType[keyof typeof ProjectType];
 
-export type WorkType = "remote" | "onsite" | "hybrid";
+export const WorkType = {
+  Remote: "remote",
+  Onsite: "onsite",
+  Hybrid: "hybrid",
+} as const;
+export type WorkType = typeof WorkType[keyof typeof WorkType];
 
 export type ProjectFilterValue = "all" | ProjectStatus;
 

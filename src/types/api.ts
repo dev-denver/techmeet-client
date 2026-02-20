@@ -81,6 +81,12 @@ export interface AddCareerRequest {
 export type UpdateCareerRequest = Partial<AddCareerRequest>;
 export type GetProfileResponse = { data: FreelancerProfile };
 
+// ── Referrer ──────────────────────────────────────────
+export interface SetReferrerRequest { referrerId: string; }
+export type SetReferrerResponse = ApiSuccessResponse;
+export interface ReferrerSearchResult { id: string; name: string; maskedPhone: string; }
+export type SearchReferrerResponse = { data: ReferrerSearchResult[] };
+
 // ── Notices ───────────────────────────────────────────
 export type GetNoticesResponse = PaginatedResponse<Notice>;
 

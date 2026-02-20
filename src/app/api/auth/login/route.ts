@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from "next/server";
 import { createServerClient, type CookieOptions } from "@supabase/ssr";
 import { createClient } from "@supabase/supabase-js";
 import { publicEnv, serverEnv } from "@/lib/config/env";
+import { AccountStatus } from "@/types";
 
 export async function POST(request: NextRequest) {
   const body = await request.json() as { email?: unknown; password?: unknown };
@@ -56,10 +57,10 @@ export async function POST(request: NextRequest) {
       .eq("id", sessionUser.id)
       .single();
 
-    if (profile?.account_status === "withdrawn") {
+    if (profile?.account_status === AccountStatus.Withdrawn) {
       await supabase.auth.signOut();
       return NextResponse.json(
-        { error: "탈퇴한 계정입니다.", code: "withdrawn" },
+        { error: "탈퇴한 계정입니다.", code: AccountStatus.Withdrawn },
         { status: 403 }
       );
     }

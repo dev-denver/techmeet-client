@@ -1,13 +1,14 @@
 import { ApplicationCard } from "@/components/features/projects/ApplicationCard";
 import { getApplications } from "@/lib/supabase/queries/applications";
+import { ApplicationStatus } from "@/types";
 
-const statusOrder = [
-  "interview",
-  "reviewing",
-  "pending",
-  "accepted",
-  "rejected",
-  "withdrawn",
+const statusOrder: string[] = [
+  ApplicationStatus.Interview,
+  ApplicationStatus.Reviewing,
+  ApplicationStatus.Pending,
+  ApplicationStatus.Accepted,
+  ApplicationStatus.Rejected,
+  ApplicationStatus.Withdrawn,
 ];
 
 export default async function ApplicationsPage() {

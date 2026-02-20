@@ -2,9 +2,9 @@ import Link from "next/link";
 import { ChevronRight, Shield, Info, UserCog, UserX } from "lucide-react";
 import { Separator } from "@/components/ui/separator";
 import { NotificationSettings } from "@/components/features/settings/NotificationSettings";
-import { PushNotificationToggle } from "@/components/features/settings/PushNotificationToggle";
 import { LogoutButton } from "@/components/features/settings/LogoutButton";
 import { getProfile } from "@/lib/supabase/queries/profile";
+import { ReferrerSection } from "@/components/features/referrer/ReferrerSection";
 
 export default async function SettingsPage() {
   const result = await getProfile();
@@ -30,6 +30,7 @@ export default async function SettingsPage() {
             <span className="text-sm text-muted-foreground">카카오 ID</span>
             <span className="text-sm font-medium">{profile?.kakaoId ?? "-"}</span>
           </div>
+          <ReferrerSection currentReferrerName={profile?.referrerName} />
           <Link
             href="/settings/profile"
             className="flex items-center justify-between w-full py-2 hover:opacity-70 transition-opacity"
@@ -50,7 +51,6 @@ export default async function SettingsPage() {
         </h3>
       </div>
       <NotificationSettings />
-      <PushNotificationToggle />
 
       {/* 앱 정보 */}
       <div className="p-4 border-b">
