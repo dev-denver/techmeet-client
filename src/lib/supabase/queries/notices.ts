@@ -20,6 +20,19 @@ function mapRowToNotice(row: NoticeRow): Notice {
   };
 }
 
+export async function getNoticeById(id: string): Promise<Notice | null> {
+  const supabase = await createServerClient();
+
+  const { data, error } = await supabase
+    .from("notices")
+    .select("*")
+    .eq("id", id)
+    .single();
+
+  if (error || !data) return null;
+  return mapRowToNotice(data as NoticeRow);
+}
+
 export async function getNotices(): Promise<GetNoticesResponse> {
   const supabase = await createServerClient();
 

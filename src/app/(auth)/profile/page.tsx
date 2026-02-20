@@ -1,6 +1,6 @@
 import { ProfileHeader } from "@/components/features/profile/ProfileHeader";
 import { AvailabilityToggle } from "@/components/features/profile/AvailabilityToggle";
-import { CareerSection } from "@/components/features/profile/CareerSection";
+import { CareerSectionClient } from "@/components/features/profile/CareerSectionClient";
 import { TechStackSection } from "@/components/features/profile/TechStackSection";
 import { getProfile } from "@/lib/supabase/queries/profile";
 import { Card, CardContent } from "@/components/ui/card";
@@ -26,7 +26,7 @@ export default async function ProfilePage() {
       <ProfileHeader profile={profile} />
       <AvailabilityToggle initialStatus={profile.availabilityStatus} />
       <TechStackSection techStack={profile.techStack} />
-      <CareerSection careers={profile.careers} />
+      <CareerSectionClient careers={profile.careers} />
 
       {/* 자기 소개 */}
       <div className="p-4 space-y-3">

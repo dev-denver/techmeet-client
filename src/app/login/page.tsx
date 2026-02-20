@@ -10,6 +10,7 @@ const KAKAO_ERROR_MESSAGES: Record<string, string> = {
   kakao_api_error: "카카오 로그인 처리 중 오류가 발생했습니다",
   session_error: "로그인 세션 생성에 실패했습니다. 다시 시도해주세요",
   missing_code: "잘못된 접근입니다",
+  withdrawn: "탈퇴한 계정입니다. 재가입이 필요합니다.",
 };
 
 function LoginForm() {

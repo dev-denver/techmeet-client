@@ -5,6 +5,7 @@ import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import { Separator } from "@/components/ui/separator";
 import { ProjectStatusBadge } from "@/components/features/projects/ProjectStatusBadge";
+import { ApplyButton } from "@/components/features/projects/ApplyButton";
 import { getProjectById } from "@/lib/supabase/queries/projects";
 import { formatDate, formatBudget, formatDeadlineDays, formatWorkType } from "@/lib/utils/format";
 
@@ -142,9 +143,7 @@ export default async function ProjectDetailPage({
       {/* 지원하기 CTA */}
       <div className="p-4">
         {project.status === "recruiting" ? (
-          <Button className="w-full h-12 text-base font-semibold">
-            지원하기
-          </Button>
+          <ApplyButton projectId={project.id} />
         ) : (
           <Button className="w-full h-12 text-base font-semibold" disabled>
             {project.status === "in_progress" ? "진행 중인 프로젝트" : "모집 종료"}

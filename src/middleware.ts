@@ -38,18 +38,38 @@ export async function middleware(request: NextRequest) {
 
   const { pathname } = request.nextUrl;
 
-  // 인증된 사용자가 로그인/회원가입 페이지 접근 → 홈으로 리다이렉트
-  if (user && (pathname === "/login" || pathname === "/signup")) {
-    const url = request.nextUrl.clone();
-    url.pathname = "/";
-    return NextResponse.redirect(url);
-  }
-
   // 미인증 사용자가 보호된 페이지 접근 → 로그인으로 리다이렉트
   if (!user && !isPublicPath(pathname)) {
     const url = request.nextUrl.clone();
     url.pathname = "/login";
     return NextResponse.redirect(url);
+  }
+
+  // 인증된 사용자 처리
+  if (user) {
+    // 탈퇴 회원 체크 (공개 경로 제외)
+    if (!isPublicPath(pathname)) {
+      const { data: profile } = await supabase
+        .from("profiles")
+        .select("account_status")
+        .eq("id", user.id)
+        .single();
+
+      if (profile?.account_status === "withdrawn") {
+        await supabase.auth.signOut();
+        const url = request.nextUrl.clone();
+        url.pathname = "/login";
+        url.searchParams.set("error", "withdrawn");
+        return NextResponse.redirect(url);
+      }
+    }
+
+    // 로그인/회원가입 페이지 접근 → 홈으로 리다이렉트
+    if (pathname === "/login" || pathname === "/signup") {
+      const url = request.nextUrl.clone();
+      url.pathname = "/";
+      return NextResponse.redirect(url);
+    }
   }
 
   return supabaseResponse;

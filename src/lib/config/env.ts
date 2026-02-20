@@ -19,6 +19,12 @@ function requireServerEnv(key: string): string {
 
 /** 서버 전용 환경변수 (NEXT_PUBLIC_ 접두사 없음) */
 export const serverEnv = {
+  get vapidPrivateKey() {
+    return requireServerEnv("VAPID_PRIVATE_KEY");
+  },
+  get vapidEmail() {
+    return requireServerEnv("VAPID_EMAIL");
+  },
   get kakaoRestApiKey() {
     return requireServerEnv("KAKAO_REST_API_KEY");
   },
@@ -68,5 +74,8 @@ export const publicEnv = {
   },
   get appEnv() {
     return process.env.NEXT_PUBLIC_APP_ENV ?? "development";
+  },
+  get vapidPublicKey() {
+    return process.env.NEXT_PUBLIC_VAPID_PUBLIC_KEY ?? "";
   },
 };

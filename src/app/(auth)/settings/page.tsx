@@ -2,6 +2,7 @@ import Link from "next/link";
 import { ChevronRight, Shield, Info, UserCog, UserX } from "lucide-react";
 import { Separator } from "@/components/ui/separator";
 import { NotificationSettings } from "@/components/features/settings/NotificationSettings";
+import { PushNotificationToggle } from "@/components/features/settings/PushNotificationToggle";
 import { LogoutButton } from "@/components/features/settings/LogoutButton";
 import { getProfile } from "@/lib/supabase/queries/profile";
 
@@ -49,6 +50,7 @@ export default async function SettingsPage() {
         </h3>
       </div>
       <NotificationSettings />
+      <PushNotificationToggle />
 
       {/* 앱 정보 */}
       <div className="p-4 border-b">
@@ -56,20 +58,26 @@ export default async function SettingsPage() {
           앱 정보
         </h3>
         <div className="space-y-1">
-          <button className="flex items-center justify-between w-full py-2 hover:opacity-70 transition-opacity">
+          <Link
+            href="/privacy"
+            className="flex items-center justify-between w-full py-2 hover:opacity-70 transition-opacity"
+          >
             <span className="flex items-center gap-2 text-sm">
               <Shield className="h-4 w-4 text-muted-foreground" />
               개인정보 처리방침
             </span>
             <ChevronRight className="h-4 w-4 text-muted-foreground" />
-          </button>
-          <button className="flex items-center justify-between w-full py-2 hover:opacity-70 transition-opacity">
+          </Link>
+          <Link
+            href="/terms"
+            className="flex items-center justify-between w-full py-2 hover:opacity-70 transition-opacity"
+          >
             <span className="flex items-center gap-2 text-sm">
               <Info className="h-4 w-4 text-muted-foreground" />
               이용약관
             </span>
             <ChevronRight className="h-4 w-4 text-muted-foreground" />
-          </button>
+          </Link>
           <div className="flex items-center justify-between py-2">
             <span className="text-sm text-muted-foreground">앱 버전</span>
             <span className="text-sm text-muted-foreground">v1.0.0</span>

@@ -103,26 +103,28 @@ export default async function HomePage() {
         {notices.length > 0 ? (
           <div className="space-y-2">
             {notices.map((notice) => (
-              <Card key={notice.id} className="hover:shadow-md transition-shadow cursor-pointer">
-                <CardContent>
-                  <div className="flex items-start gap-2">
-                    {notice.isImportant && (
-                      <Bell className="h-4 w-4 text-orange-500 shrink-0 mt-0.5" />
-                    )}
-                    <div className="space-y-1 min-w-0">
-                      <p className="text-sm font-medium leading-snug">
-                        {notice.title}
-                      </p>
-                      <p className="text-xs text-muted-foreground line-clamp-2">
-                        {notice.content}
-                      </p>
-                      <p className="text-xs text-muted-foreground">
-                        {formatDate(notice.createdAt)}
-                      </p>
+              <Link key={notice.id} href={`/notices/${notice.id}`}>
+                <Card className="hover:shadow-md transition-shadow cursor-pointer">
+                  <CardContent>
+                    <div className="flex items-start gap-2">
+                      {notice.isImportant && (
+                        <Bell className="h-4 w-4 text-orange-500 shrink-0 mt-0.5" />
+                      )}
+                      <div className="space-y-1 min-w-0">
+                        <p className="text-sm font-medium leading-snug">
+                          {notice.title}
+                        </p>
+                        <p className="text-xs text-muted-foreground line-clamp-2">
+                          {notice.content}
+                        </p>
+                        <p className="text-xs text-muted-foreground">
+                          {formatDate(notice.createdAt)}
+                        </p>
+                      </div>
                     </div>
-                  </div>
-                </CardContent>
-              </Card>
+                  </CardContent>
+                </Card>
+              </Link>
             ))}
           </div>
         ) : (

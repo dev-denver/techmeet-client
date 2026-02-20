@@ -1,7 +1,7 @@
 # 테크밋 프리랜서 앱 - 개발 문서
 
 > 이 문서는 개발 환경이 바뀌어도 어디까지 개발됐는지 파악하고 이어서 개발할 수 있도록 작성된 문서입니다.
-> 마지막 업데이트: 2026-02-19
+> 마지막 업데이트: 2026-02-20
 
 ---
 
@@ -21,9 +21,9 @@
 | Framework | Next.js 16 (App Router) | |
 | Language | TypeScript 5 strict | any 타입 금지 |
 | Styling | Tailwind CSS v4 + shadcn/ui | New York 스타일, Zinc 색상 |
-| Database | Supabase (PostgreSQL) | RLS 적용 권장 |
+| Database | Supabase (PostgreSQL + Storage) | RLS 적용 권장 |
 | Auth | Supabase Auth + 카카오 OAuth | magic link 방식 세션 생성 |
-| 알림 | 카카오 알림톡 | 미구현 (TODO) |
+| 알림 | PWA Web Push (구현됨) + 카카오 알림톡 (미구현) | |
 
 ---
 
@@ -41,19 +41,27 @@ src/
 │   │   │   ├── logout/             # 로그아웃
 │   │   │   ├── signup/             # 회원가입
 │   │   │   └── withdraw/           # 회원탈퇴 (소프트 탈퇴)
-│   │   ├── applications/           # 지원 관리 (GET, POST, DELETE)
-│   │   ├── profile/                # 프로필 관리 (GET, PUT)
+│   │   ├── applications/           # 지원 관리 (GET, POST)
+│   │   │   └── [id]/               # 지원 취소 (DELETE)
+│   │   ├── profile/                # 프로필 조회/수정 (GET, PUT)
+│   │   │   ├── avatar/             # 프로필 사진 업로드 (POST) → Supabase Storage
 │   │   │   ├── availability/       # 투입 가능 상태 변경 (PUT)
-│   │   │   └── careers/            # 경력 관리 (POST, PUT, DELETE)
-│   │   ├── projects/               # 프로젝트 조회 (GET)
-│   │   ├── notices/                # 공지사항 조회 (GET)
+│   │   │   └── careers/            # 경력 목록/추가 (GET, POST)
+│   │   │       └── [id]/           # 경력 수정/삭제 (PUT, DELETE)
+│   │   ├── projects/               # 프로젝트 목록 조회 (GET, page/pageSize/status 지원)
+│   │   │   └── [id]/               # 프로젝트 상세 조회 (GET)
+│   │   ├── push/
+│   │   │   └── subscribe/          # 푸시 구독 저장/해제 (POST, DELETE)
+│   │   ├── notices/                # 공지사항 목록 조회 (GET)
 │   │   └── settings/notifications/ # 알림 설정 (GET, PUT)
 │   ├── (auth)/                     # 인증된 사용자용 (TopBar + BottomNav)
 │   │   ├── layout.tsx              # 고정 레이아웃
 │   │   ├── page.tsx                # 홈 (/)
+│   │   ├── notices/
+│   │   │   └── [id]/page.tsx       # 공지사항 상세
 │   │   ├── projects/
-│   │   │   ├── page.tsx            # 프로젝트 목록
-│   │   │   ├── [id]/page.tsx       # 프로젝트 상세
+│   │   │   ├── page.tsx            # 프로젝트 목록 (더보기 페이지네이션)
+│   │   │   ├── [id]/page.tsx       # 프로젝트 상세 + 지원하기
 │   │   │   └── applications/page.tsx # 내 신청 내역
 │   │   ├── profile/page.tsx        # 내 정보
 │   │   └── settings/
@@ -66,23 +74,33 @@ src/
 │   └── privacy/page.tsx           # 개인정보 처리방침 (공개)
 ├── components/
 │   ├── ui/                         # shadcn/ui 기반 (avatar, badge, button, card, separator, skeleton)
-│   ├── layout/                     # TopBar, BottomNavigation
+│   ├── layout/                     # TopBar, BottomNavigation, ServiceWorkerRegistrar
 │   └── features/
-│       ├── projects/               # ProjectCard, ProjectStatusBadge, ApplicationCard, ProjectListClient, ProjectFilters
-│       ├── profile/                # ProfileHeader, AvailabilityToggle, TechStackSection, CareerSection (조회만, 편집 UI 없음)
-│       └── settings/               # NotificationSettings, LogoutButton
+│       ├── projects/               # ProjectCard, ProjectStatusBadge, ApplicationCard,
+│       │                           # ProjectListClient (더보기 페이지네이션), ProjectFilters,
+│       │                           # ApplyButton (지원 폼), CareerSectionClient (CRUD)
+│       ├── profile/                # ProfileHeader, AvatarUpload, AvailabilityToggle,
+│       │                           # TechStackSection, CareerSectionClient
+│       └── settings/               # NotificationSettings, PushNotificationToggle, LogoutButton
 ├── lib/
-│   ├── api/                        # 클라이언트 API 래퍼 함수 (apiFetch)
 │   ├── supabase/                   # Supabase 클라이언트 + 서버사이드 쿼리
+│   │   ├── client.ts               # 브라우저용 클라이언트
+│   │   ├── server.ts               # 서버용 클라이언트 (쿠키 기반 세션)
 │   │   └── queries/                # projects, applications, profile, notices
-│   ├── kakao/                      # OAuth (구현됨), 알림톡 (미구현)
+│   ├── kakao/                      # OAuth (구현됨), 알림톡 (미구현 스텁)
 │   ├── config/env.ts               # 환경변수 타입 안전 접근
 │   ├── constants/status.ts         # 상태 config (색상, 레이블) 중앙 관리
 │   └── utils/                      # cn, format, validation
 ├── hooks/
 │   └── useScrolled.ts              # main 엘리먼트 스크롤 감지
 ├── types/                          # TypeScript 타입 정의
-└── middleware.ts                   # 인증 미들웨어
+│   ├── project.ts, user.ts, application.ts, notice.ts
+│   ├── api.ts                      # API 요청/응답 타입
+│   └── index.ts                    # re-export
+├── middleware.ts                   # 인증 미들웨어 (탈퇴 회원 차단 포함)
+└── public/
+    ├── manifest.json               # PWA 매니페스트
+    └── sw.js                       # Service Worker (푸시 알림 수신)
 ```
 
 ### 인증 플로우
@@ -106,6 +124,10 @@ src/
     → supabase.auth.signUp
     → profiles 테이블 업데이트 (phone, kakao_id, notification_marketing, account_status)
     → 홈(/) 리다이렉트
+
+탈퇴 회원:
+    → 미들웨어에서 profiles.account_status = 'withdrawn' 감지
+    → /login?error=withdrawn 리다이렉트
 ```
 
 ### 레이아웃 구조
@@ -118,54 +140,79 @@ src/
     └── BottomNavigation (fixed bottom, h-16) - 홈/프로젝트/내정보/설정
 ```
 
+### 프로필 사진 업로드 플로우
+
+```
+사용자가 프로필 사진 클릭 (AvatarUpload 컴포넌트)
+    → 파일 선택 (JPG/PNG/WebP, 최대 5MB)
+    → POST /api/profile/avatar (multipart/form-data)
+    → Supabase Storage avatars/{userId}/avatar (upsert: true)
+    → profiles.avatar_url 업데이트 (URL + ?t={timestamp} 캐시 무효화)
+    → 클라이언트 화면 즉시 갱신
+```
+
+### 푸시 알림 플로우
+
+```
+사용자가 푸시 알림 토글 ON (PushNotificationToggle 컴포넌트)
+    → Notification.requestPermission()
+    → navigator.serviceWorker.ready → pushManager.subscribe({ VAPID 공개키 })
+    → POST /api/push/subscribe → Supabase push_subscriptions 저장
+
+알림 발송 (admin 레포에서 처리):
+    → push_subscriptions 테이블 조회
+    → web-push 라이브러리로 각 endpoint에 발송
+    → Service Worker(sw.js) push 이벤트 수신 → showNotification()
+```
+
 ---
 
 ## 데이터베이스 스키마 (Supabase)
 
 ### profiles 테이블
 ```sql
-id                        uuid (auth.users.id FK)
-name                      text
-email                     text
-phone                     text
-avatar_url                text
-headline                  text
-bio                       text
-tech_stack                text[]
-availability_status       text ('available' | 'partial' | 'unavailable')
-experience_years          int
-kakao_id                  text
-notification_new_project  boolean (default: true)
-notification_application_update boolean (default: true)
-notification_marketing    boolean (default: false)
-account_status            text (default: 'active') -- 'active' | 'withdrawn'
-withdrawn_at              timestamptz
-created_at                timestamptz
-updated_at                timestamptz
+id                              uuid  PRIMARY KEY (auth.users.id FK)
+name                            text  NOT NULL
+email                           text  NOT NULL
+phone                           text
+avatar_url                      text  -- Supabase Storage 공개 URL
+headline                        text
+bio                             text
+tech_stack                      text[]
+availability_status             text  DEFAULT 'available'  -- 'available' | 'partial' | 'unavailable'
+experience_years                int   DEFAULT 0
+kakao_id                        text
+notification_new_project        boolean DEFAULT true
+notification_application_update boolean DEFAULT true
+notification_marketing          boolean DEFAULT false
+account_status                  text  DEFAULT 'active'  -- 'active' | 'withdrawn'
+withdrawn_at                    timestamptz
+created_at                      timestamptz DEFAULT now()
+updated_at                      timestamptz DEFAULT now()
 ```
 
 ### careers 테이블
 ```sql
-id            uuid
-profile_id    uuid (profiles.id FK)
-company       text
-role          text
-start_date    date
+id            uuid    PRIMARY KEY DEFAULT gen_random_uuid()
+profile_id    uuid    REFERENCES profiles(id) ON DELETE CASCADE
+company       text    NOT NULL
+role          text    NOT NULL
+start_date    date    NOT NULL
 end_date      date
-is_current    boolean
+is_current    boolean DEFAULT false
 description   text
 tech_stack    text[]
 ```
 
 ### projects 테이블
 ```sql
-id                  uuid
-title               text
+id                  uuid    PRIMARY KEY DEFAULT gen_random_uuid()
+title               text    NOT NULL
 description         text
 client_name         text
 project_type        text
-work_type           text ('remote' | 'onsite' | 'hybrid')
-status              text ('recruiting' | 'in_progress' | 'completed' | 'cancelled')
+work_type           text    -- 'remote' | 'onsite' | 'hybrid'
+status              text    -- 'recruiting' | 'in_progress' | 'completed' | 'cancelled'
 tech_stack          text[]
 budget_min          int
 budget_max          int
@@ -175,29 +222,68 @@ deadline            date
 headcount           int
 location            text
 requirements        text[]
-created_at          timestamptz
-updated_at          timestamptz
+created_at          timestamptz DEFAULT now()
+updated_at          timestamptz DEFAULT now()
 ```
 
 ### applications 테이블
 ```sql
-id             uuid
-project_id     uuid (projects.id FK)
-freelancer_id  uuid (profiles.id FK)
-status         text ('pending' | 'reviewing' | 'interview' | 'accepted' | 'rejected' | 'withdrawn')
+id             uuid    PRIMARY KEY DEFAULT gen_random_uuid()
+project_id     uuid    REFERENCES projects(id)
+freelancer_id  uuid    REFERENCES profiles(id)
+status         text    -- 'pending' | 'reviewing' | 'interview' | 'accepted' | 'rejected' | 'withdrawn'
 cover_letter   text
 expected_rate  int
-applied_at     timestamptz
-updated_at     timestamptz
+applied_at     timestamptz DEFAULT now()
+updated_at     timestamptz DEFAULT now()
 ```
 
 ### notices 테이블
 ```sql
-id           uuid
-title        text
+id           uuid    PRIMARY KEY DEFAULT gen_random_uuid()
+title        text    NOT NULL
 content      text
-is_important boolean
-created_at   timestamptz
+is_important boolean DEFAULT false
+created_at   timestamptz DEFAULT now()
+```
+
+### push_subscriptions 테이블
+```sql
+id         uuid    PRIMARY KEY DEFAULT gen_random_uuid()
+user_id    uuid    REFERENCES profiles(id) ON DELETE CASCADE
+endpoint   text    NOT NULL UNIQUE
+p256dh     text    NOT NULL
+auth       text    NOT NULL
+created_at timestamptz DEFAULT now()
+```
+
+---
+
+## Supabase Storage 설정
+
+### avatars 버킷
+- **Public 버킷** (공개 읽기)
+- 경로 패턴: `avatars/{user_id}/avatar`
+- 허용 MIME: `image/jpeg`, `image/png`, `image/webp`
+- 최대 파일 크기: 5MB
+
+### RLS 정책 (권장)
+```sql
+-- 업로드: 자기 폴더만 가능
+CREATE POLICY "users can upload own avatar"
+ON storage.objects FOR INSERT
+WITH CHECK (
+  bucket_id = 'avatars'
+  AND (storage.foldername(name))[1] = auth.uid()::text
+);
+
+-- 덮어쓰기: 자기 파일만 가능
+CREATE POLICY "users can update own avatar"
+ON storage.objects FOR UPDATE
+USING (
+  bucket_id = 'avatars'
+  AND (storage.foldername(name))[1] = auth.uid()::text
+);
 ```
 
 ---
@@ -206,62 +292,73 @@ created_at   timestamptz
 
 ### 투입 가능 상태
 - `available` (투입 가능), `partial` (일부 가능), `unavailable` (투입 불가)
-- 프리랜서가 직접 토글 → API로 즉시 저장 → 매니저 화면에 반영
-- 상태 색상: 가능=초록, 일부=노랑, 불가=빨강
+- 프리랜서가 직접 토글 → PUT /api/profile/availability → 즉시 저장
+- 상태 색상: `src/lib/constants/status.ts`의 `AVAILABILITY_STATUS_CONFIG`
 
 ### 프로젝트 지원
-- 모집중 상태일 때만 지원 버튼 활성화
+- 모집중(`recruiting`) 상태일 때만 지원 버튼 활성화
 - 지원 상태 플로우: 검토대기 → 검토중 → 면접예정 → 합격/불합격
-- 회원이 직접 취소 가능 (withdrawn)
+- pending 상태에서만 회원이 직접 취소 가능 (status → 'withdrawn')
 
-### 알림 설정
-- 신규 프로젝트 알림, 신청 상태 변경 알림, 마케팅 알림
-- 카카오 알림톡으로 발송 예정 (현재 미구현)
-- 마케팅 수신 동의는 회원가입 시 선택 동의 → DB 저장
+### 프로젝트 목록 페이지네이션
+- 서버에서 첫 10개 SSR, 클라이언트에서 "더보기" 버튼으로 추가 로드
+- 필터 변경 시 페이지 리셋 후 `/api/projects?status=&page=1&pageSize=10` 재호출
+- `ProjectListClient`에서 누적 데이터 관리
+
+### 알림
+- 카카오 알림톡: 미구현 (`lib/kakao/alimtalk.ts` 스텁 상태)
+- PWA 푸시 알림: 구현됨 (구독 관리, 수신 표시)
+  - 발송은 admin 레포에서 `push_subscriptions` 조회 후 `web-push` 패키지로 처리
 
 ### 회원 탈퇴 (소프트 탈퇴)
 - `profiles.account_status = 'withdrawn'`, `withdrawn_at` 기록
 - Supabase Auth 계정은 유지 (물리 삭제 아님)
 - 탈퇴 후 30일 데이터 보관 (개인정보 처리방침 기준)
+- 미들웨어에서 재로그인 시 `/login?error=withdrawn`으로 차단
 
 ---
 
 ## ✅ 완료된 기능
 
 ### 인증
-- [x] 카카오 OAuth 로그인 (exchangeCodeForToken → getKakaoUserInfo → magic link 세션)
+- [x] 카카오 OAuth 로그인 (exchangeCodeForToken → magic link 세션)
 - [x] 이메일/비밀번호 로그인
 - [x] 카카오 신규 회원 → 회원가입 페이지 리다이렉트
-- [x] Supabase Auth 미들웨어 (보호된 라우트 처리)
+- [x] Supabase Auth 미들웨어 (보호된 라우트 + 탈퇴 회원 차단)
 - [x] 로그아웃
-- [x] 회원가입 시 법적 동의 (이용약관, 개인정보처리방침, 마케팅, 만 14세 확인)
+- [x] 회원가입 시 법적 동의 (이용약관, 개인정보처리방침, 마케팅, 만 14세)
+- [x] 회원 탈퇴 (소프트 탈퇴, account_status 변경)
 - [x] 이용약관 페이지 (/terms)
 - [x] 개인정보 처리방침 페이지 (/privacy)
-- [x] 회원 탈퇴 (소프트 탈퇴, account_status 변경)
 
 ### 프로젝트
 - [x] 프로젝트 목록 조회 (필터: 전체/모집중/진행중/완료)
-- [x] 프로젝트 상세 페이지 (기본 정보, 기술 스택, 자격 요건, 마감일 표시)
+- [x] 프로젝트 목록 페이지네이션 ("더보기", pageSize=10, 필터 연동)
+- [x] 프로젝트 상세 페이지 (기본 정보, 기술 스택, 자격 요건, 마감일)
 - [x] 프로젝트 상태 배지
-- [x] 지원하기 버튼 UI (모집중일 때만 활성화) — 실제 폼 제출 미구현
+- [x] 지원하기 폼 (cover_letter, expected_rate 입력 → POST /api/applications)
 
 ### 지원
 - [x] 내 신청 내역 조회
 - [x] 신청 상태별 정렬
 - [x] ApplicationCard compact 모드 (홈 화면 수평 스크롤)
+- [x] 지원 취소 (pending 상태에서 취소 버튼 → DELETE /api/applications/[id])
 
 ### 프로필
 - [x] 프로필 헤더 (이름, 한줄소개, 경력연수)
-- [x] 투입 가능 상태 토글 (API 연동 완료)
+- [x] 프로필 사진 업로드 (Supabase Storage, AvatarUpload 컴포넌트)
+- [x] 투입 가능 상태 토글 (PUT /api/profile/availability)
 - [x] 기술 스택 표시
-- [x] 경력 타임라인 표시 (조회만)
+- [x] 경력 추가/수정/삭제 (CareerSectionClient, /api/profile/careers CRUD)
 - [x] 자기 소개 표시
 - [x] 내 정보 수정 (/settings/profile)
 
 ### 설정
 - [x] 계정 정보 표시 (이름, 이메일, 카카오 ID)
-- [x] 알림 설정 토글 (API 연동 완료)
+- [x] 알림 설정 토글 (GET/PUT /api/settings/notifications)
+- [x] 푸시 알림 구독/해제 (PushNotificationToggle, /api/push/subscribe)
 - [x] 내 정보 수정 링크
+- [x] 개인정보 처리방침 / 이용약관 링크
 - [x] 회원 탈퇴 UI 및 API
 
 ### 홈
@@ -269,6 +366,7 @@ created_at   timestamptz
 - [x] 내 신청 현황 (최근 3건, 전체보기 링크)
 - [x] 최근 프로젝트 (모집중 3건, 전체보기 링크)
 - [x] 공지사항 목록 (중요 표시 포함)
+- [x] 공지사항 상세 페이지 (/notices/[id])
 
 ### UI/UX
 - [x] TopBar (뒤로가기, 스크롤 시 햄버거 메뉴)
@@ -276,41 +374,23 @@ created_at   timestamptz
 - [x] 모든 (auth) 페이지 로딩 스켈레톤 (loading.tsx)
 - [x] 모바일 고정 폭 (max-w-[430px])
 - [x] 수평 스크롤 (-mx-4 px-4 + scrollbar-none) 패턴
+- [x] PWA 매니페스트 + Service Worker 등록
 
 ---
 
-## 🔧 진행해야 할 기능 (TODO)
+## 🔧 TODO
 
 ### 높은 우선순위
 
-- [ ] **지원하기 기능 완성**: 프로젝트 상세 페이지에서 실제로 지원 폼 제출
-  - cover_letter(지원 동기), expected_rate(희망 단가) 입력 폼 필요
-  - POST /api/applications API는 구현됨, UI만 없음
 - [ ] **카카오 알림톡 연동**: `lib/kakao/alimtalk.ts` 현재 console.log 스텁 상태
   - 알림톡 API 제공사 계약 필요 (NHN Cloud, 솔라피, 쿨SMS 등)
   - 신규 프로젝트 등록 시 → 대상 프리랜서 전체 발송
   - 지원 상태 변경 시 → 해당 프리랜서에게 발송
-  - 템플릿 코드 `NEW_PROJECT_NOTIFY`는 제공업체 승인 후 교체 필요
-- [ ] **경력 추가/수정/삭제 UI**: CareerSection은 조회만 가능
-  - CRUD API 라우트는 구현됨 (`/api/profile/careers`, `/api/profile/careers/[id]`)
-  - 편집 UI 컴포넌트 추가 필요
-- [ ] **지원 취소 기능**: ApplicationCard에 취소 버튼 추가
-  - DELETE /api/applications/[id] API는 구현됨
-- [ ] **탈퇴 회원 미들웨어 처리**: account_status = 'withdrawn'인 경우 로그인 차단
-  - 현재 탈퇴 후 재로그인 시 홈으로 진입 가능한 상태
-
-### 중간 우선순위
-
-- [ ] **설정 > 개인정보/이용약관 링크 연결**: 설정 페이지의 개인정보처리방침/이용약관 버튼이 `<button>` 태그로만 존재, `/privacy`, `/terms` 링크 미연결
-- [ ] **공지사항 상세 페이지**: 홈에서 카드로만 표시, 상세 페이지(`/notices/[id]`) 없음
-- [ ] **프로필 사진 업로드**: Supabase Storage 연동 필요
-- [ ] **프로젝트 무한 스크롤/페이지네이션**: 현재 pageSize=20 고정
-- [ ] **비밀번호 변경**: 이메일 로그인 계정용 비밀번호 변경 기능
 
 ### 낮은 우선순위
 
+- [ ] **비밀번호 변경**: 이메일 로그인 계정용 비밀번호 변경 기능
 - [ ] **다크 모드 토글**: globals.css에 `.dark` CSS 변수 정의됨, 토글 UI 미구현
-- [ ] **푸시 알림 (PWA)**: Web Push 알림 추가 고려
 - [ ] **에러 바운더리**: 페이지별 error.tsx 추가
 
 ---
@@ -336,10 +416,26 @@ KAKAO_REDIRECT_URI=
 KAKAO_ALIMTALK_APP_KEY=
 KAKAO_ALIMTALK_SENDER_KEY=
 
+# Web Push (VAPID)
+# 키 생성: npx web-push generate-vapid-keys
+NEXT_PUBLIC_VAPID_PUBLIC_KEY=
+VAPID_PRIVATE_KEY=
+VAPID_EMAIL=mailto:admin@techmeet.kr
+
 # App
 NEXT_PUBLIC_APP_URL=
 NEXT_PUBLIC_APP_ENV=development
 ```
+
+---
+
+## Supabase 신규 설정 체크리스트
+
+- [ ] `push_subscriptions` 테이블 생성 (위 스키마 참고)
+- [ ] `avatars` Storage 버킷 생성 (Public)
+- [ ] `avatars` 버킷 RLS 정책 설정 (위 정책 참고)
+- [ ] `profiles.account_status` 컬럼 추가 (기존 rows default 'active')
+- [ ] `profiles.withdrawn_at` 컬럼 추가
 
 ---
 
@@ -349,7 +445,9 @@ NEXT_PUBLIC_APP_ENV=development
 2. **상태 색상**: `src/lib/constants/status.ts`에서만 관리, 컴포넌트에서 로컬 정의 금지
 3. **타입 안전**: `any` 타입 금지, `unknown` 후 타입 가드 사용
 4. **스크롤 감지**: `window`가 아닌 `<main>` 엘리먼트 기준 (`useScrolled` 훅)
-5. **공개 경로**: `/terms`, `/privacy` 는 미들웨어에서 인증 없이 접근 가능
+5. **공개 경로**: `/terms`, `/privacy`는 미들웨어에서 인증 없이 접근 가능
+6. **Storage 업로드**: API Route에서 처리 (클라이언트에서 직접 Supabase Storage 호출 금지)
+7. **푸시 발송**: 이 레포는 구독 관리만. 실제 발송은 admin 레포에서 처리
 
 ---
 
