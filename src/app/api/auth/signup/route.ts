@@ -170,7 +170,6 @@ export async function POST(request: NextRequest) {
       id: data.user.id,
       name,
       email,
-      birth_date,
       phone,
       kakao_id: typeof kakaoId === "string" && kakaoId ? kakaoId : null,
       notification_marketing: agreeMarketing,
