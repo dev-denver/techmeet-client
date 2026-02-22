@@ -6,6 +6,25 @@
 
 
 -- ============================================================
+-- 0. 기존 테이블 전체 초기화 (의존성 역순으로 DROP)
+--    초기 세팅 시에만 사용 — 운영 DB에서는 절대 실행 금지
+-- ============================================================
+drop trigger if exists on_auth_user_created on auth.users;
+drop function if exists public.handle_new_user();
+
+drop table if exists public.admin_audit_logs  cascade;
+drop table if exists public.profile_teams     cascade;
+drop table if exists public.teams             cascade;
+drop table if exists public.alimtalk_logs     cascade;
+drop table if exists public.admin_users       cascade;
+drop table if exists public.applications      cascade;
+drop table if exists public.careers           cascade;
+drop table if exists public.notices           cascade;
+drop table if exists public.projects          cascade;
+drop table if exists public.profiles          cascade;
+
+
+-- ============================================================
 -- 1. profiles (프리랜서 프로필)
 --    id = auth.users.id 동일 UUID 사용
 --    → client/admin 모두 profiles.id로 조회
