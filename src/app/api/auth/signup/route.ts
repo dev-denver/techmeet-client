@@ -154,27 +154,36 @@ export async function POST(request: NextRequest) {
   // 추가 프로필 필드 업데이트 (phone, kakao_id)
   // signUp 직후 세션이 없을 수 있으므로 RLS를 우회하는 service_role 클라이언트 사용
   if (data.user) {
-    const supabaseAdmin = createClient(
-      publicEnv.supabaseUrl,
-      serverEnv.supabaseServiceRoleKey,
-      { auth: { autoRefreshToken: false, persistSession: false } }
-    );
+    let supabaseAdmin;
+    try {
+      supabaseAdmin = createClient(
+        publicEnv.supabaseUrl,
+        serverEnv.supabaseServiceRoleKey,
+        { auth: { autoRefreshToken: false, persistSession: false } }
+      );
+    } catch (envError) {
+      console.error("[회원가입] service_role 클라이언트 생성 실패 — 환경변수 확인 필요:", envError);
+      return NextResponse.json({ error: "서버 설정 오류가 발생했습니다" }, { status: 500 });
+    }
 
-    const profileUpdate: Record<string, unknown> = {
+    const profileUpsert: Record<string, unknown> = {
+      id: data.user.id,
+      name,
+      email,
+      birth_date,
       phone,
-      kakao_id: typeof kakaoId === "string" ? kakaoId : null,
+      kakao_id: typeof kakaoId === "string" && kakaoId ? kakaoId : null,
       notification_marketing: agreeMarketing,
       account_status: AccountStatus.Active,
     };
-    if (referrerId) profileUpdate.referrer_id = referrerId;
+    if (referrerId) profileUpsert.referrer_id = referrerId;
 
-    const { error: updateError } = await supabaseAdmin
+    const { error: upsertError } = await supabaseAdmin
       .from("profiles")
-      .update(profileUpdate)
-      .eq("id", data.user.id);
+      .upsert(profileUpsert, { onConflict: "id" });
 
-    if (updateError) {
-      console.error("[회원가입] profiles update 실패:", updateError);
+    if (upsertError) {
+      console.error("[회원가입] profiles upsert 실패:", upsertError.message, upsertError.code, upsertError.details);
       return NextResponse.json({ error: "프로필 정보 저장에 실패했습니다" }, { status: 500 });
     }
   }
