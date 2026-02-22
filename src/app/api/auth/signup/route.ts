@@ -152,7 +152,14 @@ export async function POST(request: NextRequest) {
   }
 
   // 추가 프로필 필드 업데이트 (phone, kakao_id)
+  // signUp 직후 세션이 없을 수 있으므로 RLS를 우회하는 service_role 클라이언트 사용
   if (data.user) {
+    const supabaseAdmin = createClient(
+      publicEnv.supabaseUrl,
+      serverEnv.supabaseServiceRoleKey,
+      { auth: { autoRefreshToken: false, persistSession: false } }
+    );
+
     const profileUpdate: Record<string, unknown> = {
       phone,
       kakao_id: typeof kakaoId === "string" ? kakaoId : null,
@@ -161,7 +168,7 @@ export async function POST(request: NextRequest) {
     };
     if (referrerId) profileUpdate.referrer_id = referrerId;
 
-    const { error: updateError } = await supabase
+    const { error: updateError } = await supabaseAdmin
       .from("profiles")
       .update(profileUpdate)
       .eq("id", data.user.id);
