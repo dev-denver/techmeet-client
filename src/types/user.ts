@@ -27,7 +27,6 @@ export interface FreelancerProfile {
   name: string;
   email: string;
   phone?: string;
-  avatarUrl?: string;
   headline: string;
   bio: string;
   techStack: string[];

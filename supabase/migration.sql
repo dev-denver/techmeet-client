@@ -40,7 +40,6 @@ create table if not exists public.profiles (
   experience_years                 integer not null default 0,
   availability_status              text not null default 'available'
     check (availability_status in ('available', 'partial', 'unavailable')),
-  avatar_url                       text,
   kakao_id                         text unique,
   notification_new_project         boolean not null default true,
   notification_application_update  boolean not null default true,

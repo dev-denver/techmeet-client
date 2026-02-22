@@ -24,7 +24,6 @@ interface ProfileRow {
   name: string;
   email: string;
   phone: string | null;
-  avatar_url: string | null;
   headline: string;
   bio: string;
   tech_stack: string[];
@@ -57,7 +56,6 @@ function mapRowToProfile(row: ProfileRow): FreelancerProfile {
     name: row.name,
     email: row.email,
     phone: row.phone ?? undefined,
-    avatarUrl: row.avatar_url ?? undefined,
     headline: row.headline,
     bio: row.bio,
     techStack: row.tech_stack,
