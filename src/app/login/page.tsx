@@ -1,6 +1,6 @@
 "use client";
 
-import { MessageSquare, Eye, EyeOff } from "lucide-react";
+import { MessageSquare, Eye, EyeOff, Loader2 } from "lucide-react";
 import { useState, Suspense } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
 import { publicEnv } from "@/lib/config/env";
@@ -23,11 +23,13 @@ function LoginForm() {
   const [error, setError] = useState("");
   const [withdrawnEmail, setWithdrawnEmail] = useState<string | null>(null);
   const [isLoading, setIsLoading] = useState(false);
+  const [isKakaoLoading, setIsKakaoLoading] = useState(false);
 
   const kakaoError = searchParams.get("error");
   const kakaoErrorMessage = kakaoError ? (KAKAO_ERROR_MESSAGES[kakaoError] ?? "로그인 중 오류가 발생했습니다") : null;
 
   function handleKakaoLogin() {
+    setIsKakaoLoading(true);
     const kakaoAuthUrl =
       `https://kauth.kakao.com/oauth/authorize` +
       `?client_id=${publicEnv.kakaoRestApiKey}` +
@@ -103,12 +105,17 @@ function LoginForm() {
 
             {/* 카카오 로그인 버튼 */}
             <button
-              className="flex w-full items-center justify-center gap-3 rounded-xl px-6 py-4 text-[15px] font-semibold text-[#3C1E1E] transition-opacity hover:opacity-90 active:opacity-80"
+              className="flex w-full items-center justify-center gap-3 rounded-xl px-6 py-4 text-[15px] font-semibold text-[#3C1E1E] transition-opacity hover:opacity-90 active:opacity-80 disabled:opacity-60"
               style={{ backgroundColor: "#FEE500" }}
               onClick={handleKakaoLogin}
+              disabled={isKakaoLoading}
             >
-              <MessageSquare className="h-5 w-5" />
-              카카오 로그인
+              {isKakaoLoading ? (
+                <Loader2 className="h-5 w-5 animate-spin" />
+              ) : (
+                <MessageSquare className="h-5 w-5" />
+              )}
+              {isKakaoLoading ? "카카오 로그인 중..." : "카카오 로그인"}
             </button>
 
             {/* 구분선 */}
@@ -166,8 +173,9 @@ function LoginForm() {
               <button
                 type="submit"
                 disabled={isLoading}
-                className="w-full rounded-xl bg-zinc-900 py-3 text-[15px] font-semibold text-white transition-opacity hover:opacity-90 active:opacity-80 disabled:opacity-50"
+                className="flex w-full items-center justify-center gap-2 rounded-xl bg-zinc-900 py-3 text-[15px] font-semibold text-white transition-opacity hover:opacity-90 active:opacity-80 disabled:opacity-50"
               >
+                {isLoading && <Loader2 className="h-4 w-4 animate-spin" />}
                 {isLoading ? "로그인 중..." : "로그인"}
               </button>
             </form>
