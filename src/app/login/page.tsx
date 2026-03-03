@@ -5,6 +5,7 @@ import { useState, Suspense } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
 import { publicEnv } from "@/lib/config/env";
 import { AccountStatus } from "@/types";
+import { encryptPassword } from "@/lib/crypto/client";
 
 const KAKAO_ERROR_MESSAGES: Record<string, string> = {
   email_required: "이메일 제공에 동의해주셔야 로그인이 가능합니다",
@@ -44,10 +45,14 @@ function LoginForm() {
     setIsLoading(true);
 
     try {
+      const pkRes = await fetch("/api/auth/public-key");
+      const { publicKey } = await pkRes.json() as { publicKey: string };
+      const encryptedPassword = await encryptPassword(password, publicKey);
+
       const res = await fetch("/api/auth/login", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ email, password }),
+        body: JSON.stringify({ email, encryptedPassword }),
       });
 
       const data = await res.json() as { success?: boolean; error?: string; code?: string };

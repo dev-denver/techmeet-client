@@ -5,11 +5,12 @@ import { validatePassword, validatePhone, validateBirthDate } from "@/lib/utils/
 import { type CookieOptions } from "@supabase/ssr";
 import { publicEnv, serverEnv } from "@/lib/config/env";
 import { AccountStatus } from "@/types";
+import { decryptPassword } from "@/lib/crypto/rsa";
 
 export async function POST(request: NextRequest) {
   const body = await request.json() as {
     email?: unknown;
-    password?: unknown;
+    encryptedPassword?: unknown;
     name?: unknown;
     birth_date?: unknown;
     phone?: unknown;
@@ -18,7 +19,7 @@ export async function POST(request: NextRequest) {
     referrer_id?: unknown;
   };
 
-  const { email, password, name, birth_date, phone, kakaoId } = body;
+  const { email, encryptedPassword, name, birth_date, phone, kakaoId } = body;
   const referrerId = typeof body.referrer_id === "string" && body.referrer_id ? body.referrer_id : null;
   const agreeMarketing = typeof (body as { agree_marketing?: unknown }).agree_marketing === "boolean"
     ? (body as { agree_marketing: boolean }).agree_marketing
@@ -27,7 +28,7 @@ export async function POST(request: NextRequest) {
 
   if (
     typeof email !== "string" ||
-    typeof password !== "string" ||
+    typeof encryptedPassword !== "string" ||
     typeof name !== "string" ||
     typeof birth_date !== "string" ||
     typeof phone !== "string"
@@ -36,6 +37,13 @@ export async function POST(request: NextRequest) {
       { error: "모든 필드를 올바르게 입력해주세요" },
       { status: 400 }
     );
+  }
+
+  let password: string;
+  try {
+    password = decryptPassword(encryptedPassword);
+  } catch {
+    return NextResponse.json({ error: "비밀번호 처리에 실패했습니다" }, { status: 400 });
   }
 
   const { valid: passwordValid, errors: passwordErrors } = validatePassword(password);

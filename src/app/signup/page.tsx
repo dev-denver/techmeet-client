@@ -7,6 +7,7 @@ import { Eye, EyeOff, X } from "lucide-react";
 import { validatePassword, validatePhone, validateBirthDate, formatPhone } from "@/lib/utils/validation";
 import { ReferrerSearchModal } from "@/components/features/referrer/ReferrerSearchModal";
 import type { ReferrerSearchResult } from "@/types/api";
+import { encryptPassword } from "@/lib/crypto/client";
 
 function PasswordStrength({ password }: { password: string }) {
   if (!password) return null;
@@ -131,12 +132,16 @@ function SignupForm() {
 
     setIsLoading(true);
     try {
+      const pkRes = await fetch("/api/auth/public-key");
+      const { publicKey } = await pkRes.json() as { publicKey: string };
+      const encryptedPassword = await encryptPassword(password, publicKey);
+
       const res = await fetch("/api/auth/signup", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
           email,
-          password,
+          encryptedPassword,
           name: formName,
           birth_date: birthDate,
           phone,

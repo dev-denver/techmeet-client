@@ -37,6 +37,12 @@ export const serverEnv = {
   get supabaseServiceRoleKey() {
     return requireServerEnv("SUPABASE_SERVICE_ROLE_KEY");
   },
+  get authRsaPrivateKey() {
+    return requireServerEnv("AUTH_RSA_PRIVATE_KEY");
+  },
+  get authRsaPublicKey() {
+    return requireServerEnv("AUTH_RSA_PUBLIC_KEY");
+  },
 };
 
 /** 클라이언트에서 접근 가능한 공개 환경변수 (NEXT_PUBLIC_ 접두사) */

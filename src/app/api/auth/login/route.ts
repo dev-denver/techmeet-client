@@ -3,16 +3,24 @@ import { createServerClient, type CookieOptions } from "@supabase/ssr";
 import { createClient } from "@supabase/supabase-js";
 import { publicEnv, serverEnv } from "@/lib/config/env";
 import { AccountStatus } from "@/types";
+import { decryptPassword } from "@/lib/crypto/rsa";
 
 export async function POST(request: NextRequest) {
-  const body = await request.json() as { email?: unknown; password?: unknown };
-  const { email, password } = body;
+  const body = await request.json() as { email?: unknown; encryptedPassword?: unknown };
+  const { email, encryptedPassword } = body;
 
-  if (typeof email !== "string" || typeof password !== "string") {
+  if (typeof email !== "string" || typeof encryptedPassword !== "string") {
     return NextResponse.json(
       { error: "이메일과 비밀번호를 입력해주세요" },
       { status: 400 }
     );
+  }
+
+  let password: string;
+  try {
+    password = decryptPassword(encryptedPassword);
+  } catch {
+    return NextResponse.json({ error: "비밀번호 처리에 실패했습니다" }, { status: 400 });
   }
 
   const supabaseResponse = NextResponse.json({ success: true });

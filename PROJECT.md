@@ -1,14 +1,15 @@
 # 테크밋 프리랜서 앱 - 개발 문서
 
 > 이 문서는 개발 환경이 바뀌어도 어디까지 개발됐는지 파악하고 이어서 개발할 수 있도록 작성된 문서입니다.
-> 마지막 업데이트: 2026-02-21
+> 마지막 업데이트: 2026-02-28
 
 ---
 
 ## 프로젝트 개요
 
 테크밋 소속 **프리랜서 개발자 전용** 웹앱입니다.
-- 관리자 기능은 별도 레포지토리에서 관리
+
+- 관리자 기능은 별도 레포지토리에서 관리 (https://github.com/dev-denver/techmeet-admin)
 - 카카오 로그인 전용 (이메일 로그인 보조 지원)
 - 모바일 앱형 UI (max-w-[430px] 고정 폭, 반응형 없음)
 
@@ -16,14 +17,14 @@
 
 ## 기술 스택
 
-| 항목 | 기술 | 비고 |
-|------|------|------|
-| Framework | Next.js 16 (App Router) | |
-| Language | TypeScript 5 strict | any 타입 금지 |
-| Styling | Tailwind CSS v4 + shadcn/ui | New York 스타일, Zinc 색상 |
-| Database | Supabase (PostgreSQL + Storage) | RLS 적용 권장 |
-| Auth | Supabase Auth + 카카오 OAuth | magic link 방식 세션 생성 |
-| 알림 | 카카오 알림톡 (미구현) | |
+| 항목      | 기술                         | 비고                       |
+| --------- | ---------------------------- | -------------------------- |
+| Framework | Next.js 16 (App Router)      |                            |
+| Language  | TypeScript 5 strict          | any 타입 금지              |
+| Styling   | Tailwind CSS v4 + shadcn/ui  | New York 스타일, Zinc 색상 |
+| Database  | Supabase (PostgreSQL)        | RLS 적용 권장              |
+| Auth      | Supabase Auth + 카카오 OAuth | magic link 방식 세션 생성  |
+| 알림      | 카카오 알림톡 (미구현)       | TODO 항목                  |
 
 ---
 
@@ -44,7 +45,6 @@ src/
 │   │   ├── applications/           # 지원 관리 (GET, POST)
 │   │   │   └── [id]/               # 지원 취소 (DELETE)
 │   │   ├── profile/                # 프로필 조회/수정 (GET, PUT)
-│   │   │   ├── avatar/             # 프로필 사진 업로드 (POST) → Supabase Storage
 │   │   │   ├── availability/       # 투입 가능 상태 변경 (PUT)
 │   │   │   ├── referrer/           # 추천인 등록 (POST)
 │   │   │   │   └── search/         # 추천인 검색 (GET, admin client)
@@ -73,18 +73,27 @@ src/
 │   ├── terms/page.tsx              # 이용약관 (공개)
 │   └── privacy/page.tsx           # 개인정보 처리방침 (공개)
 ├── components/
-│   ├── ui/                         # shadcn/ui 기반 (avatar, badge, button, card, separator, skeleton, bottom-sheet)
+│   ├── ui/                         # shadcn/ui 기반 (badge, bottom-sheet, button, card, separator, skeleton)
 │   ├── layout/                     # TopBar, BottomNavigation
 │   └── features/
 │       ├── projects/               # ProjectCard, ProjectStatusBadge, ApplicationCard,
 │       │                           # ProjectListClient (더보기 페이지네이션), ProjectFilters,
 │       │                           # ApplyButton (지원 폼 + BottomSheet)
-│       ├── profile/                # ProfileHeader, AvatarUpload, AvailabilityToggle,
+│       ├── profile/                # ProfileHeader, AvailabilityToggle,
 │       │                           # TechStackSection, TechStackInput, CareerSection,
 │       │                           # CareerSectionClient (CRUD), CareerTimelineDot
 │       ├── referrer/               # ReferrerSection, ReferrerSearchModal (BottomSheet)
 │       └── settings/               # NotificationSettings, LogoutButton
 ├── lib/
+│   ├── api/                        # 클라이언트 사이드 API 호출 함수
+│   │   ├── client.ts               # apiFetch 기반 fetch 래퍼, ApiError 클래스
+│   │   ├── projects.ts             # projectsApi (getList, getById)
+│   │   ├── applications.ts         # applicationsApi (getList, create, withdraw)
+│   │   ├── profile.ts              # profileApi (get, update, updateAvailability, career CRUD)
+│   │   ├── notices.ts              # noticesApi (getList)
+│   │   ├── auth.ts                 # authApi (signup, login)
+│   │   ├── settings.ts             # settingsApi (getNotifications, updateNotifications)
+│   │   └── index.ts                # re-export
 │   ├── supabase/                   # Supabase 클라이언트 + 서버사이드 쿼리
 │   │   ├── client.ts               # 브라우저용 클라이언트
 │   │   ├── server.ts               # 서버용 클라이언트 (쿠키 기반 세션)
@@ -140,152 +149,35 @@ src/
     └── BottomNavigation (fixed bottom, h-16) - 홈/프로젝트/내정보/설정
 ```
 
-### 프로필 사진 업로드 플로우
-
-```
-사용자가 프로필 사진 클릭 (AvatarUpload 컴포넌트)
-    → 파일 선택 (JPG/PNG/WebP, 최대 5MB)
-    → POST /api/profile/avatar (multipart/form-data)
-    → Supabase Storage avatars/{userId}/avatar (upsert: true)
-    → profiles.avatar_url 업데이트 (URL + ?t={timestamp} 캐시 무효화)
-    → 클라이언트 화면 즉시 갱신
-```
-
----
-
-## 데이터베이스 스키마 (Supabase)
-
-### profiles 테이블
-```sql
-id                              uuid  PRIMARY KEY (auth.users.id FK)
-name                            text  NOT NULL
-email                           text  NOT NULL
-phone                           text
-avatar_url                      text  -- Supabase Storage 공개 URL
-headline                        text
-bio                             text
-tech_stack                      text[]
-availability_status             text  DEFAULT 'available'  -- 'available' | 'partial' | 'unavailable'
-experience_years                int   DEFAULT 0
-kakao_id                        text
-notification_new_project        boolean DEFAULT true
-notification_application_update boolean DEFAULT true
-notification_marketing          boolean DEFAULT false
-account_status                  text  DEFAULT 'active'  -- 'active' | 'withdrawn'
-withdrawn_at                    timestamptz
-referrer_id                     uuid  REFERENCES profiles(id) ON DELETE SET NULL
-created_at                      timestamptz DEFAULT now()
-updated_at                      timestamptz DEFAULT now()
-```
-
-### careers 테이블
-```sql
-id            uuid    PRIMARY KEY DEFAULT gen_random_uuid()
-profile_id    uuid    REFERENCES profiles(id) ON DELETE CASCADE
-company       text    NOT NULL
-role          text    NOT NULL
-start_date    date    NOT NULL
-end_date      date
-is_current    boolean DEFAULT false
-description   text
-tech_stack    text[]
-```
-
-### projects 테이블
-```sql
-id                  uuid    PRIMARY KEY DEFAULT gen_random_uuid()
-title               text    NOT NULL
-description         text
-client_name         text
-project_type        text
-work_type           text    -- 'remote' | 'onsite' | 'hybrid'
-status              text    -- 'recruiting' | 'in_progress' | 'completed' | 'cancelled'
-tech_stack          text[]
-budget_min          int
-budget_max          int
-duration_start_date date
-duration_end_date   date
-deadline            date
-headcount           int
-location            text
-requirements        text[]
-created_at          timestamptz DEFAULT now()
-updated_at          timestamptz DEFAULT now()
-```
-
-### applications 테이블
-```sql
-id             uuid    PRIMARY KEY DEFAULT gen_random_uuid()
-project_id     uuid    REFERENCES projects(id)
-freelancer_id  uuid    REFERENCES profiles(id)
-status         text    -- 'pending' | 'reviewing' | 'interview' | 'accepted' | 'rejected' | 'withdrawn'
-cover_letter   text
-expected_rate  int
-applied_at     timestamptz DEFAULT now()
-updated_at     timestamptz DEFAULT now()
-```
-
-### notices 테이블
-```sql
-id           uuid    PRIMARY KEY DEFAULT gen_random_uuid()
-title        text    NOT NULL
-content      text
-is_important boolean DEFAULT false
-created_at   timestamptz DEFAULT now()
-```
-
----
-
-## Supabase Storage 설정
-
-### avatars 버킷
-- **Public 버킷** (공개 읽기)
-- 경로 패턴: `avatars/{user_id}/avatar`
-- 허용 MIME: `image/jpeg`, `image/png`, `image/webp`
-- 최대 파일 크기: 5MB
-
-### RLS 정책 (권장)
-```sql
--- 업로드: 자기 폴더만 가능
-CREATE POLICY "users can upload own avatar"
-ON storage.objects FOR INSERT
-WITH CHECK (
-  bucket_id = 'avatars'
-  AND (storage.foldername(name))[1] = auth.uid()::text
-);
-
--- 덮어쓰기: 자기 파일만 가능
-CREATE POLICY "users can update own avatar"
-ON storage.objects FOR UPDATE
-USING (
-  bucket_id = 'avatars'
-  AND (storage.foldername(name))[1] = auth.uid()::text
-);
-```
-
 ---
 
 ## 비즈니스 로직
 
 ### 투입 가능 상태
+
 - `available` (투입 가능), `partial` (일부 가능), `unavailable` (투입 불가)
+- 3단계 토글로 순환 변경
 - 프리랜서가 직접 토글 → PUT /api/profile/availability → 즉시 저장
-- 상태 색상: `src/lib/constants/status.ts`의 `AVAILABILITY_STATUS_CONFIG`
+- 상태 색상: `src/lib/constants/status.ts`의 `AVAILABILITY_STATUS_CONFIG`, `AVAILABILITY_TOGGLE_CONFIG`
 
 ### 프로젝트 지원
+
 - 모집중(`recruiting`) 상태일 때만 지원 버튼 활성화
 - 지원 상태 플로우: 검토대기 → 검토중 → 면접예정 → 합격/불합격
 - pending 상태에서만 회원이 직접 취소 가능 (status → 'withdrawn')
 
 ### 프로젝트 목록 페이지네이션
+
 - 서버에서 첫 10개 SSR, 클라이언트에서 "더보기" 버튼으로 추가 로드
 - 필터 변경 시 페이지 리셋 후 `/api/projects?status=&page=1&pageSize=10` 재호출
 - `ProjectListClient`에서 누적 데이터 관리
 
 ### 알림
+
 - 카카오 알림톡: 미구현 (`lib/kakao/alimtalk.ts` 스텁 상태)
 
 ### 회원 탈퇴 (소프트 탈퇴)
+
 - `profiles.account_status = 'withdrawn'`, `withdrawn_at` 기록
 - Supabase Auth 계정은 유지 (물리 삭제 아님)
 - 탈퇴 후 30일 데이터 보관 (개인정보 처리방침 기준)
@@ -296,6 +188,7 @@ USING (
 ## ✅ 완료된 기능
 
 ### 인증
+
 - [x] 카카오 OAuth 로그인 (exchangeCodeForToken → magic link 세션)
 - [x] 이메일/비밀번호 로그인
 - [x] 카카오 신규 회원 → 회원가입 페이지 리다이렉트
@@ -307,6 +200,7 @@ USING (
 - [x] 개인정보 처리방침 페이지 (/privacy)
 
 ### 프로젝트
+
 - [x] 프로젝트 목록 조회 (필터: 전체/모집중/진행중/완료)
 - [x] 프로젝트 목록 페이지네이션 ("더보기", pageSize=10, 필터 연동)
 - [x] 프로젝트 상세 페이지 (기본 정보, 기술 스택, 자격 요건, 마감일)
@@ -314,21 +208,23 @@ USING (
 - [x] 지원하기 폼 (cover_letter, expected_rate 입력 → POST /api/applications)
 
 ### 지원
+
 - [x] 내 신청 내역 조회
 - [x] 신청 상태별 정렬
 - [x] ApplicationCard compact 모드 (홈 화면 수평 스크롤)
 - [x] 지원 취소 (pending 상태에서 취소 버튼 → DELETE /api/applications/[id])
 
 ### 프로필
+
 - [x] 프로필 헤더 (이름, 한줄소개, 경력연수)
-- [x] 프로필 사진 업로드 (Supabase Storage, AvatarUpload 컴포넌트)
-- [x] 투입 가능 상태 토글 (PUT /api/profile/availability)
+- [x] 투입 가능 상태 토글 (PUT /api/profile/availability) - 3단계: 투입 가능 / 일부 가능 / 투입 불가
 - [x] 기술 스택 표시
 - [x] 경력 추가/수정/삭제 (CareerSectionClient, /api/profile/careers CRUD)
 - [x] 자기 소개 표시
 - [x] 내 정보 수정 (/settings/profile)
 
 ### 설정
+
 - [x] 계정 정보 표시 (이름, 이메일, 카카오 ID)
 - [x] 알림 설정 토글 (GET/PUT /api/settings/notifications)
 - [x] 내 정보 수정 링크
@@ -337,13 +233,15 @@ USING (
 - [x] 추천인 등록 (미등록 시 등록 버튼 → 모달, 등록 후 이름 read-only 표시)
 
 ### 추천인
+
 - [x] 회원가입 시 추천인 선택 (선택 사항, 이름/전화번호 검색)
 - [x] 설정 페이지에서 추후 등록 가능 (미등록 시)
 - [x] 추천인 1명 제한, 등록 후 클라이언트 변경 불가 (관리자만 변경)
-- [x] 전화번호 마스킹 (010-****-5678)
+- [x] 전화번호 마스킹 (010-\*\*\*\*-5678)
 - [x] API: GET /api/profile/referrer/search, POST /api/profile/referrer
 
 ### 홈
+
 - [x] 인사 배너 (이름, 투입 가능 상태 배지)
 - [x] 내 신청 현황 (최근 3건, 전체보기 링크)
 - [x] 최근 프로젝트 (모집중 3건, 전체보기 링크)
@@ -351,6 +249,7 @@ USING (
 - [x] 공지사항 상세 페이지 (/notices/[id])
 
 ### UI/UX
+
 - [x] TopBar (뒤로가기, 스크롤 시 햄버거 메뉴)
 - [x] BottomNavigation (홈/프로젝트/내정보/설정)
 - [x] 모든 (auth) 페이지 로딩 스켈레톤 (loading.tsx)
@@ -364,7 +263,7 @@ USING (
 ### 높은 우선순위
 
 - [ ] **카카오 알림톡 연동**: `lib/kakao/alimtalk.ts` 현재 console.log 스텁 상태
-  - 알림톡 API 제공사 계약 필요 (NHN Cloud, 솔라피, 쿨SMS 등)
+  - 알림톡 API 제공사 계약 필요 (센트온)
   - 신규 프로젝트 등록 시 → 대상 프리랜서 전체 발송
   - 지원 상태 변경 시 → 해당 프리랜서에게 발송
 
@@ -376,41 +275,11 @@ USING (
 
 ---
 
-## 환경변수 목록
-
-`.env.local`에 설정 필요:
-
-```
-# Supabase
-NEXT_PUBLIC_SUPABASE_URL=
-NEXT_PUBLIC_SUPABASE_ANON_KEY=
-SUPABASE_URL=
-SUPABASE_SERVICE_ROLE_KEY=
-
-# Kakao OAuth
-NEXT_PUBLIC_KAKAO_REST_API_KEY=
-NEXT_PUBLIC_KAKAO_REDIRECT_URI=
-KAKAO_REST_API_KEY=
-KAKAO_REDIRECT_URI=
-
-# Kakao 알림톡 (미사용 중)
-KAKAO_ALIMTALK_APP_KEY=
-KAKAO_ALIMTALK_SENDER_KEY=
-
-# App
-NEXT_PUBLIC_APP_URL=
-NEXT_PUBLIC_APP_ENV=development
-```
-
----
-
 ## Supabase 신규 설정 체크리스트
 
-- [ ] `avatars` Storage 버킷 생성 (Public)
-- [ ] `avatars` 버킷 RLS 정책 설정 (위 정책 참고)
-- [ ] `profiles.account_status` 컬럼 추가 (기존 rows default 'active')
-- [ ] `profiles.withdrawn_at` 컬럼 추가
-- [ ] `profiles.referrer_id` 컬럼 추가 (uuid, REFERENCES profiles(id) ON DELETE SET NULL)
+- [x] `profiles.account_status` 컬럼 추가 (기존 rows default 'active') - 구현 완료
+- [x] `profiles.withdrawn_at` 컬럼 추가 - 구현 완료
+- [x] `profiles.referrer_id` 컬럼 추가 (uuid, REFERENCES profiles(id) ON DELETE SET NULL) - 구현 완료
 
 ---
 
@@ -421,10 +290,10 @@ NEXT_PUBLIC_APP_ENV=development
 3. **타입 안전**: `any` 타입 금지, `unknown` 후 타입 가드 사용
 4. **스크롤 감지**: `window`가 아닌 `<main>` 엘리먼트 기준 (`useScrolled` 훅)
 5. **공개 경로**: `/terms`, `/privacy`는 미들웨어에서 인증 없이 접근 가능
-6. **Storage 업로드**: API Route에서 처리 (클라이언트에서 직접 Supabase Storage 호출 금지)
-7. **API Route 인증**: 모든 인증 필요 API route 핸들러 최상단에서 `getUser()` → 미인증 시 401 반환
-8. **BottomSheet 사용**: 하단 모달 패턴은 `components/ui/bottom-sheet.tsx` 공통 컴포넌트 사용
-9. **focus-visible**: 커스텀 input/button에 `focus-visible:` 접두사 사용 (`focus:` 금지)
+6. **API Route 인증**: 모든 인증 필요 API route 핸들러 최상단에서 `getUser()` → 미인증 시 401 반환
+7. **BottomSheet 사용**: 하단 모달 패턴은 `components/ui/bottom-sheet.tsx` 공통 컴포넌트 사용
+8. **focus-visible**: 커스텀 input/button에 `focus-visible:` 접두사 사용 (`focus:` 금지)
+9. **클라이언트 API 호출**: `lib/api/` 모듈의 `*Api` 객체 사용 (apiFetch 직접 호출 금지)
 
 ---
 
