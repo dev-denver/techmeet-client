@@ -30,24 +30,19 @@ export interface Project {
   id: string;
   title: string;
   description: string;
-  clientName: string;
-  projectType: ProjectType;
-  workType: WorkType;
+  clientName: string | null;
+  projectType: ProjectType | null;
+  workType: WorkType | null;
   status: ProjectStatus;
   techStack: string[];
-  budget: {
-    min: number;
-    max: number;
-    currency: "KRW";
-  };
   duration: {
-    startDate: string;
-    endDate: string;
+    startDate: string | null;
+    endDate: string | null;
   };
-  deadline: string;
-  headcount: number;
+  deadline: string | null;
+  headcount: number | null;
   location?: string;
-  requirements: string[];
+  requirements: string[] | null;
   createdAt: string;
   updatedAt: string;
 }

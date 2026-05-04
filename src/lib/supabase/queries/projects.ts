@@ -6,20 +6,17 @@ interface ProjectRow {
   id: string;
   title: string;
   description: string;
-  client_name: string;
-  project_type: string;
-  work_type: string;
+  client_name: string | null;
+  project_type: string | null;
+  work_type: string | null;
   status: ProjectStatus;
   tech_stack: string[];
-  budget_min: number;
-  budget_max: number;
-  budget_currency: string;
-  duration_start_date: string;
-  duration_end_date: string;
-  deadline: string;
-  headcount: number;
+  duration_start_date: string | null;
+  duration_end_date: string | null;
+  deadline: string | null;
+  headcount: number | null;
   location: string | null;
-  requirements: string[];
+  requirements: string[] | null;
   created_at: string;
   updated_at: string;
 }
@@ -34,11 +31,6 @@ function mapRowToProject(row: ProjectRow): Project {
     workType: row.work_type as Project["workType"],
     status: row.status,
     techStack: row.tech_stack,
-    budget: {
-      min: row.budget_min,
-      max: row.budget_max,
-      currency: "KRW",
-    },
     duration: {
       startDate: row.duration_start_date,
       endDate: row.duration_end_date,

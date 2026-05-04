@@ -3,18 +3,18 @@
 import { useState } from "react";
 import { cn } from "@/lib/utils/cn";
 import { AVAILABILITY_TOGGLE_CONFIG } from "@/lib/constants";
-import type { AvailabilityStatus } from "@/types";
+import { AvailabilityStatus } from "@/types";
 
 const options = (Object.entries(AVAILABILITY_TOGGLE_CONFIG) as [AvailabilityStatus, { label: string; className: string }][]).map(
   ([value, config]) => ({ value, ...config })
 );
 
 interface AvailabilityToggleProps {
-  initialStatus: AvailabilityStatus;
+  initialStatus: AvailabilityStatus | null;
 }
 
 export function AvailabilityToggle({ initialStatus }: AvailabilityToggleProps) {
-  const [status, setStatus] = useState<AvailabilityStatus>(initialStatus);
+  const [status, setStatus] = useState<AvailabilityStatus>(initialStatus ?? AvailabilityStatus.Unavailable);
   const [isUpdating, setIsUpdating] = useState(false);
 
   async function handleChange(newStatus: AvailabilityStatus) {

@@ -14,8 +14,8 @@ export interface Application {
   projectTitle: string;
   freelancerId: string;
   status: ApplicationStatus;
-  coverLetter: string;
-  expectedRate: number;
+  coverLetter: string | null;
+  expectedRate: number | null;
   appliedAt: string;
   updatedAt: string;
 }

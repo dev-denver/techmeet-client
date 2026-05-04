@@ -5,7 +5,11 @@ import { useRouter } from "next/navigation";
 import { Plus, Pencil, Trash2, X, Check } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
+import { FormField } from "@/components/ui/form-field";
+import { Input } from "@/components/ui/input";
+import { Textarea } from "@/components/ui/textarea";
 import { CareerTimelineDot } from "@/components/features/profile/CareerTimelineDot";
+import { cn } from "@/lib/utils/cn";
 import { formatMonthYear } from "@/lib/utils/format";
 import type { Career, AddCareerRequest } from "@/types";
 
@@ -21,6 +25,14 @@ interface CareerFormState {
   isCurrent: boolean;
   description: string;
   techStackInput: string;
+}
+
+interface CareerFieldErrors {
+  company?: string;
+  role?: string;
+  startDate?: string;
+  endDate?: string;
+  description?: string;
 }
 
 const EMPTY_FORM: CareerFormState = {
@@ -51,19 +63,22 @@ export function CareerSectionClient({ careers }: CareerSectionClientProps) {
   const [isAdding, setIsAdding] = useState(false);
   const [deletingId, setDeletingId] = useState<string | null>(null);
   const [form, setForm] = useState<CareerFormState>(EMPTY_FORM);
-  const [formError, setFormError] = useState("");
+  const [fieldErrors, setFieldErrors] = useState<CareerFieldErrors>({});
+  const [serverError, setServerError] = useState("");
   const [isSubmitting, setIsSubmitting] = useState(false);
 
   function openAdd() {
     setForm(EMPTY_FORM);
-    setFormError("");
+    setFieldErrors({});
+    setServerError("");
     setEditingId(null);
     setIsAdding(true);
   }
 
   function openEdit(career: Career) {
     setForm(careerToForm(career));
-    setFormError("");
+    setFieldErrors({});
+    setServerError("");
     setIsAdding(false);
     setEditingId(career.id);
   }
@@ -71,29 +86,37 @@ export function CareerSectionClient({ careers }: CareerSectionClientProps) {
   function closeForm() {
     setIsAdding(false);
     setEditingId(null);
-    setFormError("");
+    setFieldErrors({});
+    setServerError("");
   }
 
   function updateForm(field: keyof CareerFormState, value: string | boolean) {
     setForm((prev) => ({ ...prev, [field]: value }));
+    if (field in fieldErrors) {
+      setFieldErrors((prev) => ({ ...prev, [field]: undefined }));
+    }
   }
 
-  function validateForm(): string {
-    if (!form.company.trim()) return "회사명을 입력해주세요";
-    if (!form.role.trim()) return "직무/역할을 입력해주세요";
-    if (!form.startDate) return "시작일을 입력해주세요";
-    if (!form.isCurrent && !form.endDate) return "종료일을 입력하거나 현재 재직 중을 선택해주세요";
-    if (!form.description.trim()) return "업무 설명을 입력해주세요";
-    return "";
+  function validate(): boolean {
+    const errors: CareerFieldErrors = {};
+    if (!form.company.trim()) errors.company = "회사명을 입력해주세요";
+    if (!form.role.trim()) errors.role = "직무/역할을 입력해주세요";
+    if (!form.startDate) errors.startDate = "시작일을 입력해주세요";
+    if (!form.isCurrent && !form.endDate) {
+      errors.endDate = "종료일을 입력하거나 현재 재직 중을 선택해주세요";
+    }
+    if (form.startDate && form.endDate && !form.isCurrent && form.startDate > form.endDate) {
+      errors.endDate = "종료일은 시작일 이후여야 합니다";
+    }
+    if (!form.description.trim()) errors.description = "업무 설명을 입력해주세요";
+
+    setFieldErrors(errors);
+    return Object.keys(errors).length === 0;
   }
 
   async function handleSubmit(e: React.FormEvent) {
     e.preventDefault();
-    const err = validateForm();
-    if (err) {
-      setFormError(err);
-      return;
-    }
+    if (!validate()) return;
 
     const techStack = form.techStackInput
       .split(",")
@@ -111,7 +134,7 @@ export function CareerSectionClient({ careers }: CareerSectionClientProps) {
     };
 
     setIsSubmitting(true);
-    setFormError("");
+    setServerError("");
     try {
       let res: Response;
       if (editingId) {
@@ -130,14 +153,14 @@ export function CareerSectionClient({ careers }: CareerSectionClientProps) {
 
       const data = await res.json() as { error?: string };
       if (!res.ok) {
-        setFormError(data.error ?? "저장에 실패했습니다");
+        setServerError(data.error ?? "저장에 실패했습니다");
         return;
       }
 
       closeForm();
       router.refresh();
     } catch {
-      setFormError("네트워크 오류가 발생했습니다");
+      setServerError("네트워크 오류가 발생했습니다");
     } finally {
       setIsSubmitting(false);
     }
@@ -179,19 +202,16 @@ export function CareerSectionClient({ careers }: CareerSectionClientProps) {
         )}
       </div>
 
-      {/* 경력 목록 */}
       {careers.length > 0 && (
         <div className="space-y-4">
           {careers.map((career, idx) => {
-            const isThisEditing = editingId === career.id;
-            const isThisDeleting = deletingId === career.id;
-
-            if (isThisEditing) {
+            if (editingId === career.id) {
               return (
                 <CareerForm
                   key={career.id}
                   form={form}
-                  error={formError}
+                  fieldErrors={fieldErrors}
+                  serverError={serverError}
                   isSubmitting={isSubmitting}
                   isEdit
                   onUpdate={updateForm}
@@ -201,15 +221,14 @@ export function CareerSectionClient({ careers }: CareerSectionClientProps) {
               );
             }
 
+            const isThisDeleting = deletingId === career.id;
+
             return (
               <div key={career.id} className="relative flex gap-4">
-                {/* 타임라인 선 */}
                 <CareerTimelineDot
                   isCurrent={career.isCurrent}
                   isLast={idx === careers.length - 1}
                 />
-
-                {/* 내용 */}
                 <div className="flex-1 pb-4 space-y-1.5">
                   <div className="flex items-start justify-between gap-2">
                     <div>
@@ -275,13 +294,15 @@ export function CareerSectionClient({ careers }: CareerSectionClientProps) {
                       : ""}
                   </p>
                   <p className="text-xs text-zinc-600 leading-relaxed">{career.description}</p>
-                  <div className="flex flex-wrap gap-1.5">
-                    {career.techStack.map((tech) => (
-                      <Badge key={tech} variant="secondary" className="text-xs">
-                        {tech}
-                      </Badge>
-                    ))}
-                  </div>
+                  {career.techStack.length > 0 && (
+                    <div className="flex flex-wrap gap-1.5">
+                      {career.techStack.map((tech) => (
+                        <Badge key={tech} variant="secondary" className="text-xs">
+                          {tech}
+                        </Badge>
+                      ))}
+                    </div>
+                  )}
                 </div>
               </div>
             );
@@ -289,16 +310,15 @@ export function CareerSectionClient({ careers }: CareerSectionClientProps) {
         </div>
       )}
 
-      {/* 경력 없을 때 */}
       {careers.length === 0 && !showForm && (
         <p className="text-sm text-muted-foreground">등록된 경력이 없습니다.</p>
       )}
 
-      {/* 추가 폼 */}
       {isAdding && (
         <CareerForm
           form={form}
-          error={formError}
+          fieldErrors={fieldErrors}
+          serverError={serverError}
           isSubmitting={isSubmitting}
           isEdit={false}
           onUpdate={updateForm}
@@ -312,7 +332,8 @@ export function CareerSectionClient({ careers }: CareerSectionClientProps) {
 
 interface CareerFormProps {
   form: CareerFormState;
-  error: string;
+  fieldErrors: CareerFieldErrors;
+  serverError: string;
   isSubmitting: boolean;
   isEdit: boolean;
   onUpdate: (field: keyof CareerFormState, value: string | boolean) => void;
@@ -322,60 +343,63 @@ interface CareerFormProps {
 
 function CareerForm({
   form,
-  error,
+  fieldErrors,
+  serverError,
   isSubmitting,
   isEdit,
   onUpdate,
   onSubmit,
   onCancel,
 }: CareerFormProps) {
+  const inputClass = (error?: string) =>
+    cn(
+      "w-full rounded-lg border bg-white px-3 py-2 text-sm focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2",
+      error ? "border-red-300" : "border-zinc-200"
+    );
+
   return (
-    <form onSubmit={onSubmit} className="space-y-3 bg-zinc-50 rounded-xl p-4">
+    <form onSubmit={onSubmit} className="space-y-3.5 bg-zinc-50 rounded-xl p-4">
       <p className="text-sm font-semibold">{isEdit ? "경력 수정" : "경력 추가"}</p>
 
       <div className="grid grid-cols-2 gap-3">
-        <div className="space-y-1">
-          <label className="text-xs font-medium text-muted-foreground">회사명 *</label>
+        <FormField label="회사명" required error={fieldErrors.company}>
           <input
             type="text"
             value={form.company}
             onChange={(e) => onUpdate("company", e.target.value)}
             placeholder="테크밋"
-            className="w-full rounded-lg border border-zinc-200 bg-white px-3 py-2 text-sm focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2"
+            className={inputClass(fieldErrors.company)}
           />
-        </div>
-        <div className="space-y-1">
-          <label className="text-xs font-medium text-muted-foreground">직무/역할 *</label>
+        </FormField>
+        <FormField label="직무/역할" required error={fieldErrors.role}>
           <input
             type="text"
             value={form.role}
             onChange={(e) => onUpdate("role", e.target.value)}
             placeholder="프론트엔드 개발자"
-            className="w-full rounded-lg border border-zinc-200 bg-white px-3 py-2 text-sm focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2"
+            className={inputClass(fieldErrors.role)}
           />
-        </div>
+        </FormField>
       </div>
 
       <div className="grid grid-cols-2 gap-3">
-        <div className="space-y-1">
-          <label className="text-xs font-medium text-muted-foreground">시작일 *</label>
+        <FormField label="시작일" required error={fieldErrors.startDate}>
           <input
             type="month"
             value={form.startDate ? form.startDate.slice(0, 7) : ""}
             onChange={(e) => onUpdate("startDate", `${e.target.value}-01`)}
-            className="w-full rounded-lg border border-zinc-200 bg-white px-3 py-2 text-sm focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2"
+            className={inputClass(fieldErrors.startDate)}
           />
-        </div>
-        <div className="space-y-1">
-          <label className="text-xs font-medium text-muted-foreground">종료일</label>
+        </FormField>
+        <FormField label="종료일" error={fieldErrors.endDate}>
           <input
             type="month"
             value={form.endDate ? form.endDate.slice(0, 7) : ""}
             disabled={form.isCurrent}
             onChange={(e) => onUpdate("endDate", `${e.target.value}-01`)}
-            className="w-full rounded-lg border border-zinc-200 bg-white px-3 py-2 text-sm focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:opacity-50"
+            className={cn(inputClass(fieldErrors.endDate), form.isCurrent && "opacity-40")}
           />
-        </div>
+        </FormField>
       </div>
 
       <label className="flex items-center gap-2 cursor-pointer">
@@ -385,49 +409,37 @@ function CareerForm({
           onChange={(e) => onUpdate("isCurrent", e.target.checked)}
           className="rounded"
         />
-        <span className="text-sm">현재 재직 중</span>
+        <span className="text-sm text-zinc-700">현재 재직 중</span>
       </label>
 
-      <div className="space-y-1">
-        <label className="text-xs font-medium text-muted-foreground">업무 설명 *</label>
-        <textarea
+      <FormField label="업무 설명" required error={fieldErrors.description}>
+        <Textarea
           value={form.description}
           onChange={(e) => onUpdate("description", e.target.value)}
           placeholder="담당한 업무와 성과를 간략히 적어주세요"
           rows={3}
-          className="w-full rounded-lg border border-zinc-200 bg-white px-3 py-2 text-sm resize-none focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2"
+          className={fieldErrors.description ? "border-red-300" : ""}
         />
-      </div>
+      </FormField>
 
-      <div className="space-y-1">
-        <label className="text-xs font-medium text-muted-foreground">기술 스택 (쉼표로 구분)</label>
-        <input
+      <FormField label="기술 스택" optional hint="쉼표(,)로 구분하여 입력">
+        <Input
           type="text"
           value={form.techStackInput}
           onChange={(e) => onUpdate("techStackInput", e.target.value)}
           placeholder="React, TypeScript, Node.js"
-          className="w-full rounded-lg border border-zinc-200 bg-white px-3 py-2 text-sm focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2"
         />
-      </div>
+      </FormField>
 
-      {error && <p className="text-xs text-red-500">{error}</p>}
+      {serverError && (
+        <p className="text-xs text-red-500 bg-red-50 rounded-lg px-3 py-2">{serverError}</p>
+      )}
 
       <div className="flex gap-2">
-        <Button
-          type="submit"
-          size="sm"
-          disabled={isSubmitting}
-          className="flex-1"
-        >
+        <Button type="submit" size="sm" disabled={isSubmitting} className="flex-1">
           {isSubmitting ? "저장 중..." : isEdit ? "수정 완료" : "추가"}
         </Button>
-        <Button
-          type="button"
-          size="sm"
-          variant="outline"
-          onClick={onCancel}
-          disabled={isSubmitting}
-        >
+        <Button type="button" size="sm" variant="outline" onClick={onCancel} disabled={isSubmitting}>
           취소
         </Button>
       </div>

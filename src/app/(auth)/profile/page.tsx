@@ -27,12 +27,6 @@ export default async function ProfilePage() {
       <AvailabilityToggle initialStatus={profile.availabilityStatus} />
       <TechStackSection techStack={profile.techStack} />
       <CareerSectionClient careers={profile.careers} />
-
-      {/* 자기 소개 */}
-      <div className="p-4 space-y-3">
-        <h3 className="font-semibold">자기 소개</h3>
-        <p className="text-sm text-zinc-700 leading-relaxed">{profile.bio}</p>
-      </div>
     </div>
   );
 }

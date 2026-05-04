@@ -6,6 +6,8 @@ import { useRouter, useSearchParams } from "next/navigation";
 import { publicEnv } from "@/lib/config/env";
 import { AccountStatus } from "@/types";
 import { encryptPassword } from "@/lib/crypto/client";
+import { Input } from "@/components/ui/input";
+import { cn } from "@/lib/utils/cn";
 
 const KAKAO_ERROR_MESSAGES: Record<string, string> = {
   email_required: "이메일 제공에 동의해주셔야 로그인이 가능합니다",
@@ -27,7 +29,9 @@ function LoginForm() {
   const [isKakaoLoading, setIsKakaoLoading] = useState(false);
 
   const kakaoError = searchParams.get("error");
-  const kakaoErrorMessage = kakaoError ? (KAKAO_ERROR_MESSAGES[kakaoError] ?? "로그인 중 오류가 발생했습니다") : null;
+  const kakaoErrorMessage = kakaoError
+    ? (KAKAO_ERROR_MESSAGES[kakaoError] ?? "로그인 중 오류가 발생했습니다")
+    : null;
 
   function handleKakaoLogin() {
     setIsKakaoLoading(true);
@@ -46,7 +50,7 @@ function LoginForm() {
 
     try {
       const pkRes = await fetch("/api/auth/public-key");
-      const { publicKey } = await pkRes.json() as { publicKey: string };
+      const { publicKey } = (await pkRes.json()) as { publicKey: string };
       const encryptedPassword = await encryptPassword(password, publicKey);
 
       const res = await fetch("/api/auth/login", {
@@ -55,7 +59,11 @@ function LoginForm() {
         body: JSON.stringify({ email, encryptedPassword }),
       });
 
-      const data = await res.json() as { success?: boolean; error?: string; code?: string };
+      const data = (await res.json()) as {
+        success?: boolean;
+        error?: string;
+        code?: string;
+      };
       if (!res.ok) {
         if (res.status === 403 && data.code === AccountStatus.Withdrawn) {
           setWithdrawnEmail(email);
@@ -75,7 +83,7 @@ function LoginForm() {
 
   return (
     <div className="flex min-h-screen items-center justify-center bg-zinc-100">
-      <div className="w-full max-w-[430px] min-h-screen bg-white flex flex-col items-center justify-between px-8 py-16">
+      <div className="w-full max-w-[430px] min-h-screen bg-white flex flex-col items-center justify-between px-6 py-16">
         <div className="flex-1 flex flex-col items-center justify-center w-full gap-8">
           {/* 로고 */}
           <div className="flex flex-col items-center gap-3">
@@ -89,7 +97,7 @@ function LoginForm() {
           </div>
 
           {/* 설명 */}
-          <div className="text-center space-y-2">
+          <div className="text-center space-y-1.5">
             <p className="text-lg font-medium text-zinc-800">
               프리랜서 개발자를 위한
               <br />
@@ -101,9 +109,8 @@ function LoginForm() {
           </div>
 
           <div className="w-full flex flex-col gap-4">
-            {/* 카카오 에러 메시지 */}
             {kakaoErrorMessage && (
-              <p className="text-sm text-red-500 text-center bg-red-50 rounded-lg px-4 py-3">
+              <p className="text-sm text-red-600 text-center bg-red-50 rounded-lg px-4 py-3">
                 {kakaoErrorMessage}
               </p>
             )}
@@ -126,40 +133,42 @@ function LoginForm() {
             {/* 구분선 */}
             <div className="flex items-center gap-3">
               <div className="flex-1 h-px bg-zinc-200" />
-              <span className="text-xs text-zinc-400">또는 이메일로 로그인</span>
+              <span className="text-xs text-zinc-400 whitespace-nowrap">또는 이메일로 로그인</span>
               <div className="flex-1 h-px bg-zinc-200" />
             </div>
 
             {/* 이메일 로그인 폼 */}
             <form onSubmit={handleEmailLogin} className="flex flex-col gap-3">
-              <input
+              <Input
                 type="email"
                 value={email}
                 onChange={(e) => setEmail(e.target.value)}
                 required
                 placeholder="이메일"
-                className="w-full rounded-lg border border-zinc-200 bg-white px-3 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-zinc-900"
               />
               <div className="relative">
-                <input
+                <Input
                   type={showPassword ? "text" : "password"}
                   value={password}
                   onChange={(e) => setPassword(e.target.value)}
                   required
                   placeholder="비밀번호"
-                  className="w-full rounded-lg border border-zinc-200 bg-white px-3 py-2.5 pr-10 text-sm focus:outline-none focus:ring-2 focus:ring-zinc-900"
+                  className="pr-10"
                 />
                 <button
                   type="button"
                   onClick={() => setShowPassword((v) => !v)}
                   className="absolute right-3 top-1/2 -translate-y-1/2 text-zinc-400 hover:text-zinc-600"
+                  tabIndex={-1}
                 >
                   {showPassword ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
                 </button>
               </div>
 
               {error && (
-                <p className="text-sm text-red-500 text-center">{error}</p>
+                <p className="text-sm text-red-600 text-center bg-red-50 rounded-lg px-3 py-2.5">
+                  {error}
+                </p>
               )}
 
               {withdrawnEmail && (
@@ -167,7 +176,11 @@ function LoginForm() {
                   <p className="text-red-600 font-medium">탈퇴한 계정입니다.</p>
                   <button
                     type="button"
-                    onClick={() => router.push(`/signup?email=${encodeURIComponent(withdrawnEmail)}&reactivate=true`)}
+                    onClick={() =>
+                      router.push(
+                        `/signup?email=${encodeURIComponent(withdrawnEmail)}&reactivate=true`
+                      )
+                    }
                     className="text-zinc-800 underline underline-offset-2 font-semibold"
                   >
                     재가입하기
@@ -178,7 +191,9 @@ function LoginForm() {
               <button
                 type="submit"
                 disabled={isLoading}
-                className="flex w-full items-center justify-center gap-2 rounded-xl bg-zinc-900 py-3 text-[15px] font-semibold text-white transition-opacity hover:opacity-90 active:opacity-80 disabled:opacity-50"
+                className={cn(
+                  "flex w-full items-center justify-center gap-2 rounded-xl bg-zinc-900 py-3.5 text-[15px] font-semibold text-white transition-opacity hover:opacity-90 active:opacity-80 disabled:opacity-50"
+                )}
               >
                 {isLoading && <Loader2 className="h-4 w-4 animate-spin" />}
                 {isLoading ? "로그인 중..." : "로그인"}
@@ -187,12 +202,15 @@ function LoginForm() {
           </div>
         </div>
 
-        {/* 이용약관 */}
         <p className="text-xs text-muted-foreground text-center leading-relaxed">
           로그인 시{" "}
-          <button className="underline underline-offset-2">이용약관</button>
-          {" "}및{" "}
-          <button className="underline underline-offset-2">개인정보 처리방침</button>
+          <button className="underline underline-offset-2 hover:text-foreground transition-colors">
+            이용약관
+          </button>{" "}
+          및{" "}
+          <button className="underline underline-offset-2 hover:text-foreground transition-colors">
+            개인정보 처리방침
+          </button>
           에 동의하게 됩니다.
         </p>
       </div>

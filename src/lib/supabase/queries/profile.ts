@@ -24,11 +24,10 @@ interface ProfileRow {
   name: string;
   email: string;
   phone: string | null;
-  headline: string;
-  bio: string;
+  bio: string | null;
   tech_stack: string[];
-  availability_status: AvailabilityStatus;
-  experience_years: number;
+  availability_status: AvailabilityStatus | null;
+  experience_years: number | null;
   kakao_id: string | null;
   referrer_id: string | null;
   referrer: { name: string } | null;
@@ -56,7 +55,6 @@ function mapRowToProfile(row: ProfileRow): FreelancerProfile {
     name: row.name,
     email: row.email,
     phone: row.phone ?? undefined,
-    headline: row.headline,
     bio: row.bio,
     techStack: row.tech_stack,
     careers: row.careers.map(mapRowToCareer),
@@ -113,7 +111,6 @@ export async function updateProfile(payload: UpdateProfileRequest): Promise<void
   const updateData: Record<string, unknown> = {};
   if (payload.name !== undefined) updateData.name = payload.name;
   if (payload.phone !== undefined) updateData.phone = payload.phone;
-  if (payload.headline !== undefined) updateData.headline = payload.headline;
   if (payload.bio !== undefined) updateData.bio = payload.bio;
   if (payload.techStack !== undefined) updateData.tech_stack = payload.techStack;
   if (payload.experienceYears !== undefined) updateData.experience_years = payload.experienceYears;

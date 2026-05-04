@@ -26,10 +26,12 @@ export default async function SettingsPage() {
             <span className="text-sm text-muted-foreground">이메일</span>
             <span className="text-sm font-medium">{profile?.email ?? "-"}</span>
           </div>
-          <div className="flex items-center justify-between py-2">
-            <span className="text-sm text-muted-foreground">카카오 ID</span>
-            <span className="text-sm font-medium">{profile?.kakaoId ?? "-"}</span>
-          </div>
+          {profile?.phone && (
+            <div className="flex items-center justify-between py-2">
+              <span className="text-sm text-muted-foreground">전화번호</span>
+              <span className="text-sm font-medium">{profile.phone}</span>
+            </div>
+          )}
           <ReferrerSection currentReferrerName={profile?.referrerName} />
           <Link
             href="/settings/profile"

@@ -5,6 +5,8 @@ import { serverEnv, publicEnv } from "@/lib/config/env";
 import { exchangeCodeForToken, getKakaoUserInfo } from "@/lib/kakao/oauth";
 import { AccountStatus } from "@/types";
 
+const UUID_REGEX = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
+
 export async function GET(request: NextRequest) {
   const { searchParams } = new URL(request.url);
   const code = searchParams.get("code");
@@ -36,6 +38,10 @@ export async function GET(request: NextRequest) {
 
     const { kakaoId, email, name } = kakaoUser;
 
+    // pending_referral 쿠키 읽기 (공유 링크로 접근한 경우)
+    const pendingReferral = request.cookies.get("pending_referral")?.value ?? null;
+    const isValidRef = !!pendingReferral && UUID_REGEX.test(pendingReferral);
+
     // Admin 클라이언트 생성 (RLS 우회, service_role key 사용)
     const supabaseAdmin = createClient(
       publicEnv.supabaseUrl,
@@ -44,17 +50,40 @@ export async function GET(request: NextRequest) {
     );
 
     // Step 3: DB에서 kakao_id로 기존 유저 조회
-    const { data: profile, error: profileError } = await supabaseAdmin
+    // .single() 대신 .limit(1) 배열 방식 사용 — 중복 행 에러 방지
+    const { data: profileRows, error: profileError } = await supabaseAdmin
       .from("profiles")
       .select("id, email, account_status")
       .eq("kakao_id", kakaoId)
-      .single();
+      .limit(1);
+
+    let profile = profileRows?.[0] ?? null;
 
     console.log("[카카오 콜백] Step 3: profiles 조회", {
       found: !!profile,
       errorCode: profileError?.code,
       errorMessage: profileError?.message,
     });
+
+    // kakao_id로 못 찾은 경우, 같은 이메일의 기존 프로필이 있으면 kakao_id 자동 연결
+    if (!profile && email) {
+      const { data: emailProfileRows } = await supabaseAdmin
+        .from("profiles")
+        .select("id, email, account_status")
+        .eq("email", email)
+        .limit(1);
+
+      const emailProfile = emailProfileRows?.[0] ?? null;
+
+      if (emailProfile) {
+        console.log("[카카오 콜백] Step 3-1: 이메일 일치 프로필 발견 → kakao_id 연결");
+        await supabaseAdmin
+          .from("profiles")
+          .update({ kakao_id: kakaoId })
+          .eq("id", emailProfile.id);
+        profile = emailProfile;
+      }
+    }
 
     if (profile) {
       // 탈퇴 회원 → 재가입 페이지로
@@ -64,7 +93,10 @@ export async function GET(request: NextRequest) {
         reactivateUrl.searchParams.set("name", name ?? "");
         reactivateUrl.searchParams.set("kakao_id", kakaoId);
         reactivateUrl.searchParams.set("reactivate", "true");
-        return NextResponse.redirect(reactivateUrl);
+        if (isValidRef) reactivateUrl.searchParams.set("ref", pendingReferral!);
+        const reactivateResponse = NextResponse.redirect(reactivateUrl);
+        reactivateResponse.cookies.set("pending_referral", "", { maxAge: 0, path: "/" });
+        return reactivateResponse;
       }
 
       // 기존 유저: 매직 링크 생성 (이메일 발송 없음)
@@ -125,6 +157,8 @@ export async function GET(request: NextRequest) {
       }
 
       console.log("[카카오 콜백] Step 5: 성공 → / 리다이렉트");
+      // 기존 유저: pending_referral 쿠키 삭제
+      redirectResponse.cookies.set("pending_referral", "", { maxAge: 0, path: "/" });
       return redirectResponse;
     }
 
@@ -134,7 +168,10 @@ export async function GET(request: NextRequest) {
     signupUrl.searchParams.set("email", email);
     signupUrl.searchParams.set("name", name ?? "");
     signupUrl.searchParams.set("kakao_id", kakaoId);
-    return NextResponse.redirect(signupUrl);
+    if (isValidRef) signupUrl.searchParams.set("ref", pendingReferral!);
+    const signupResponse = NextResponse.redirect(signupUrl);
+    signupResponse.cookies.set("pending_referral", "", { maxAge: 0, path: "/" });
+    return signupResponse;
   } catch (error) {
     console.error("[카카오 콜백 오류]", error);
     return NextResponse.redirect(

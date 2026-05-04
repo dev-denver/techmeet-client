@@ -327,7 +327,10 @@ create table if not exists public.alimtalk_logs (
 );
 
 alter table public.alimtalk_logs enable row level security;
--- service_role 전용
+
+-- 인증된 사용자: 자신의 알림 내역만 조회 가능
+create policy "alimtalk_logs_select_own" on public.alimtalk_logs
+  for select to authenticated using (user_id = auth.uid());
 
 -- alimtalk_logs.template_code → alimtalk_templates.code
 alter table public.alimtalk_logs

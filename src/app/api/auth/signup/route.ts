@@ -1,11 +1,35 @@
 import { NextRequest, NextResponse } from "next/server";
 import { createServerClient } from "@supabase/ssr";
-import { createClient } from "@supabase/supabase-js";
+import { createClient, type SupabaseClient } from "@supabase/supabase-js";
 import { validatePassword, validatePhone, validateBirthDate } from "@/lib/utils/validation";
 import { type CookieOptions } from "@supabase/ssr";
 import { publicEnv, serverEnv } from "@/lib/config/env";
 import { AccountStatus } from "@/types";
 import { decryptPassword } from "@/lib/crypto/rsa";
+
+// 중복 이메일이 admin 계정인지 확인하여 명확한 에러 메시지 반환
+// admin 계정이면 409(관리자 전용 안내), 아니면 null 반환 → 기존 409("이미 사용 중") 폴백
+async function checkAdminAccount(
+  email: string,
+  supabaseAdmin: SupabaseClient
+): Promise<NextResponse | null> {
+  const { data: adminUser, error: adminQueryError } = await supabaseAdmin
+    .from("admin_users")
+    .select("auth_user_id")
+    .eq("email", email)
+    .maybeSingle();
+
+  if (adminQueryError) {
+    console.error("[admin 계정 확인] admin_users 조회 오류:", adminQueryError);
+    return null;
+  }
+  if (!adminUser) return null;
+
+  return NextResponse.json(
+    { error: "관리자 계정으로 등록된 이메일입니다. 다른 이메일을 사용해주세요." },
+    { status: 409 }
+  );
+}
 
 export async function POST(request: NextRequest) {
   const body = await request.json() as {
@@ -67,6 +91,18 @@ export async function POST(request: NextRequest) {
 
   const supabaseResponse = NextResponse.json({ success: true }, { status: 201 });
 
+  let supabaseAdmin: SupabaseClient;
+  try {
+    supabaseAdmin = createClient(
+      publicEnv.supabaseUrl,
+      serverEnv.supabaseServiceRoleKey,
+      { auth: { autoRefreshToken: false, persistSession: false } }
+    );
+  } catch (envError) {
+    console.error("[공통] service_role 클라이언트 생성 실패 — 환경변수 확인 필요:", envError);
+    return NextResponse.json({ error: "서버 설정 오류가 발생했습니다" }, { status: 500 });
+  }
+
   const supabase = createServerClient(
     publicEnv.supabaseUrl,
     publicEnv.supabaseAnonKey,
@@ -85,12 +121,6 @@ export async function POST(request: NextRequest) {
   );
 
   if (reactivate) {
-    const supabaseAdmin = createClient(
-      publicEnv.supabaseUrl,
-      serverEnv.supabaseServiceRoleKey,
-      { auth: { autoRefreshToken: false, persistSession: false } }
-    );
-
     const { data: existingProfile } = await supabaseAdmin
       .from("profiles")
       .select("id, account_status")
@@ -101,34 +131,45 @@ export async function POST(request: NextRequest) {
       return NextResponse.json({ error: "재가입할 수 없는 계정입니다." }, { status: 400 });
     }
 
-    const { error: updateAuthError } = await supabaseAdmin.auth.admin.updateUserById(
-      existingProfile.id,
-      {
-        password: password as string,
-        ban_duration: "none",
-        user_metadata: { name, phone, birth_date },
-      }
-    );
-
-    if (updateAuthError) {
-      console.error("[재가입] auth user 복원 실패:", updateAuthError);
+    // 기존 계정 완전 삭제 — profiles·career_items·applications 모두 CASCADE 삭제
+    const { error: deleteError } = await supabaseAdmin.auth.admin.deleteUser(existingProfile.id);
+    if (deleteError) {
+      console.error("[재가입] 기존 계정 삭제 실패:", deleteError);
       return NextResponse.json({ error: "재가입 처리에 실패했습니다." }, { status: 500 });
     }
 
+    // 새 auth 계정 생성 (이메일 확인 즉시 처리)
+    const { data: newUser, error: createError } = await supabaseAdmin.auth.admin.createUser({
+      email,
+      password,
+      email_confirm: true,
+      user_metadata: { name, phone, birth_date },
+    });
+
+    if (createError || !newUser.user) {
+      console.error("[재가입] 신규 계정 생성 실패:", createError);
+      return NextResponse.json({ error: "재가입에 실패했습니다." }, { status: 500 });
+    }
+
+    // 새 프로필 생성
+    const newProfileInsert: Record<string, unknown> = {
+      id: newUser.user.id,
+      name,
+      email,
+      phone,
+      kakao_id: typeof kakaoId === "string" && kakaoId ? kakaoId : null,
+      notification_marketing: agreeMarketing,
+      account_status: AccountStatus.Active,
+    };
+    if (referrerId) newProfileInsert.referrer_id = referrerId;
+
     const { error: profileError } = await supabaseAdmin
       .from("profiles")
-      .update({
-        account_status: AccountStatus.Active,
-        withdrawn_at: null,
-        phone,
-        kakao_id: typeof kakaoId === "string" && kakaoId ? kakaoId : null,
-        notification_marketing: agreeMarketing,
-      })
-      .eq("id", existingProfile.id);
+      .upsert(newProfileInsert, { onConflict: "id" });
 
     if (profileError) {
-      console.error("[재가입] profiles 복원 실패:", profileError);
-      return NextResponse.json({ error: "프로필 복원에 실패했습니다." }, { status: 500 });
+      console.error("[재가입] 프로필 생성 실패:", profileError);
+      return NextResponse.json({ error: "프로필 정보 저장에 실패했습니다." }, { status: 500 });
     }
 
     const { error: signInError } = await supabase.auth.signInWithPassword({
@@ -154,26 +195,22 @@ export async function POST(request: NextRequest) {
 
   if (error) {
     if (error.status === 422 || error.message.includes("already registered")) {
+      const linked = await checkAdminAccount(email, supabaseAdmin);
+      if (linked) return linked;
       return NextResponse.json({ error: "이미 사용 중인 이메일입니다" }, { status: 409 });
     }
     return NextResponse.json({ error: "회원가입에 실패했습니다" }, { status: 500 });
   }
 
-  // 추가 프로필 필드 업데이트 (phone, kakao_id)
-  // signUp 직후 세션이 없을 수 있으므로 RLS를 우회하는 service_role 클라이언트 사용
-  if (data.user) {
-    let supabaseAdmin;
-    try {
-      supabaseAdmin = createClient(
-        publicEnv.supabaseUrl,
-        serverEnv.supabaseServiceRoleKey,
-        { auth: { autoRefreshToken: false, persistSession: false } }
-      );
-    } catch (envError) {
-      console.error("[회원가입] service_role 클라이언트 생성 실패 — 환경변수 확인 필요:", envError);
-      return NextResponse.json({ error: "서버 설정 오류가 발생했습니다" }, { status: 500 });
-    }
+  // 이메일 확인이 활성화된 경우 Supabase는 기존 이메일에 대해 유령 user를 반환함
+  // identities가 빈 배열이면 이미 가입된 이메일
+  if (!data.user || data.user.identities?.length === 0) {
+    const linked = await checkAdminAccount(email, supabaseAdmin);
+    if (linked) return linked;
+    return NextResponse.json({ error: "이미 사용 중인 이메일입니다" }, { status: 409 });
+  }
 
+  if (data.user) {
     const profileUpsert: Record<string, unknown> = {
       id: data.user.id,
       name,

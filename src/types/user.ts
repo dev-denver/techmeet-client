@@ -27,12 +27,11 @@ export interface FreelancerProfile {
   name: string;
   email: string;
   phone?: string;
-  headline: string;
-  bio: string;
+  bio: string | null;
   techStack: string[];
   careers: Career[];
-  availabilityStatus: AvailabilityStatus;
-  experienceYears: number;
+  availabilityStatus: AvailabilityStatus | null;
+  experienceYears: number | null;
   kakaoId?: string;
   referrerId?: string;
   referrerName?: string;

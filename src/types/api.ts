@@ -58,7 +58,6 @@ export type CreateApplicationResponse = { data: Application };
 export interface UpdateProfileRequest {
   name?: string;
   phone?: string;
-  headline?: string;
   bio?: string;
   techStack?: string[];
   experienceYears?: number;
@@ -89,6 +88,10 @@ export type SearchReferrerResponse = { data: ReferrerSearchResult[] };
 
 // ── Notices ───────────────────────────────────────────
 export type GetNoticesResponse = PaginatedResponse<Notice>;
+
+// ── Notifications ─────────────────────────────────────
+import type { AlimtalkLog } from "./notification";
+export type GetAlimtalkLogsResponse = PaginatedResponse<AlimtalkLog>;
 
 // ── Settings ──────────────────────────────────────────
 export interface NotificationSettings {

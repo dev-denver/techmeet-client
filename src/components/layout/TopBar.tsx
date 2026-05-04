@@ -1,7 +1,8 @@
 "use client";
 
 import { usePathname, useRouter } from "next/navigation";
-import { ArrowLeft, Menu } from "lucide-react";
+import Link from "next/link";
+import { ArrowLeft, Bell } from "lucide-react";
 import { useScrolled } from "@/hooks/useScrolled";
 import { cn } from "@/lib/utils/cn";
 
@@ -13,6 +14,7 @@ const pageTitles: Record<string, string> = {
   "/settings": "설정",
   "/settings/profile": "내 정보 수정",
   "/settings/withdraw": "회원 탈퇴",
+  "/notifications": "알림 내역",
 };
 
 function getTitle(pathname: string): string {
@@ -24,10 +26,17 @@ function getTitle(pathname: string): string {
 }
 
 function isDetailPage(pathname: string): boolean {
-  if (pathname.startsWith("/projects/") && pathname !== "/projects" && pathname !== "/projects/applications") {
+  if (
+    pathname.startsWith("/projects/") &&
+    pathname !== "/projects" &&
+    pathname !== "/projects/applications"
+  ) {
     return true;
   }
   if (pathname === "/settings/profile" || pathname === "/settings/withdraw") {
+    return true;
+  }
+  if (pathname === "/notifications") {
     return true;
   }
   return false;
@@ -48,26 +57,27 @@ export function TopBar() {
       )}
     >
       <div className="flex items-center w-full gap-3">
-        {showBackButton ? (
+        {showBackButton && (
           <button
             onClick={() => router.back()}
-            className="p-1 -ml-1 rounded-md hover:bg-accent transition-colors"
+            className="p-1 -ml-1 rounded-md hover:bg-accent active:bg-accent/80 transition-colors"
             aria-label="뒤로가기"
           >
             <ArrowLeft className="h-5 w-5" />
           </button>
-        ) : null}
+        )}
 
         <h1 className="flex-1 text-base font-semibold">{title}</h1>
 
-        {scrolled && !showBackButton ? (
-          <button
-            className="p-1 -mr-1 rounded-md hover:bg-accent transition-colors"
-            aria-label="메뉴"
+        {!showBackButton && (
+          <Link
+            href="/notifications"
+            className="p-1 -mr-1 rounded-md hover:bg-accent active:bg-accent/80 transition-colors"
+            aria-label="알림 내역"
           >
-            <Menu className="h-5 w-5" />
-          </button>
-        ) : null}
+            <Bell className="h-5 w-5" />
+          </Link>
+        )}
       </div>
     </header>
   );

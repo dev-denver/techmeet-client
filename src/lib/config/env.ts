@@ -22,6 +22,9 @@ export const serverEnv = {
   get kakaoRestApiKey() {
     return requireServerEnv("KAKAO_REST_API_KEY");
   },
+  get kakaoClientSecret() {
+    return process.env.KAKAO_CLIENT_SECRET ?? null;
+  },
   get kakaoRedirectUri() {
     return requireServerEnv("KAKAO_REDIRECT_URI");
   },

@@ -8,6 +8,8 @@ export { ApplicationStatus } from "./application";
 export type { Application } from "./application";
 
 export type { Notice } from "./notice";
+export { AlimtalkServiceType } from "./notification";
+export type { AlimtalkLog } from "./notification";
 export type {
   ApiSuccessResponse,
   ApiErrorResponse,
@@ -26,6 +28,7 @@ export type {
   UpdateCareerRequest,
   GetProfileResponse,
   GetNoticesResponse,
+  GetAlimtalkLogsResponse,
   NotificationSettings,
   GetNotificationSettingsResponse,
   UpdateNotificationSettingsRequest,

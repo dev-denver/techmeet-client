@@ -39,15 +39,22 @@ export interface KakaoUserInfo {
  * @throws 카카오 API 오류 시 Error
  */
 export async function exchangeCodeForToken(code: string): Promise<string> {
+  const params: Record<string, string> = {
+    grant_type: "authorization_code",
+    client_id: serverEnv.kakaoRestApiKey,
+    redirect_uri: serverEnv.kakaoRedirectUri,
+    code,
+  };
+
+  const clientSecret = serverEnv.kakaoClientSecret;
+  if (clientSecret) {
+    params.client_secret = clientSecret;
+  }
+
   const res = await fetch("https://kauth.kakao.com/oauth/token", {
     method: "POST",
     headers: { "Content-Type": "application/x-www-form-urlencoded" },
-    body: new URLSearchParams({
-      grant_type: "authorization_code",
-      client_id: serverEnv.kakaoRestApiKey,
-      redirect_uri: serverEnv.kakaoRedirectUri,
-      code,
-    }),
+    body: new URLSearchParams(params),
   });
 
   if (!res.ok) {

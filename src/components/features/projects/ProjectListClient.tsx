@@ -1,8 +1,10 @@
 "use client";
 
 import { useState } from "react";
+import { FolderOpen, Loader2 } from "lucide-react";
 import { ProjectFilters } from "./ProjectFilters";
 import { ProjectCard } from "./ProjectCard";
+import { EmptyState } from "@/components/ui/empty-state";
 import type { Project, ProjectFilterValue } from "@/types";
 import type { GetProjectsResponse } from "@/types/api";
 
@@ -53,19 +55,25 @@ export function ProjectListClient({ initialProjects, initialTotal }: ProjectList
   return (
     <div className="space-y-4">
       <ProjectFilters onFilterChange={handleFilterChange} />
-      <div className="space-y-3">
-        {projects.length > 0 ? (
-          projects.map((project) => (
+
+      {isLoading && projects.length === 0 ? (
+        <div className="flex justify-center py-16">
+          <Loader2 className="h-6 w-6 animate-spin text-zinc-400" />
+        </div>
+      ) : projects.length === 0 ? (
+        <EmptyState
+          icon={FolderOpen}
+          title="해당하는 프로젝트가 없습니다"
+          description="다른 필터를 선택해보세요"
+        />
+      ) : (
+        <div className="space-y-3">
+          {projects.map((project) => (
             <ProjectCard key={project.id} project={project} />
-          ))
-        ) : (
-          !isLoading && (
-            <p className="text-center text-sm text-muted-foreground py-12">
-              해당하는 프로젝트가 없습니다.
-            </p>
-          )
-        )}
-      </div>
+          ))}
+        </div>
+      )}
+
       {hasMore && (
         <button
           onClick={handleLoadMore}
@@ -74,7 +82,7 @@ export function ProjectListClient({ initialProjects, initialTotal }: ProjectList
         >
           {isLoading ? (
             <>
-              <span className="size-4 border-2 border-current border-t-transparent rounded-full animate-spin" />
+              <Loader2 className="h-4 w-4 animate-spin" />
               불러오는 중...
             </>
           ) : (

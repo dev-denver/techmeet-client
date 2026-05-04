@@ -6,7 +6,7 @@ export default async function ProjectsPage() {
 
   return (
     <div className="p-4 space-y-4">
-      <p className="text-sm text-muted-foreground">총 {total}개 프로젝트</p>
+      <p className="text-xs text-muted-foreground">총 {total}개 프로젝트</p>
       <ProjectListClient initialProjects={projects} initialTotal={total} />
     </div>
   );

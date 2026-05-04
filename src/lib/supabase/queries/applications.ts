@@ -12,8 +12,8 @@ interface ApplicationRow {
   project_id: string;
   freelancer_id: string;
   status: ApplicationStatus;
-  cover_letter: string;
-  expected_rate: number;
+  cover_letter: string | null;
+  expected_rate: number | null;
   applied_at: string;
   updated_at: string;
   projects: { title: string } | null;

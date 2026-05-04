@@ -53,7 +53,7 @@ export function ReferrerSearchModal({ onSelect, onClose, hasBottomNav = false }:
 
   return (
     <BottomSheet open onClose={onClose} hasBottomNav={hasBottomNav}>
-      <div className="p-4 pb-8 flex flex-col gap-4 max-h-[80vh]">
+      <div className="px-4 pb-6 pt-2 flex flex-col gap-4">
         {/* 헤더 */}
         <div className="flex items-center justify-between">
           <h2 className="text-base font-semibold">추천인 검색</h2>
@@ -91,39 +91,41 @@ export function ReferrerSearchModal({ onSelect, onClose, hasBottomNav = false }:
         {error && <p className="text-sm text-red-500">{error}</p>}
 
         {/* 검색 결과 */}
-        <div className="flex-1 overflow-y-auto">
-          {isLoading && (
-            <p className="text-sm text-zinc-400 text-center py-6">검색 중...</p>
-          )}
-          {!isLoading && searched && results.length === 0 && (
-            <p className="text-sm text-zinc-400 text-center py-6">검색 결과가 없습니다</p>
-          )}
-          {!isLoading && results.length > 0 && (
-            <ul className="space-y-1">
-              {results.map((item) => (
-                <li key={item.id}>
-                  <button
-                    type="button"
-                    onClick={() => setSelected(item)}
-                    className={`w-full flex items-center justify-between px-3 py-3 rounded-lg text-left transition-colors ${
-                      selected?.id === item.id
-                        ? "bg-zinc-900 text-white"
-                        : "hover:bg-zinc-50 text-zinc-800"
-                    }`}
-                  >
-                    <div>
-                      <p className="text-sm font-medium">{item.name}</p>
-                      <p className={`text-xs mt-0.5 ${selected?.id === item.id ? "text-zinc-300" : "text-zinc-400"}`}>
-                        {item.maskedPhone}
-                      </p>
-                    </div>
-                    {selected?.id === item.id && <Check className="h-4 w-4 shrink-0" />}
-                  </button>
-                </li>
-              ))}
-            </ul>
-          )}
-        </div>
+        {(isLoading || searched) && (
+          <div className="overflow-y-auto overscroll-contain max-h-[240px] -mx-1 px-1">
+            {isLoading && (
+              <p className="text-sm text-zinc-400 text-center py-6">검색 중...</p>
+            )}
+            {!isLoading && searched && results.length === 0 && (
+              <p className="text-sm text-zinc-400 text-center py-6">검색 결과가 없습니다</p>
+            )}
+            {!isLoading && results.length > 0 && (
+              <ul className="space-y-1">
+                {results.map((item) => (
+                  <li key={item.id}>
+                    <button
+                      type="button"
+                      onClick={() => setSelected(item)}
+                      className={`w-full flex items-center justify-between px-3 py-3 rounded-lg text-left transition-colors ${
+                        selected?.id === item.id
+                          ? "bg-zinc-900 text-white"
+                          : "hover:bg-zinc-50 text-zinc-800"
+                      }`}
+                    >
+                      <div className="min-w-0">
+                        <p className="text-sm font-medium truncate">{item.name}</p>
+                        <p className={`text-xs mt-0.5 ${selected?.id === item.id ? "text-zinc-300" : "text-zinc-400"}`}>
+                          {item.maskedPhone}
+                        </p>
+                      </div>
+                      {selected?.id === item.id && <Check className="h-4 w-4 shrink-0 ml-2" />}
+                    </button>
+                  </li>
+                ))}
+              </ul>
+            )}
+          </div>
+        )}
 
         {/* 선택 완료 버튼 */}
         <button
