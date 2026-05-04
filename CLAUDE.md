@@ -1,3 +1,7 @@
+> **읽는 순서: 이 파일(CLAUDE.md) → project.md**
+> 이 파일은 변경이 거의 없는 개발 규칙·아키텍처 기준입니다.
+> 비즈니스 요건·기능 구성·완료 현황은 `project.md`를 확인하세요.
+
 # 프로젝트: techmeet-client
 
 테크밋 소속 프리랜서 개발자를 위한 **프리랜서 전용 웹앱**입니다.
@@ -8,17 +12,18 @@
 - 프리랜서 개발자가 테크밋에서 등록한 개발 프로젝트를 조회하고 지원할 수 있습니다
 - 프리랜서가 자신의 경력, 기술 스택, 현재 투입 상태를 직접 관리합니다
 - 카카오 알림톡을 통해 신규 프로젝트 등록 시 자동 알림을 받습니다
+- techmeet-admin과 동일한 Supabase DB 공유 (스키마: `sql/techmeet-client-admin.sql`)
 
 ## 기술 스택
 
-| 항목 | 기술 |
-|------|------|
-| Framework | Next.js 16 (App Router) |
-| Language | TypeScript 5 (strict mode) |
-| Styling | Tailwind CSS v4 + shadcn/ui |
-| Database | Supabase (PostgreSQL) |
-| Auth | 카카오 OAuth (소셜 로그인) |
-| 알림 | 카카오 비즈니스 알림톡 API |
+| 항목      | 기술                        |
+| --------- | --------------------------- |
+| Framework | Next.js 16 (App Router)     |
+| Language  | TypeScript 5 (strict mode)  |
+| Styling   | Tailwind CSS v4 + shadcn/ui |
+| Database  | Supabase (PostgreSQL)       |
+| Auth      | 카카오 OAuth (소셜 로그인)  |
+| 알림      | 카카오 비즈니스 알림톡 API  |
 
 ## 명령어
 
@@ -91,7 +96,7 @@
 
 ## 유틸리티 함수
 
-- `format.ts`: `formatDate`, `formatShortDate`, `formatBudget`, `formatDeadlineDays`, `getDeadlineDays`, `formatMonthYear`
+- `format.ts`: `formatDate`, `formatShortDate`, `formatDeadlineDays`, `getDeadlineDays`, `formatMonthYear`
 - `validation.ts`: `validatePassword`, `validatePhone`, `validateEmail`, `validateAge`, `formatPhone`
 - `cn.ts`: Tailwind 클래스 병합 (`clsx` + `tailwind-merge`)
 
@@ -160,9 +165,33 @@
 - `CareerTimelineDot` (`components/features/profile/`): 경력 타임라인 dot + line
 - `BottomSheet` (`components/ui/`): 하단 모달 오버레이
 
+## Supabase 클라이언트 사용
+
+| 상황                                          | 클라이언트                                            |
+| --------------------------------------------- | ----------------------------------------------------- |
+| Client Component                              | `createClient()` from `@/lib/supabase/client`         |
+| Server Component / API Route (인증 세션 필요) | `createServerClient()` from `@/lib/supabase/server`   |
+| API Route (RLS bypass — 추천인 검색 등)       | `@/lib/supabase/server` + `SUPABASE_SERVICE_ROLE_KEY` |
+
 ## 중요 사항
 
 - `.env` 파일은 절대 커밋하지 마세요
 - Supabase 클라이언트는 `/lib/supabase`에서만 초기화
 - 카카오 알림톡 API 키는 환경변수로만 관리
 - 인증이 필요한 페이지는 Supabase Auth 미들웨어로 보호
+
+## 작업 모드 설정
+
+### Accept Edits On 모드
+
+사용자가 **"accept edits on"** 을 입력하면 아래 규칙을 즉시 적용한다.
+
+- Claude가 작업 중 확인이 필요한 모든 질문(파일 수정, DB 마이그레이션, 패키지 설치, API 변경 등)에 대해 **자동으로 yes로 간주하고 즉시 실행**한다.
+- 중간에 "진행할까요?", "확인해주세요", "어떻게 할까요?" 등의 질문 없이 계획한 모든 단계를 연속으로 수행한다.
+- 작업 완료 후 변경 사항을 한 번에 요약해서 보고한다.
+
+### Accept Edits Off 모드
+
+사용자가 **"accept edits off"** 를 입력하면 기본 동작으로 복귀한다.
+
+- 파괴적 작업(DB 마이그레이션, 파일 대량 수정 등)은 실행 전 확인을 요청한다.

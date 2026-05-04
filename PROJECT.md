@@ -1,7 +1,7 @@
 # 테크밋 프리랜서 앱 - 개발 문서
 
 > 이 문서는 개발 환경이 바뀌어도 어디까지 개발됐는지 파악하고 이어서 개발할 수 있도록 작성된 문서입니다.
-> 마지막 업데이트: 2026-02-28
+> 마지막 업데이트: 2026-05-03
 
 ---
 
@@ -275,11 +275,18 @@ src/
 
 ---
 
-## Supabase 신규 설정 체크리스트
+## DB 주요 테이블
 
-- [x] `profiles.account_status` 컬럼 추가 (기존 rows default 'active') - 구현 완료
-- [x] `profiles.withdrawn_at` 컬럼 추가 - 구현 완료
-- [x] `profiles.referrer_id` 컬럼 추가 (uuid, REFERENCES profiles(id) ON DELETE SET NULL) - 구현 완료
+- `profiles` — 프리랜서 프로필 (account_status, withdrawn_at, referrer_id 포함)
+- `careers` — 경력 (is_current, tech_stack 포함)
+- `projects` — 프로젝트 (admin 관리, client 읽기 전용)
+- `notices` — 공지사항 (notice_type: immediate/scheduled, start_at/end_at 포함)
+- `applications` — 지원 내역 (available_start_date·admin_memo는 admin 전용 컬럼)
+- `admin_users` — 관리자 계정 (service_role 전용)
+- `alimtalk_templates` + `alimtalk_logs` — 알림톡 서식·발송 이력 (service_role 전용)
+- `admin_audit_logs` — 관리자 감사 로그 (service_role 전용)
+
+전체 DDL: `sql/techmeet-client-admin.sql`
 
 ---
 

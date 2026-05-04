@@ -6,7 +6,8 @@ function parseDate(dateString: string): Date {
   return date;
 }
 
-export function formatDate(dateString: string): string {
+export function formatDate(dateString: string | null | undefined): string {
+  if (!dateString) return "-";
   const date = parseDate(dateString);
   return date.toLocaleDateString("ko-KR", {
     year: "numeric",
@@ -15,7 +16,8 @@ export function formatDate(dateString: string): string {
   });
 }
 
-export function formatShortDate(dateString: string): string {
+export function formatShortDate(dateString: string | null | undefined): string {
+  if (!dateString) return "-";
   const date = parseDate(dateString);
   return date.toLocaleDateString("ko-KR", {
     month: "short",
@@ -23,11 +25,8 @@ export function formatShortDate(dateString: string): string {
   });
 }
 
-export function formatBudget(min: number, max: number): string {
-  return `월 ${min.toLocaleString()}만원 ~ ${max.toLocaleString()}만원`;
-}
-
-export function getDeadlineDays(deadline: string): number | null {
+export function getDeadlineDays(deadline: string | null | undefined): number | null {
+  if (!deadline) return null;
   const deadlineDate = parseDate(deadline);
   const now = new Date();
   const diffMs = deadlineDate.getTime() - now.getTime();
@@ -36,7 +35,7 @@ export function getDeadlineDays(deadline: string): number | null {
   return diffDays;
 }
 
-export function formatDeadlineDays(deadline: string): string {
+export function formatDeadlineDays(deadline: string | null | undefined): string {
   const days = getDeadlineDays(deadline);
   if (days === null) return "마감";
   if (days === 0) return "오늘 마감";
@@ -51,8 +50,9 @@ export function formatMonthYear(dateString: string): string {
 
 import { WorkType } from "@/types";
 
-export function formatWorkType(workType: WorkType): string {
+export function formatWorkType(workType: WorkType | null | undefined): string {
   if (workType === WorkType.Remote) return "원격";
   if (workType === WorkType.Onsite) return "현장";
-  return "하이브리드";
+  if (workType === WorkType.Hybrid) return "하이브리드";
+  return "-";
 }
