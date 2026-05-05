@@ -35,8 +35,8 @@ export function AvailabilityToggle({ initialStatus }: AvailabilityToggleProps) {
   }
 
   return (
-    <div className="p-4 border-b space-y-3">
-      <h3 className="font-semibold text-sm">투입 가능 상태</h3>
+    <div className="px-4 py-5 border-b space-y-3">
+      <h3 className="font-semibold">투입 가능 상태</h3>
       <div className="flex gap-2">
         {options.map((option) => (
           <button

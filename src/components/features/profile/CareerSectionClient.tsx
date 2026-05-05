@@ -187,7 +187,7 @@ export function CareerSectionClient({ careers }: CareerSectionClientProps) {
   const showForm = isAdding || editingId !== null;
 
   return (
-    <div className="p-4 border-b space-y-4">
+    <div className="px-4 py-5 border-b space-y-4">
       <div className="flex items-center justify-between">
         <h3 className="font-semibold">경력</h3>
         {!showForm && (
@@ -297,9 +297,12 @@ export function CareerSectionClient({ careers }: CareerSectionClientProps) {
                   {career.techStack.length > 0 && (
                     <div className="flex flex-wrap gap-1.5">
                       {career.techStack.map((tech) => (
-                        <Badge key={tech} variant="secondary" className="text-xs">
+                        <span
+                          key={tech}
+                          className="text-xs bg-indigo-50 text-indigo-600 px-2 py-0.5 rounded-md font-medium"
+                        >
                           {tech}
-                        </Badge>
+                        </span>
                       ))}
                     </div>
                   )}

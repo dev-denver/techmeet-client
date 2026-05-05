@@ -22,6 +22,9 @@ function getTitle(pathname: string): string {
   if (pathname.startsWith("/projects/") && pathname !== "/projects/applications") {
     return "프로젝트 상세";
   }
+  if (pathname.startsWith("/notices/")) {
+    return "공지사항";
+  }
   return "테크밋";
 }
 
@@ -37,6 +40,9 @@ function isDetailPage(pathname: string): boolean {
     return true;
   }
   if (pathname === "/notifications") {
+    return true;
+  }
+  if (pathname.startsWith("/notices/")) {
     return true;
   }
   return false;

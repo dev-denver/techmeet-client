@@ -98,11 +98,11 @@ export function NotificationSettings() {
   }
 
   return (
-    <div className="space-y-0">
+    <div className="divide-y divide-border">
       {notificationItems.map((item) => (
         <div
           key={item.id}
-          className="flex items-center justify-between p-4 border-b"
+          className="flex items-center justify-between px-4 py-3.5"
         >
           <div className="flex-1 pr-4">
             <p className="text-sm font-medium">{item.label}</p>

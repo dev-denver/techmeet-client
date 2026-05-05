@@ -1,41 +1,19 @@
 import { notFound } from "next/navigation";
-
-function ProjectDeadlineCard({ deadline }: { deadline: string }) {
-  const deadlineText = formatDeadlineDays(deadline);
-  const isExpired = deadlineText === "마감";
-  return (
-    <div className="p-4 border-b">
-      <div className="rounded-xl bg-zinc-50 border border-zinc-200 px-4 py-3 flex items-center justify-between">
-        <div>
-          <p className="text-xs text-muted-foreground">지원 마감일</p>
-          <p className="font-semibold text-sm mt-0.5">{formatDate(deadline)}</p>
-        </div>
-        <span className={`text-sm font-semibold ${isExpired ? "text-muted-foreground" : "text-orange-600"}`}>
-          {deadlineText}
-        </span>
-      </div>
-    </div>
-  );
-}
-
 import { MapPin, Clock, Users, Calendar } from "lucide-react";
-import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { ProjectStatusBadge } from "@/components/features/projects/ProjectStatusBadge";
 import { ApplyButton } from "@/components/features/projects/ApplyButton";
 import { ShareButton } from "@/components/features/projects/ShareButton";
 import { getProjectById } from "@/lib/supabase/queries/projects";
 import { createServerClient } from "@/lib/supabase/server";
-import { formatDate, formatDeadlineDays, formatWorkType } from "@/lib/utils/format";
+import { formatDate, formatDeadlineDays, getDeadlineDays, formatWorkType } from "@/lib/utils/format";
 import { ProjectStatus } from "@/types";
 
 interface ProjectDetailPageProps {
   params: Promise<{ id: string }>;
 }
 
-export default async function ProjectDetailPage({
-  params,
-}: ProjectDetailPageProps) {
+export default async function ProjectDetailPage({ params }: ProjectDetailPageProps) {
   const { id } = await params;
   const [result, supabase] = await Promise.all([
     getProjectById(id),
@@ -44,98 +22,97 @@ export default async function ProjectDetailPage({
   const { data: { user } } = await supabase.auth.getUser();
   const currentUserId = user?.id ?? null;
 
-  if (!result) {
-    notFound();
-  }
+  if (!result) notFound();
 
   const { data: project } = result;
   const isRecruiting = project.status === ProjectStatus.Recruiting;
+  const deadlineText = formatDeadlineDays(project.deadline);
+  const deadlineDays = getDeadlineDays(project.deadline);
+  const isUrgent = isRecruiting && deadlineDays !== null && deadlineDays <= 7;
+  const isExpired = deadlineText === "마감";
 
   return (
-    <div className="pb-6">
-      {/* 헤더 */}
-      <div className="p-4 space-y-2.5 border-b">
-        <div className="flex items-center justify-between gap-2">
+    <div>
+      {/* 히어로 */}
+      <div className="bg-gradient-to-br from-zinc-900 to-zinc-700 px-4 pt-5 pb-6">
+        <div className="flex items-center justify-between gap-2 mb-3">
+          <ProjectStatusBadge status={project.status} />
           <div className="flex items-center gap-2">
-            <ProjectStatusBadge status={project.status} />
-            {isRecruiting && (
-              <span className="text-xs text-muted-foreground">
-                {formatDeadlineDays(project.deadline)}
+            {isRecruiting && deadlineText && (
+              <span
+                className={`text-xs font-semibold px-2.5 py-0.5 rounded-full ${
+                  isUrgent
+                    ? "bg-red-500/25 text-red-300"
+                    : "bg-white/15 text-white/70"
+                }`}
+              >
+                {deadlineText}
               </span>
             )}
+            {currentUserId && (
+              <ShareButton
+                projectId={project.id}
+                userId={currentUserId}
+                className="border-white/25 text-white/80 hover:bg-white/10 hover:text-white bg-transparent"
+              />
+            )}
           </div>
-          {currentUserId && (
-            <ShareButton projectId={project.id} userId={currentUserId} />
-          )}
         </div>
-        <h1 className="text-lg font-bold leading-snug">{project.title}</h1>
-        {project.clientName && (
-          <p className="text-sm text-muted-foreground">{project.clientName}</p>
-        )}
-      </div>
 
-      {/* 기본 정보 */}
-      <div className="p-4 border-b">
-        <h2 className="font-semibold mb-3">프로젝트 정보</h2>
-        <div className="grid grid-cols-2 gap-y-3 gap-x-4">
+        <h1 className="text-white text-xl font-bold leading-snug">{project.title}</h1>
+        {project.clientName && (
+          <p className="text-white/50 text-sm mt-1.5">{project.clientName}</p>
+        )}
+
+        {/* 핵심 정보 chips */}
+        <div className="flex flex-wrap gap-2 mt-4">
           {project.workType && (
-            <div className="flex items-start gap-2">
-              <Clock className="h-4 w-4 text-muted-foreground shrink-0 mt-0.5" />
-              <div>
-                <p className="text-xs text-muted-foreground">근무 형태</p>
-                <p className="text-sm font-medium mt-0.5">{formatWorkType(project.workType)}</p>
-              </div>
-            </div>
-          )}
-          {project.headcount !== null && (
-            <div className="flex items-start gap-2">
-              <Users className="h-4 w-4 text-muted-foreground shrink-0 mt-0.5" />
-              <div>
-                <p className="text-xs text-muted-foreground">모집 인원</p>
-                <p className="text-sm font-medium mt-0.5">{project.headcount}명</p>
-              </div>
-            </div>
-          )}
-          {(project.duration.startDate || project.duration.endDate) && (
-            <div className="flex items-start gap-2 col-span-2">
-              <Calendar className="h-4 w-4 text-muted-foreground shrink-0 mt-0.5" />
-              <div>
-                <p className="text-xs text-muted-foreground">프로젝트 기간</p>
-                <p className="text-sm font-medium mt-0.5">
-                  {formatDate(project.duration.startDate)} ~ {formatDate(project.duration.endDate)}
-                </p>
-              </div>
-            </div>
+            <span className="flex items-center gap-1.5 text-xs text-white/80 bg-white/10 px-3 py-1.5 rounded-full">
+              <Clock className="h-3 w-3" />
+              {formatWorkType(project.workType)}
+            </span>
           )}
           {project.location && (
-            <div className="flex items-start gap-2 col-span-2">
-              <MapPin className="h-4 w-4 text-muted-foreground shrink-0 mt-0.5" />
-              <div>
-                <p className="text-xs text-muted-foreground">근무 위치</p>
-                <p className="text-sm font-medium mt-0.5">{project.location}</p>
-              </div>
-            </div>
+            <span className="flex items-center gap-1.5 text-xs text-white/80 bg-white/10 px-3 py-1.5 rounded-full">
+              <MapPin className="h-3 w-3" />
+              {project.location}
+            </span>
+          )}
+          {project.headcount !== null && (
+            <span className="flex items-center gap-1.5 text-xs text-white/80 bg-white/10 px-3 py-1.5 rounded-full">
+              <Users className="h-3 w-3" />
+              {project.headcount}명 모집
+            </span>
+          )}
+          {(project.duration.startDate || project.duration.endDate) && (
+            <span className="flex items-center gap-1.5 text-xs text-white/80 bg-white/10 px-3 py-1.5 rounded-full">
+              <Calendar className="h-3 w-3" />
+              {formatDate(project.duration.startDate)} ~ {formatDate(project.duration.endDate)}
+            </span>
           )}
         </div>
       </div>
 
       {/* 기술 스택 */}
       {project.techStack.length > 0 && (
-        <div className="p-4 border-b">
+        <div className="px-4 py-5 border-b">
           <h2 className="font-semibold mb-3">요구 기술 스택</h2>
           <div className="flex flex-wrap gap-2">
             {project.techStack.map((tech) => (
-              <Badge key={tech} variant="secondary" className="text-sm px-3 py-1">
+              <span
+                key={tech}
+                className="text-sm bg-indigo-50 text-indigo-600 px-3 py-1 rounded-lg font-medium"
+              >
                 {tech}
-              </Badge>
+              </span>
             ))}
           </div>
         </div>
       )}
 
-      {/* 프로젝트 설명 */}
+      {/* 프로젝트 소개 */}
       {project.description && (
-        <div className="p-4 border-b">
+        <div className="px-4 py-5 border-b bg-zinc-50">
           <h2 className="font-semibold mb-3">프로젝트 소개</h2>
           <p className="text-sm text-zinc-700 leading-relaxed whitespace-pre-wrap">
             {project.description}
@@ -145,12 +122,12 @@ export default async function ProjectDetailPage({
 
       {/* 자격 요건 */}
       {project.requirements && project.requirements.length > 0 && (
-        <div className="p-4 border-b">
+        <div className="px-4 py-5 border-b">
           <h2 className="font-semibold mb-3">자격 요건</h2>
-          <ul className="space-y-2">
+          <ul className="space-y-2.5">
             {project.requirements.map((req, idx) => (
-              <li key={idx} className="flex items-start gap-2 text-sm">
-                <span className="text-muted-foreground mt-0.5 shrink-0">•</span>
+              <li key={idx} className="flex items-start gap-2.5 text-sm">
+                <span className="w-1.5 h-1.5 rounded-full bg-zinc-400 shrink-0 mt-1.5" />
                 <span className="text-zinc-700">{req}</span>
               </li>
             ))}
@@ -158,11 +135,31 @@ export default async function ProjectDetailPage({
         </div>
       )}
 
-      {/* 지원 마감 */}
-      {project.deadline && <ProjectDeadlineCard deadline={project.deadline} />}
+      {/* 마감일 */}
+      {project.deadline && (
+        <div className="px-4 py-5 border-b bg-zinc-50">
+          <div className="flex items-center justify-between">
+            <div>
+              <p className="text-xs text-muted-foreground mb-0.5">지원 마감일</p>
+              <p className="font-semibold">{formatDate(project.deadline)}</p>
+            </div>
+            <span
+              className={`text-sm font-bold px-3 py-1 rounded-full ${
+                isExpired
+                  ? "bg-zinc-100 text-zinc-400"
+                  : isUrgent
+                  ? "bg-red-50 text-red-500"
+                  : "bg-orange-50 text-orange-500"
+              }`}
+            >
+              {deadlineText}
+            </span>
+          </div>
+        </div>
+      )}
 
-      {/* 지원하기 CTA */}
-      <div className="p-4">
+      {/* CTA */}
+      <div className="sticky bottom-16 z-10 bg-white border-t px-4 py-3">
         {isRecruiting ? (
           <ApplyButton projectId={project.id} />
         ) : (

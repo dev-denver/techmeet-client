@@ -6,10 +6,10 @@ import { ProjectStatus } from "@/types";
 import type { ProjectFilterValue } from "@/types";
 
 const filters: { value: ProjectFilterValue; label: string }[] = [
-  { value: "all", label: "전체" },
-  { value: ProjectStatus.Recruiting, label: "모집중" },
-  { value: ProjectStatus.InProgress, label: "진행중" },
-  { value: ProjectStatus.Completed, label: "완료" },
+  { value: "all",                     label: "전체"  },
+  { value: ProjectStatus.Recruiting,  label: "모집중" },
+  { value: ProjectStatus.InProgress,  label: "진행중" },
+  { value: ProjectStatus.Completed,   label: "완료"  },
 ];
 
 interface ProjectFiltersProps {
@@ -19,13 +19,13 @@ interface ProjectFiltersProps {
 export function ProjectFilters({ onFilterChange }: ProjectFiltersProps) {
   const [active, setActive] = useState<ProjectFilterValue>("all");
 
-  const handleChange = (value: ProjectFilterValue) => {
+  function handleChange(value: ProjectFilterValue) {
     setActive(value);
     onFilterChange(value);
-  };
+  }
 
   return (
-    <div className="flex gap-2 overflow-x-auto pb-1 scrollbar-none">
+    <div className="flex gap-2 overflow-x-auto scrollbar-none">
       {filters.map(({ value, label }) => (
         <button
           key={value}
@@ -33,8 +33,8 @@ export function ProjectFilters({ onFilterChange }: ProjectFiltersProps) {
           className={cn(
             "shrink-0 px-4 py-2 rounded-full text-sm font-medium transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2",
             active === value
-              ? "bg-primary text-primary-foreground"
-              : "bg-secondary text-secondary-foreground hover:bg-secondary/80"
+              ? "bg-zinc-900 text-white"
+              : "bg-zinc-100 text-zinc-600 hover:bg-zinc-200"
           )}
         >
           {label}

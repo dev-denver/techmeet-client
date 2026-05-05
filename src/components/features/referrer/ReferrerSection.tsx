@@ -41,7 +41,7 @@ export function ReferrerSection({ currentReferrerName }: Props) {
 
   if (currentReferrerName) {
     return (
-      <div className="flex items-center justify-between py-2">
+      <div className="flex items-center justify-between px-4 py-3.5">
         <span className="text-sm text-muted-foreground">추천인</span>
         <div className="flex items-center gap-2">
           <span className="text-sm font-medium">{currentReferrerName}</span>
@@ -56,7 +56,7 @@ export function ReferrerSection({ currentReferrerName }: Props) {
 
   return (
     <>
-      <div className="flex flex-col gap-1 py-2">
+      <div className="px-4 py-3.5">
         <div className="flex items-center justify-between">
           <span className="text-sm text-muted-foreground">추천인</span>
           <button
@@ -68,7 +68,7 @@ export function ReferrerSection({ currentReferrerName }: Props) {
             {isLoading ? "처리 중..." : "추천인 등록"}
           </button>
         </div>
-        {error && <p className="text-xs text-red-500">{error}</p>}
+        {error && <p className="text-xs text-red-500 mt-1">{error}</p>}
       </div>
 
       {showModal && (

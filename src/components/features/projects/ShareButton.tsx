@@ -3,13 +3,15 @@
 import { useState } from "react";
 import { Share2, Check } from "lucide-react";
 import { Button } from "@/components/ui/button";
+import { cn } from "@/lib/utils/cn";
 
 interface ShareButtonProps {
   projectId: string;
   userId: string;
+  className?: string;
 }
 
-export function ShareButton({ projectId, userId }: ShareButtonProps) {
+export function ShareButton({ projectId, userId, className }: ShareButtonProps) {
   const [copied, setCopied] = useState(false);
 
   async function handleShare() {
@@ -38,7 +40,7 @@ export function ShareButton({ projectId, userId }: ShareButtonProps) {
       variant="outline"
       size="sm"
       onClick={() => void handleShare()}
-      className="gap-1.5 shrink-0"
+      className={cn("gap-1.5 shrink-0", className)}
       aria-label="프로젝트 공유하기"
     >
       {copied ? (

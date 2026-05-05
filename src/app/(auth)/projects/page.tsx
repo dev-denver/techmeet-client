@@ -4,10 +4,5 @@ import { ProjectListClient } from "@/components/features/projects/ProjectListCli
 export default async function ProjectsPage() {
   const { data: projects, total } = await getProjects({ status: "all", pageSize: 10 });
 
-  return (
-    <div className="p-4 space-y-4">
-      <p className="text-xs text-muted-foreground">총 {total}개 프로젝트</p>
-      <ProjectListClient initialProjects={projects} initialTotal={total} />
-    </div>
-  );
+  return <ProjectListClient initialProjects={projects} initialTotal={total} />;
 }
