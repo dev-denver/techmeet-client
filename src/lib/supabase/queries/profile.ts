@@ -51,6 +51,8 @@ interface ProfileRow {
   careers: CareerRow[];
 }
 
+// DB의 snake_case 컬럼명을 TypeScript camelCase 인터페이스로 변환하는 매퍼들.
+// Supabase가 자동 변환을 지원하지 않아 명시적으로 매핑한다.
 function mapRowToCareer(row: CareerRow): Career {
   return {
     id: row.id,
@@ -225,6 +227,7 @@ export async function updateCareer(id: string, payload: UpdateCareerRequest): Pr
   const { error } = await supabase
     .from("careers")
     .update(updateData)
+    // profile_id 이중 검증: RLS가 있더라도 API 레이어에서 소유권을 명시적으로 확인
     .eq("id", id)
     .eq("profile_id", user.id);
 
@@ -240,6 +243,7 @@ export async function deleteCareer(id: string): Promise<void> {
   const { error } = await supabase
     .from("careers")
     .delete()
+    // profile_id 이중 검증: 타인의 경력을 삭제하지 못하도록 소유권 확인
     .eq("id", id)
     .eq("profile_id", user.id);
 

@@ -5,7 +5,7 @@ import { getApplications } from "@/lib/supabase/queries/applications";
 import { ApplicationStatus } from "@/types";
 
 export default async function ApplicationsPage() {
-  const { data: applications, total } = await getApplications();
+  const { data: applications, total } = await getApplications().catch(() => ({ data: [], total: 0 }));
 
   const reviewingCount = applications.filter(
     (a) => a.status === ApplicationStatus.Pending || a.status === ApplicationStatus.Reviewing

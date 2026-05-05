@@ -35,7 +35,7 @@ function StatusBadge({ isSuccess }: { isSuccess: boolean | null }) {
 }
 
 export default async function NotificationsPage() {
-  const { data: logs, total } = await getAlimtalkLogs();
+  const { data: logs, total } = await getAlimtalkLogs().catch(() => ({ data: [], total: 0 }));
 
   return (
     <div className="pb-6">

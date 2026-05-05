@@ -1,3 +1,10 @@
+/**
+ * Next.js 미들웨어 역할을 담당하는 프록시.
+ * next.config.ts의 `experimental.instrumentationHook` 없이 middleware.ts 대신 사용하며,
+ * Supabase 세션 쿠키 갱신 + 인증 보호 + 탈퇴 회원 차단을 처리한다.
+ *
+ * 이 파일은 middleware.ts에서 import하여 실행된다.
+ */
 import { createServerClient, type CookieOptions } from "@supabase/ssr";
 import { NextResponse, type NextRequest } from "next/server";
 import { publicEnv } from "@/lib/config/env";

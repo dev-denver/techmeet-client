@@ -25,6 +25,8 @@ interface KakaoPostcodeResult {
   zonecode: string;
 }
 
+// Daum Postcode 스크립트를 동적으로 로드 (이미 로드된 경우 재사용).
+// 주소 검색창을 열 때까지 스크립트 로드를 지연시켜 초기 번들 크기를 줄인다.
 async function loadScript(): Promise<void> {
   if (window.daum?.Postcode) return;
   await new Promise<void>((resolve, reject) => {
@@ -79,6 +81,8 @@ export function KakaoAddressInput({ value, onChange }: KakaoAddressInputProps) {
       })
       .catch(console.error);
 
+    // cleanup: isOpen이 false로 바뀌거나 컴포넌트가 언마운트될 때
+    // stale 플래그로 비동기 콜백이 이미 해제된 DOM에 접근하지 않도록 방어
     return () => { stale = true; };
   }, [isOpen, onChange]);
 

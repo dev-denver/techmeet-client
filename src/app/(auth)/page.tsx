@@ -12,18 +12,19 @@ import { AVAILABILITY_STATUS_CONFIG } from "@/lib/constants";
 import { ApplicationStatus, AvailabilityStatus, ProjectStatus } from "@/types";
 
 export default async function HomePage() {
-  const [profileResult, applicationsResult, projectsResult, noticesResult] = await Promise.all([
+  // allSettled 사용: 개별 섹션 오류가 전체 페이지를 중단시키지 않도록
+  const [profileResult, applicationsResult, projectsResult, noticesResult] = await Promise.allSettled([
     getProfile(),
     getApplications(),
     getProjects({ status: ProjectStatus.Recruiting }),
     getNotices(),
   ]);
 
-  const profile = profileResult?.data;
-  const allApplications = applicationsResult.data;
+  const profile = profileResult.status === "fulfilled" ? profileResult.value?.data : null;
+  const allApplications = applicationsResult.status === "fulfilled" ? applicationsResult.value.data : [];
   const recentApplications = allApplications.slice(0, 3);
-  const recentProjects = projectsResult.data.slice(0, 3);
-  const notices = noticesResult.data;
+  const recentProjects = projectsResult.status === "fulfilled" ? projectsResult.value.data.slice(0, 3) : [];
+  const notices = noticesResult.status === "fulfilled" ? noticesResult.value.data : [];
 
   const availConfig = profile?.availabilityStatus
     ? AVAILABILITY_STATUS_CONFIG[profile.availabilityStatus]

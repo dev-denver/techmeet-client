@@ -79,6 +79,7 @@ export default function EditProfilePage() {
   function validate(): boolean {
     let valid = true;
     if (!name.trim()) { setNameError("이름을 입력해주세요"); valid = false; }
+    else if (name.trim().length > 50) { setNameError("이름은 50자 이하로 입력해주세요"); valid = false; }
     else setNameError("");
     if (phone && !validatePhone(phone)) { setPhoneError("올바른 휴대폰 번호 형식이 아닙니다 (010-XXXX-XXXX)"); valid = false; }
     else setPhoneError("");
@@ -148,10 +149,11 @@ export default function EditProfilePage() {
         {/* 기본 정보 */}
         <SectionDivider label="기본 정보" />
 
-        <FormField label="이름" required error={nameError}>
+        <FormField label="이름" required error={nameError} hint={!nameError ? `${name.length}/50` : undefined}>
           <Input
             type="text"
             value={name}
+            maxLength={50}
             onChange={(e) => { setName(e.target.value); if (nameError) setNameError(e.target.value.trim() ? "" : "이름을 입력해주세요"); }}
             className={nameError ? "border-red-300" : ""}
           />
@@ -271,8 +273,14 @@ export default function EditProfilePage() {
           <TechStackInput value={techStack} onChange={setTechStack} />
         </FormField>
 
-        <FormField label="자기 소개" optional>
-          <Textarea value={bio} onChange={(e) => setBio(e.target.value)} rows={4} placeholder="간단한 자기 소개를 작성해주세요" />
+        <FormField label="자기 소개" optional hint={`${bio.length}/500`}>
+          <Textarea
+            value={bio}
+            onChange={(e) => setBio(e.target.value.slice(0, 500))}
+            rows={4}
+            placeholder="간단한 자기 소개를 작성해주세요"
+            maxLength={500}
+          />
         </FormField>
 
         {serverError && (

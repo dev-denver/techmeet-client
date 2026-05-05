@@ -129,6 +129,21 @@
 
 - 클라이언트: 제출 전 `validation.ts` 함수로 검증 → 에러 메시지 표시
 - 서버: API 라우트에서 동일 검증 재실행 (이중 검증)
+- 공통 검증 함수: `validatePhone`, `validateBirthDate`, `validatePassword`, `validateEmail` (`validation.ts`)
+- 날짜 역전 검사: `startDate < endDate` 비교 (문자열 비교로 동작, ISO 8601 형식 전제)
+- 길이 제한 규칙: 이름 50자, 회사명·직무·학교명·프로젝트명 100자, 자기소개 500자
+
+## 글자 수 카운터 패턴
+
+- `FormField`의 `hint` prop에 `` `${value.length}/최대자수` `` 전달
+- 입력 필드에 `maxLength` 속성 함께 적용 (하드 제한)
+- Textarea는 `onChange`에서 `.slice(0, 최대자수)` 적용
+
+## 에러 바운더리 패턴
+
+- `src/app/(auth)/error.tsx` — (auth) 그룹 글로벌 폴백 (AlertCircle 아이콘 + 재시도 버튼)
+- Server Component에서 throw 발생 시 자동으로 error.tsx 표시
+- 개별 섹션 실패가 전체 페이지를 중단시키지 않아야 할 때는 `Promise.allSettled` 사용
 
 ## BottomSheet 패턴
 

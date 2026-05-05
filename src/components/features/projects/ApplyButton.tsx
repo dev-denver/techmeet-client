@@ -10,6 +10,7 @@ import { Textarea } from "@/components/ui/textarea";
 import { cn } from "@/lib/utils/cn";
 
 const MIN_COVER_LETTER = 20;
+// BottomSheet footer에 제출 버튼을 두고, form은 sheet body 안에 있어 별도 id로 연결
 const FORM_ID = "apply-form";
 
 interface ApplyButtonProps {

@@ -5,6 +5,13 @@ import { publicEnv, serverEnv } from "@/lib/config/env";
 import { AccountStatus } from "@/types";
 import { decryptPassword } from "@/lib/crypto/rsa";
 
+/**
+ * 로그인 흐름:
+ * 1. 클라이언트가 RSA 공개키로 암호화한 비밀번호를 수신
+ * 2. 서버 개인키로 복호화 후 Supabase signInWithPassword 호출
+ * 3. 탈퇴 계정(account_status=withdrawn) 감지 시 즉시 로그아웃 후 403 반환
+ * 4. 세션 쿠키를 supabaseResponse에 직접 주입하여 브라우저에 전달
+ */
 export async function POST(request: NextRequest) {
   const body = await request.json() as { email?: unknown; encryptedPassword?: unknown };
   const { email, encryptedPassword } = body;

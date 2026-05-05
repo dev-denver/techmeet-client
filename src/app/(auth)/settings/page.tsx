@@ -1,5 +1,5 @@
 import Link from "next/link";
-import { ChevronRight, Shield, Info, UserCog, UserX, LogOut } from "lucide-react";
+import { ChevronRight, Shield, Info, UserCog, UserX } from "lucide-react";
 import { NotificationSettings } from "@/components/features/settings/NotificationSettings";
 import { LogoutButton } from "@/components/features/settings/LogoutButton";
 import { getProfile } from "@/lib/supabase/queries/profile";

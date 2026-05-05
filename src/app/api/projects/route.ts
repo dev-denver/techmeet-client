@@ -6,8 +6,8 @@ export async function GET(request: NextRequest) {
   try {
     const { searchParams } = request.nextUrl;
     const status = (searchParams.get("status") ?? "all") as ProjectFilterValue;
-    const page = parseInt(searchParams.get("page") ?? "1", 10);
-    const pageSize = parseInt(searchParams.get("pageSize") ?? "20", 10);
+    const page = Math.max(1, parseInt(searchParams.get("page") ?? "1", 10));
+    const pageSize = Math.min(100, Math.max(1, parseInt(searchParams.get("pageSize") ?? "20", 10)));
     const search = searchParams.get("search") ?? undefined;
 
     const result = await getProjects({ status, page, pageSize, search });

@@ -1,7 +1,7 @@
 # 테크밋 프리랜서 앱 - 개발 문서
 
 > 이 문서는 개발 환경이 바뀌어도 어디까지 개발됐는지 파악하고 이어서 개발할 수 있도록 작성된 문서입니다.
-> 마지막 업데이트: 2026-05-03
+> 마지막 업데이트: 2026-05-05
 
 ---
 
@@ -255,6 +255,19 @@ src/
 - [x] 모든 (auth) 페이지 로딩 스켈레톤 (loading.tsx)
 - [x] 모바일 고정 폭 (max-w-[430px])
 - [x] 수평 스크롤 (-mx-4 px-4 + scrollbar-none) 패턴
+- [x] 글로벌 에러 바운더리 (auth)/error.tsx — 페이지 렌더링 실패 시 재시도 UI
+
+### 코드 품질 고도화 (2026-05-05)
+
+- [x] API 유효성 검사 강화: PUT /api/profile (이름 50자·phone·birthDate·experienceMonths·gender)
+- [x] API 유효성 검사 강화: POST/PUT /api/profile/careers (길이·날짜 역전)
+- [x] API 유효성 검사 강화: POST /api/applications (coverLetter 20자·expectedRate 1~9999)
+- [x] API 유효성 검사 강화: education·skill-inventories (길이·날짜 역전)
+- [x] GET /api/projects page/pageSize 범위 방어 (Math.min/max)
+- [x] 클라이언트 글자 수 카운터: 이름 (50자), 자기소개 (500자)
+- [x] 미사용 파일 제거: empty-state.tsx, settings/page.tsx 미사용 import
+- [x] 주요 복잡 로직에 개발자 주석 추가 (KakaoAddressInput, RSA, proxy, profile queries 등)
+- [x] 홈·신청내역·알림 페이지 — 개별 데이터 로드 실패 시 graceful fallback 처리
 
 ---
 
@@ -271,7 +284,6 @@ src/
 
 - [ ] **비밀번호 변경**: 이메일 로그인 계정용 비밀번호 변경 기능
 - [ ] **다크 모드 토글**: globals.css에 `.dark` CSS 변수 정의됨, 토글 UI 미구현
-- [ ] **에러 바운더리**: 페이지별 error.tsx 추가
 
 ---
 

@@ -169,6 +169,8 @@ export function ProfileTabsClient({ profile }: ProfileTabsClientProps) {
   const [availFromDate, setAvailFromDate] = useState<string | null>(profile.availableFromDate);
   const [isSaving, setIsSaving] = useState(false);
 
+  // 서버에서 받은 초기값과 현재 로컬 상태를 비교해 미저장 변경이 있는지 감지.
+  // 투입 가능 상태는 별도 저장 버튼을 통해 명시적으로 저장하는 방식이라 isDirty 관리가 필요하다.
   const isDirty =
     availStatus !== (profile.availabilityStatus ?? AvailabilityStatus.Unavailable) ||
     availFromDate !== profile.availableFromDate;
@@ -178,6 +180,8 @@ export function ProfileTabsClient({ profile }: ProfileTabsClientProps) {
     setAvailFromDate(date ?? null);
   }
 
+  // 투입 상태 변경이 있으면 먼저 저장한 뒤 기본정보 수정 페이지로 이동.
+  // 저장 실패해도 페이지 이동은 진행 (에러 표시 없이 최선 노력).
   async function handleSaveAndEdit() {
     if (isDirty) {
       setIsSaving(true);
