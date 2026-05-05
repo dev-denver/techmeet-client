@@ -43,16 +43,49 @@ export function formatDeadlineDays(deadline: string | null | undefined): string 
   return `${days}일 후 마감`;
 }
 
+export function formatExperience(years: number | null, months: number): string {
+  const y = years ?? 0;
+  if (y === 0 && months === 0) return "경력 없음";
+  if (months === 0) return `${y}년`;
+  if (y === 0) return `${months}개월`;
+  return `${y}년 ${months}개월`;
+}
+
 export function formatMonthYear(dateString: string): string {
   const [year, month] = dateString.split("-");
   return `${year}년 ${month}월`;
 }
 
-import { WorkType } from "@/types";
+import { WorkType, ProjectType } from "@/types";
 
 export function formatWorkType(workType: WorkType | null | undefined): string {
   if (workType === WorkType.Remote) return "원격";
   if (workType === WorkType.Onsite) return "현장";
   if (workType === WorkType.Hybrid) return "하이브리드";
   return "-";
+}
+
+export function formatProjectType(projectType: ProjectType | null | undefined): string {
+  if (projectType === ProjectType.Web) return "웹개발";
+  if (projectType === ProjectType.Mobile) return "모바일";
+  if (projectType === ProjectType.Backend) return "백엔드";
+  if (projectType === ProjectType.Fullstack) return "풀스택";
+  if (projectType === ProjectType.Data) return "데이터";
+  if (projectType === ProjectType.Design) return "디자인";
+  if (projectType === ProjectType.Other) return "기타";
+  return "-";
+}
+
+export function formatProjectPeriod(
+  startDate: string | null | undefined,
+  endDate: string | null | undefined
+): string | null {
+  if (!startDate && !endDate) return null;
+  const fmt = (d: string) => {
+    const [year, month] = d.split("-");
+    return `${year}.${month.padStart(2, "0")}`;
+  };
+  if (startDate && endDate) return `${fmt(startDate)} ~ ${fmt(endDate)}`;
+  if (startDate) return `${fmt(startDate)} 시작`;
+  return `~ ${fmt(endDate!)}`;
 }

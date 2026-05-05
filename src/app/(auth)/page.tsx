@@ -1,5 +1,5 @@
 import Link from "next/link";
-import { ChevronRight, Bell, Megaphone } from "lucide-react";
+import { ChevronRight, Bell, Megaphone, CalendarClock } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
 import { ProjectCard } from "@/components/features/projects/ProjectCard";
 import { ApplicationCard } from "@/components/features/projects/ApplicationCard";
@@ -7,9 +7,9 @@ import { getProfile } from "@/lib/supabase/queries/profile";
 import { getApplications } from "@/lib/supabase/queries/applications";
 import { getProjects } from "@/lib/supabase/queries/projects";
 import { getNotices } from "@/lib/supabase/queries/notices";
-import { formatDate } from "@/lib/utils/format";
+import { formatDate, formatShortDate } from "@/lib/utils/format";
 import { AVAILABILITY_STATUS_CONFIG } from "@/lib/constants";
-import { ApplicationStatus, ProjectStatus } from "@/types";
+import { ApplicationStatus, AvailabilityStatus, ProjectStatus } from "@/types";
 
 export default async function HomePage() {
   const [profileResult, applicationsResult, projectsResult, noticesResult] = await Promise.all([
@@ -35,6 +35,9 @@ export default async function HomePage() {
   const interviewCount = allApplications.filter(
     (a) => a.status === ApplicationStatus.Interview
   ).length;
+  const acceptedCount = allApplications.filter(
+    (a) => a.status === ApplicationStatus.Accepted
+  ).length;
 
   return (
     <div>
@@ -54,16 +57,25 @@ export default async function HomePage() {
           )}
         </div>
 
+        {/* 투입 가능 예정일 (partial 상태일 때만) */}
+        {profile?.availabilityStatus === AvailabilityStatus.Partial && profile.availableFromDate && (
+          <div className="mt-3 flex items-center gap-1.5 text-zinc-400 text-xs">
+            <CalendarClock className="h-3.5 w-3.5 shrink-0" />
+            <span>투입 가능 예정일: <span className="text-zinc-200 font-medium">{formatShortDate(profile.availableFromDate)}</span></span>
+          </div>
+        )}
+
         {/* 지원 현황 요약 */}
-        <div className="mt-5 grid grid-cols-3 divide-x divide-zinc-700 bg-zinc-700/40 border border-zinc-600/50 rounded-2xl overflow-hidden">
+        <div className="mt-5 grid grid-cols-4 divide-x divide-zinc-700 bg-zinc-700/40 border border-zinc-600/50 rounded-2xl overflow-hidden">
           {[
-            { label: "전체 지원", value: allApplications.length },
+            { label: "전체", value: allApplications.length },
             { label: "검토 중", value: reviewingCount },
-            { label: "면접 예정", value: interviewCount },
+            { label: "면접", value: interviewCount },
+            { label: "합격", value: acceptedCount },
           ].map((stat) => (
             <div key={stat.label} className="text-center py-4">
-              <p className="text-white font-bold text-2xl leading-none tabular-nums">{stat.value}</p>
-              <p className="text-zinc-500 text-[11px] mt-2 font-medium">{stat.label}</p>
+              <p className="text-white font-bold text-xl leading-none tabular-nums">{stat.value}</p>
+              <p className="text-zinc-500 text-[10px] mt-2 font-medium">{stat.label}</p>
             </div>
           ))}
         </div>

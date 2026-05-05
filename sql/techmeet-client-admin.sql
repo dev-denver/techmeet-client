@@ -56,6 +56,7 @@ create table if not exists public.profiles (
   bio                              text,                                                                  -- 자기소개
   tech_stack                       text[]      not null default array[]::text[],                          -- 기술 스택
   experience_years                 integer,                                                               -- 경력 연수
+  experience_months                integer     not null default 0 check (experience_months between 0 and 11), -- 경력 개월 (0~11)
   kakao_id                         text,                                                                  -- 카카오 ID
   availability_status              text                                                                   -- 투입 가능 상태 (available/partial/unavailable)
     check (availability_status in ('available', 'partial', 'unavailable')),

@@ -12,6 +12,7 @@ import { CareerSectionClient } from "./CareerSectionClient";
 import { CardWrap, FieldRow, SectionHeader } from "./tabs/TabShared";
 import { Pencil, Save } from "lucide-react";
 import { cn } from "@/lib/utils/cn";
+import { formatExperience } from "@/lib/utils/format";
 
 type Tab = "basic" | "education" | "career" | "skill";
 
@@ -58,7 +59,9 @@ function BasicInfoTab({ profile, availStatus, availFromDate, isDirty, isSaving, 
             <div className="px-4 py-3 border-b border-zinc-100">
               <p className="text-[10px] text-zinc-400 font-medium mb-0.5">경력</p>
               <p className="text-sm text-zinc-800 font-medium">
-                {profile.experienceYears !== null ? `${profile.experienceYears}년` : "-"}
+                {profile.experienceYears !== null || profile.experienceMonths > 0
+                  ? formatExperience(profile.experienceYears, profile.experienceMonths)
+                  : "-"}
               </p>
             </div>
           </div>

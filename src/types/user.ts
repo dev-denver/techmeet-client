@@ -76,6 +76,7 @@ export interface FreelancerProfile {
   skillInventories: SkillInventory[];
   availabilityStatus: AvailabilityStatus | null;
   experienceYears: number | null;
+  experienceMonths: number;
   birthDate: string | null;
   gender: Gender | null;
   joiningDate: string | null;

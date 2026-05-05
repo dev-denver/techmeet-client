@@ -62,6 +62,7 @@ export interface UpdateProfileRequest {
   bio?: string;
   techStack?: string[];
   experienceYears?: number;
+  experienceMonths?: number;
   birthDate?: string | null;
   gender?: "male" | "female" | null;
   joiningDate?: string | null;

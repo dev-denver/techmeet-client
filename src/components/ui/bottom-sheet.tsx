@@ -6,10 +6,11 @@ interface BottomSheetProps {
   open: boolean;
   onClose: () => void;
   hasBottomNav?: boolean;
+  footer?: React.ReactNode;
   children: React.ReactNode;
 }
 
-export function BottomSheet({ open, onClose, hasBottomNav = false, children }: BottomSheetProps) {
+export function BottomSheet({ open, onClose, hasBottomNav = false, footer, children }: BottomSheetProps) {
   if (!open) return null;
 
   return (
@@ -21,7 +22,7 @@ export function BottomSheet({ open, onClose, hasBottomNav = false, children }: B
     >
       <div
         className={cn(
-          "w-full max-w-[430px] rounded-t-2xl bg-white flex flex-col max-h-[85vh] overflow-hidden animate-in slide-in-from-bottom duration-300",
+          "w-full max-w-[600px] rounded-t-2xl bg-white flex flex-col max-h-[85vh] overflow-hidden animate-in slide-in-from-bottom duration-300",
           hasBottomNav && "mb-16"
         )}
         onClick={(e) => e.stopPropagation()}
@@ -32,6 +33,11 @@ export function BottomSheet({ open, onClose, hasBottomNav = false, children }: B
         <div className="overflow-y-auto overscroll-contain flex-1">
           {children}
         </div>
+        {footer && (
+          <div className="shrink-0 border-t border-zinc-100">
+            {footer}
+          </div>
+        )}
       </div>
     </div>
   );

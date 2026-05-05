@@ -1,7 +1,7 @@
 import Link from "next/link";
-import { MapPin, Clock, Users } from "lucide-react";
+import { MapPin, Clock, Users, CalendarRange, Layers } from "lucide-react";
 import { ProjectStatusBadge } from "./ProjectStatusBadge";
-import { formatDeadlineDays, getDeadlineDays, formatWorkType } from "@/lib/utils/format";
+import { formatDeadlineDays, getDeadlineDays, formatWorkType, formatProjectType, formatProjectPeriod } from "@/lib/utils/format";
 import { ProjectStatus } from "@/types";
 import type { Project } from "@/types";
 
@@ -16,6 +16,7 @@ export function ProjectCard({ project }: ProjectCardProps) {
     project.status === ProjectStatus.Recruiting &&
     deadlineDays !== null &&
     deadlineDays <= 7;
+  const period = formatProjectPeriod(project.duration.startDate, project.duration.endDate);
 
   return (
     <Link href={`/projects/${project.id}`}>
@@ -66,7 +67,25 @@ export function ProjectCard({ project }: ProjectCardProps) {
             </div>
           )}
 
-          {/* 메타 정보 */}
+          {/* 기간 + 유형 */}
+          {(period || project.projectType) && (
+            <div className="flex items-center gap-2 flex-wrap">
+              {period && (
+                <span className="flex items-center gap-1 text-xs text-zinc-500 bg-zinc-50 px-2.5 py-1 rounded-full border border-zinc-200">
+                  <CalendarRange className="h-3 w-3" />
+                  {period}
+                </span>
+              )}
+              {project.projectType && (
+                <span className="flex items-center gap-1 text-xs text-zinc-500 bg-zinc-50 px-2.5 py-1 rounded-full border border-zinc-200">
+                  <Layers className="h-3 w-3" />
+                  {formatProjectType(project.projectType)}
+                </span>
+              )}
+            </div>
+          )}
+
+          {/* 근무 형태 + 위치 + 인원 */}
           {(project.location || project.workType || project.headcount !== null) && (
             <div className="flex items-center gap-2 flex-wrap">
               {project.workType && (

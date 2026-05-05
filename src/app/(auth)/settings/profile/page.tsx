@@ -6,6 +6,7 @@ import { Minus, Plus } from "lucide-react";
 import { SaveButton } from "@/components/ui/save-button";
 import { validatePhone, formatPhone } from "@/lib/utils/validation";
 import { TechStackInput } from "@/components/features/profile/TechStackInput";
+import { KakaoAddressInput } from "@/components/features/profile/KakaoAddressInput";
 import { Skeleton } from "@/components/ui/skeleton";
 import { FormField } from "@/components/ui/form-field";
 import { Input } from "@/components/ui/input";
@@ -44,6 +45,7 @@ export default function EditProfilePage() {
 
   // 경력/기술/소개
   const [experienceYears, setExperienceYears] = useState(0);
+  const [experienceMonths, setExperienceMonths] = useState(0);
   const [techStack, setTechStack] = useState<string[]>([]);
   const [bio, setBio] = useState("");
 
@@ -66,6 +68,7 @@ export default function EditProfilePage() {
         setPhone(data.phone ?? "");
         setAddress(data.address ?? "");
         setExperienceYears(data.experienceYears ?? 0);
+        setExperienceMonths(data.experienceMonths ?? 0);
         setTechStack(data.techStack);
         setBio(data.bio ?? "");
       })
@@ -104,6 +107,7 @@ export default function EditProfilePage() {
           phone,
           address: address || null,
           experienceYears,
+          experienceMonths,
           techStack,
           bio,
         }),
@@ -211,36 +215,55 @@ export default function EditProfilePage() {
         </FormField>
 
         <FormField label="주소" optional>
-          <Textarea
-            value={address}
-            onChange={(e) => setAddress(e.target.value)}
-            rows={2}
-            placeholder="ex. 서울시 강남구 테헤란로 123"
-          />
+          <KakaoAddressInput value={address} onChange={setAddress} />
         </FormField>
 
         {/* 경력 / 기술 / 소개 */}
         <SectionDivider label="경력 및 기술" />
 
-        <FormField label="경력 연수">
-          <div className="flex items-center gap-0 border border-zinc-200 rounded-lg overflow-hidden w-fit">
-            <button
-              type="button"
-              onClick={() => setExperienceYears((y) => Math.max(0, y - 1))}
-              className="h-11 w-11 flex items-center justify-center text-zinc-500 hover:bg-zinc-50 active:bg-zinc-100 transition-colors border-r border-zinc-200"
-              aria-label="경력 연수 감소"
-            >
-              <Minus className="h-4 w-4" />
-            </button>
-            <span className="w-16 text-center text-sm font-medium tabular-nums select-none">{experienceYears}년</span>
-            <button
-              type="button"
-              onClick={() => setExperienceYears((y) => Math.min(50, y + 1))}
-              className="h-11 w-11 flex items-center justify-center text-zinc-500 hover:bg-zinc-50 active:bg-zinc-100 transition-colors border-l border-zinc-200"
-              aria-label="경력 연수 증가"
-            >
-              <Plus className="h-4 w-4" />
-            </button>
+        <FormField label="경력">
+          <div className="flex items-center gap-3">
+            {/* 연 스테퍼 */}
+            <div className="flex items-center gap-0 border border-zinc-200 rounded-lg overflow-hidden">
+              <button
+                type="button"
+                onClick={() => setExperienceYears((y) => Math.max(0, y - 1))}
+                className="h-11 w-11 flex items-center justify-center text-zinc-500 hover:bg-zinc-50 active:bg-zinc-100 transition-colors border-r border-zinc-200"
+                aria-label="연수 감소"
+              >
+                <Minus className="h-4 w-4" />
+              </button>
+              <span className="w-14 text-center text-sm font-medium tabular-nums select-none">{experienceYears}년</span>
+              <button
+                type="button"
+                onClick={() => setExperienceYears((y) => Math.min(50, y + 1))}
+                className="h-11 w-11 flex items-center justify-center text-zinc-500 hover:bg-zinc-50 active:bg-zinc-100 transition-colors border-l border-zinc-200"
+                aria-label="연수 증가"
+              >
+                <Plus className="h-4 w-4" />
+              </button>
+            </div>
+
+            {/* 월 스테퍼 */}
+            <div className="flex items-center gap-0 border border-zinc-200 rounded-lg overflow-hidden">
+              <button
+                type="button"
+                onClick={() => setExperienceMonths((m) => Math.max(0, m - 1))}
+                className="h-11 w-11 flex items-center justify-center text-zinc-500 hover:bg-zinc-50 active:bg-zinc-100 transition-colors border-r border-zinc-200"
+                aria-label="개월 감소"
+              >
+                <Minus className="h-4 w-4" />
+              </button>
+              <span className="w-16 text-center text-sm font-medium tabular-nums select-none">{experienceMonths}개월</span>
+              <button
+                type="button"
+                onClick={() => setExperienceMonths((m) => Math.min(11, m + 1))}
+                className="h-11 w-11 flex items-center justify-center text-zinc-500 hover:bg-zinc-50 active:bg-zinc-100 transition-colors border-l border-zinc-200"
+                aria-label="개월 증가"
+              >
+                <Plus className="h-4 w-4" />
+              </button>
+            </div>
           </div>
         </FormField>
 

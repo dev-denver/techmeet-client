@@ -1,6 +1,7 @@
 import Link from "next/link";
 import { Pencil } from "lucide-react";
 import type { FreelancerProfile } from "@/types";
+import { formatExperience } from "@/lib/utils/format";
 
 interface ProfileHeaderProps {
   profile: FreelancerProfile;
@@ -21,9 +22,9 @@ export function ProfileHeader({ profile }: ProfileHeaderProps) {
           </Link>
         </div>
         <div className="flex flex-wrap items-center gap-2 mt-2">
-          {profile.experienceYears !== null && (
+          {(profile.experienceYears !== null || profile.experienceMonths > 0) && (
             <span className="inline-flex items-center text-xs bg-zinc-800 text-zinc-300 border border-zinc-700/80 px-2.5 py-1 rounded-lg font-medium">
-              경력 {profile.experienceYears}년
+              경력 {formatExperience(profile.experienceYears, profile.experienceMonths)}
             </span>
           )}
           {profile.phone && (

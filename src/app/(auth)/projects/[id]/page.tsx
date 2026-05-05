@@ -158,8 +158,11 @@ export default async function ProjectDetailPage({ params }: ProjectDetailPagePro
         </div>
       )}
 
-      {/* CTA */}
-      <div className="sticky bottom-16 z-10 bg-white border-t px-4 py-3">
+      {/* CTA 높이만큼 하단 여백 확보 */}
+      <div className="h-20" />
+
+      {/* CTA - BottomNav 바로 위에 고정 */}
+      <div className="fixed bottom-16 left-1/2 -translate-x-1/2 w-full max-w-[600px] z-30 bg-white border-t px-4 py-3">
         {isRecruiting ? (
           <ApplyButton projectId={project.id} />
         ) : (

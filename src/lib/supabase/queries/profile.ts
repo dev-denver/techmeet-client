@@ -34,6 +34,7 @@ interface ProfileRow {
   availability_status: AvailabilityStatus | null;
   available_from_date: string | null;
   experience_years: number | null;
+  experience_months: number;
   birth_date: string | null;
   gender: Gender | null;
   joining_date: string | null;
@@ -78,6 +79,7 @@ function mapRowToProfile(row: ProfileRow, profile: Partial<FreelancerProfile> = 
     availabilityStatus: row.availability_status,
     availableFromDate: row.available_from_date,
     experienceYears: row.experience_years,
+    experienceMonths: row.experience_months,
     birthDate: row.birth_date,
     gender: row.gender,
     joiningDate: row.joining_date,
@@ -148,6 +150,7 @@ export async function updateProfile(payload: UpdateProfileRequest): Promise<void
   if (payload.bio !== undefined) updateData.bio = payload.bio;
   if (payload.techStack !== undefined) updateData.tech_stack = payload.techStack;
   if (payload.experienceYears !== undefined) updateData.experience_years = payload.experienceYears;
+  if (payload.experienceMonths !== undefined) updateData.experience_months = payload.experienceMonths;
   if ("birthDate" in payload) updateData.birth_date = (payload as Record<string, unknown>).birthDate;
   if ("gender" in payload) updateData.gender = (payload as Record<string, unknown>).gender;
   if ("joiningDate" in payload) updateData.joining_date = (payload as Record<string, unknown>).joiningDate;

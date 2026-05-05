@@ -10,6 +10,7 @@ import { Textarea } from "@/components/ui/textarea";
 import { cn } from "@/lib/utils/cn";
 
 const MIN_COVER_LETTER = 20;
+const FORM_ID = "apply-form";
 
 interface ApplyButtonProps {
   projectId: string;
@@ -100,8 +101,28 @@ export function ApplyButton({ projectId }: ApplyButtonProps) {
         지원하기
       </Button>
 
-      <BottomSheet open={open} onClose={handleClose}>
-        <div className="px-5 pb-6 pt-2 space-y-5">
+      <BottomSheet
+        open={open}
+        onClose={handleClose}
+        footer={
+          <div className="px-5 pt-3 pb-6 space-y-2.5">
+            {serverError && (
+              <p className="text-sm text-red-500 bg-red-50 rounded-lg px-3 py-2.5">
+                {serverError}
+              </p>
+            )}
+            <Button
+              type="submit"
+              form={FORM_ID}
+              disabled={isSubmitting}
+              className="w-full h-12 text-base font-semibold"
+            >
+              {isSubmitting ? "제출 중..." : "지원 신청"}
+            </Button>
+          </div>
+        }
+      >
+        <div className="px-5 pt-2 pb-4 space-y-5">
           <div className="flex items-center justify-between">
             <h2 className="text-lg font-bold">지원하기</h2>
             <button
@@ -113,7 +134,7 @@ export function ApplyButton({ projectId }: ApplyButtonProps) {
             </button>
           </div>
 
-          <form onSubmit={handleSubmit} className="space-y-5">
+          <form id={FORM_ID} onSubmit={handleSubmit} className="space-y-5">
             <FormField label="지원 동기" required error={coverLetterError}>
               <div className="relative">
                 <Textarea
@@ -155,20 +176,6 @@ export function ApplyButton({ projectId }: ApplyButtonProps) {
                 </span>
               </div>
             </FormField>
-
-            {serverError && (
-              <p className="text-sm text-red-500 bg-red-50 rounded-lg px-3 py-2.5">
-                {serverError}
-              </p>
-            )}
-
-            <Button
-              type="submit"
-              disabled={isSubmitting}
-              className="w-full h-12 text-base font-semibold"
-            >
-              {isSubmitting ? "제출 중..." : "지원 신청"}
-            </Button>
           </form>
         </div>
       </BottomSheet>
