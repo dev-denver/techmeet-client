@@ -1,9 +1,6 @@
-import { ProfileHeader } from "@/components/features/profile/ProfileHeader";
-import { AvailabilityToggle } from "@/components/features/profile/AvailabilityToggle";
-import { CareerSectionClient } from "@/components/features/profile/CareerSectionClient";
-import { TechStackSection } from "@/components/features/profile/TechStackSection";
-import { getProfile } from "@/lib/supabase/queries/profile";
 import { Card, CardContent } from "@/components/ui/card";
+import { ProfileTabsClient } from "@/components/features/profile/ProfileTabsClient";
+import { getProfile } from "@/lib/supabase/queries/profile";
 
 export default async function ProfilePage() {
   const result = await getProfile();
@@ -21,12 +18,5 @@ export default async function ProfilePage() {
     );
   }
 
-  return (
-    <div className="pb-4">
-      <ProfileHeader profile={profile} />
-      <AvailabilityToggle initialStatus={profile.availabilityStatus} />
-      <TechStackSection techStack={profile.techStack} />
-      <CareerSectionClient careers={profile.careers} />
-    </div>
-  );
+  return <ProfileTabsClient profile={profile} />;
 }

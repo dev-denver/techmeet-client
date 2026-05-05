@@ -1,8 +1,8 @@
 export { ProjectStatus, ProjectType, WorkType } from "./project";
 export type { Project, ProjectFilterValue } from "./project";
 
-export { AvailabilityStatus, AccountStatus } from "./user";
-export type { FreelancerProfile, Career } from "./user";
+export { AvailabilityStatus, AccountStatus, Gender } from "./user";
+export type { FreelancerProfile, Career, Education, Certification, SkillInventory } from "./user";
 
 export { ApplicationStatus } from "./application";
 export type { Application } from "./application";

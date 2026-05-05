@@ -11,7 +11,7 @@ export function TechStackSection({ techStack }: TechStackSectionProps) {
           {techStack.map((tech) => (
             <span
               key={tech}
-              className="text-sm bg-indigo-50 text-indigo-600 px-3 py-1 rounded-lg font-medium"
+              className="text-sm bg-zinc-700 text-zinc-100 px-3 py-1 rounded-lg font-medium"
             >
               {tech}
             </span>

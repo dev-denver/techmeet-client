@@ -61,10 +61,19 @@ export interface UpdateProfileRequest {
   bio?: string;
   techStack?: string[];
   experienceYears?: number;
+  birthDate?: string | null;
+  gender?: "male" | "female" | null;
+  joiningDate?: string | null;
+  affiliation?: string | null;
+  department?: string | null;
+  positionTitle?: string | null;
+  militaryService?: string | null;
+  address?: string | null;
 }
 
 export interface UpdateAvailabilityRequest {
   status: AvailabilityStatus;
+  availableFromDate?: string | null;
 }
 
 export interface AddCareerRequest {

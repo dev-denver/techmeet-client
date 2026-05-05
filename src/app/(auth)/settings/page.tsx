@@ -52,18 +52,10 @@ export default async function SettingsPage() {
   return (
     <div className="pb-8">
       {/* 프로필 요약 */}
-      <div className="bg-gradient-to-br from-zinc-900 to-zinc-700 px-4 pt-5 pb-6">
-        <div className="flex items-center gap-3.5">
-          <div className="h-14 w-14 rounded-full bg-white/15 border border-white/20 flex items-center justify-center shrink-0">
-            <span className="text-xl font-bold text-white">
-              {profile?.name?.slice(0, 2) ?? "?"}
-            </span>
-          </div>
-          <div>
-            <p className="text-white font-bold text-lg leading-tight">{profile?.name ?? "-"}</p>
-            <p className="text-white/50 text-sm mt-0.5">{profile?.email ?? "-"}</p>
-          </div>
-        </div>
+      <div className="bg-zinc-950 px-5 pt-6 pb-6">
+        <p className="text-zinc-500 text-xs font-medium tracking-wide">설정</p>
+        <p className="text-white font-bold text-[17px] leading-tight mt-0.5">{profile?.name ?? "-"}</p>
+        <p className="text-zinc-600 text-sm mt-1">{profile?.email ?? "-"}</p>
       </div>
 
       <div className="px-4 pt-4 space-y-4">

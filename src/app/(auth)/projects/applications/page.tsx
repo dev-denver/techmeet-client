@@ -20,22 +20,24 @@ export default async function ApplicationsPage() {
   return (
     <div>
       {/* 히어로 */}
-      <div className="bg-gradient-to-br from-zinc-900 to-zinc-700 px-4 pt-5 pb-6">
-        <p className="text-white/60 text-sm mb-1">총 지원 건수</p>
-        <p className="text-white font-bold leading-none">
-          <span className="text-3xl">{total}</span>
-          <span className="text-lg font-medium text-white/60 ml-1">건</span>
+      <div className="bg-zinc-950 px-5 pt-6 pb-5">
+        <div className="flex items-baseline gap-2">
+          <p className="text-zinc-500 text-xs font-medium tracking-wide">총 지원 건수</p>
+        </div>
+        <p className="text-white font-bold leading-none mt-0.5">
+          <span className="text-3xl tabular-nums">{total}</span>
+          <span className="text-base font-medium text-zinc-500 ml-1">건</span>
         </p>
 
-        <div className="mt-4 grid grid-cols-3 gap-2">
+        <div className="mt-5 grid grid-cols-3 divide-x divide-zinc-800 bg-zinc-900/60 border border-zinc-800 rounded-2xl overflow-hidden">
           {[
             { label: "검토 중", value: reviewingCount },
             { label: "면접 예정", value: interviewCount },
             { label: "합격", value: acceptedCount },
           ].map((stat) => (
-            <div key={stat.label} className="bg-white/10 rounded-xl px-3 py-2.5 text-center">
-              <p className="text-white font-bold text-2xl leading-none">{stat.value}</p>
-              <p className="text-white/60 text-xs mt-1.5">{stat.label}</p>
+            <div key={stat.label} className="text-center py-4">
+              <p className="text-white font-bold text-2xl leading-none tabular-nums">{stat.value}</p>
+              <p className="text-zinc-500 text-[11px] mt-2 font-medium">{stat.label}</p>
             </div>
           ))}
         </div>

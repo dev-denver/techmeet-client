@@ -39,20 +39,13 @@ export default async function HomePage() {
   return (
     <div>
       {/* 히어로 배너 */}
-      <section className="px-4 pt-5 pb-5 bg-gradient-to-br from-zinc-900 to-zinc-700">
-        <div className="flex items-center justify-between gap-3">
-          <div className="flex items-center gap-3">
-            <div className="w-11 h-11 rounded-full bg-white/15 border border-white/20 flex items-center justify-center shrink-0">
-              <span className="text-white font-bold text-base">
-                {profile?.name?.[0] ?? "T"}
-              </span>
-            </div>
-            <div>
-              <p className="text-white/60 text-xs">안녕하세요 👋</p>
-              <h2 className="text-white text-lg font-bold leading-tight mt-0.5">
-                {profile ? `${profile.name}님` : "로그인 후 이용해주세요"}
-              </h2>
-            </div>
+      <section className="px-5 pt-6 pb-5 bg-zinc-950">
+        <div className="flex items-center justify-between">
+          <div>
+            <p className="text-zinc-500 text-xs font-medium tracking-wide">안녕하세요</p>
+            <h2 className="text-white text-[17px] font-bold leading-tight mt-0.5">
+              {profile ? `${profile.name}님` : "로그인 후 이용해주세요"}
+            </h2>
           </div>
           {availConfig && (
             <Badge variant="outline" className={`${availConfig.className} shrink-0`}>
@@ -62,15 +55,15 @@ export default async function HomePage() {
         </div>
 
         {/* 지원 현황 요약 */}
-        <div className="mt-4 grid grid-cols-3 gap-2">
+        <div className="mt-5 grid grid-cols-3 divide-x divide-zinc-800 bg-zinc-900/60 border border-zinc-800 rounded-2xl overflow-hidden">
           {[
             { label: "전체 지원", value: allApplications.length },
             { label: "검토 중", value: reviewingCount },
             { label: "면접 예정", value: interviewCount },
           ].map((stat) => (
-            <div key={stat.label} className="bg-white/10 rounded-xl px-3 py-2.5 text-center">
-              <p className="text-white font-bold text-2xl leading-none">{stat.value}</p>
-              <p className="text-white/60 text-xs mt-1.5">{stat.label}</p>
+            <div key={stat.label} className="text-center py-4">
+              <p className="text-white font-bold text-2xl leading-none tabular-nums">{stat.value}</p>
+              <p className="text-zinc-500 text-[11px] mt-2 font-medium">{stat.label}</p>
             </div>
           ))}
         </div>
@@ -133,38 +126,33 @@ export default async function HomePage() {
       </section>
 
       {/* 공지사항 */}
-      <section className="pt-5 pb-6">
-        <div className="flex items-center gap-2 px-4 mb-3">
-          <Megaphone className="h-4 w-4 text-muted-foreground" />
-          <h3 className="font-semibold">공지사항</h3>
-        </div>
-        {notices.length > 0 ? (
-          <div className="divide-y divide-border">
-            {notices.map((notice) => (
-              <Link key={notice.id} href={`/notices/${notice.id}`}>
-                <div className="flex items-start gap-3 px-4 py-3.5 hover:bg-zinc-50 transition-colors active:bg-zinc-100">
-                  <div className="w-4 shrink-0 mt-0.5">
-                    {notice.isImportant && <Bell className="h-4 w-4 text-orange-500" />}
-                  </div>
-                  <div className="flex-1 min-w-0">
-                    <p className="text-sm font-medium leading-snug line-clamp-1">
+      {notices.length > 0 && (
+        <section className="pt-4 pb-6 px-4">
+          <div className="rounded-xl border border-zinc-100 bg-zinc-50 overflow-hidden">
+            <div className="flex items-center justify-between px-4 py-3 border-b border-zinc-100">
+              <span className="text-xs font-medium text-zinc-500 flex items-center gap-1.5">
+                <Megaphone className="h-3.5 w-3.5" />
+                공지사항
+              </span>
+            </div>
+            <div className="divide-y divide-zinc-100">
+              {notices.slice(0, 2).map((notice) => (
+                <Link key={notice.id} href={`/notices/${notice.id}`}>
+                  <div className="flex items-center gap-3 px-4 py-3 hover:bg-zinc-100/60 transition-colors active:bg-zinc-100">
+                    {notice.isImportant && <Bell className="h-3.5 w-3.5 text-zinc-400 shrink-0" />}
+                    <p className="flex-1 text-xs text-zinc-600 leading-snug line-clamp-1">
                       {notice.title}
                     </p>
-                    <p className="text-xs text-muted-foreground mt-0.5">
+                    <span className="text-[10px] text-zinc-400 shrink-0">
                       {formatDate(notice.createdAt)}
-                    </p>
+                    </span>
                   </div>
-                  <ChevronRight className="h-4 w-4 text-muted-foreground shrink-0 mt-0.5" />
-                </div>
-              </Link>
-            ))}
+                </Link>
+              ))}
+            </div>
           </div>
-        ) : (
-          <div className="mx-4 rounded-xl bg-zinc-50 border border-dashed border-zinc-200 px-4 py-5 text-center">
-            <p className="text-sm text-muted-foreground">등록된 공지사항이 없습니다.</p>
-          </div>
-        )}
-      </section>
+        </section>
+      )}
     </div>
   );
 }

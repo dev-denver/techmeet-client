@@ -34,7 +34,7 @@ export default async function ProjectDetailPage({ params }: ProjectDetailPagePro
   return (
     <div>
       {/* 히어로 */}
-      <div className="bg-gradient-to-br from-zinc-900 to-zinc-700 px-4 pt-5 pb-6">
+      <div className="bg-zinc-950 px-5 pt-6 pb-5">
         <div className="flex items-center justify-between gap-2 mb-3">
           <ProjectStatusBadge status={project.status} />
           <div className="flex items-center gap-2">
@@ -42,8 +42,8 @@ export default async function ProjectDetailPage({ params }: ProjectDetailPagePro
               <span
                 className={`text-xs font-semibold px-2.5 py-0.5 rounded-full ${
                   isUrgent
-                    ? "bg-red-500/25 text-red-300"
-                    : "bg-white/15 text-white/70"
+                    ? "bg-red-500/20 text-red-400"
+                    : "bg-zinc-800 text-zinc-400"
                 }`}
               >
                 {deadlineText}
@@ -53,7 +53,7 @@ export default async function ProjectDetailPage({ params }: ProjectDetailPagePro
               <ShareButton
                 projectId={project.id}
                 userId={currentUserId}
-                className="border-white/25 text-white/80 hover:bg-white/10 hover:text-white bg-transparent"
+                className="border-zinc-700 text-zinc-400 hover:bg-zinc-800 hover:text-zinc-200 bg-transparent"
               />
             )}
           </div>
@@ -61,31 +61,31 @@ export default async function ProjectDetailPage({ params }: ProjectDetailPagePro
 
         <h1 className="text-white text-xl font-bold leading-snug">{project.title}</h1>
         {project.clientName && (
-          <p className="text-white/50 text-sm mt-1.5">{project.clientName}</p>
+          <p className="text-zinc-500 text-sm mt-1.5">{project.clientName}</p>
         )}
 
         {/* 핵심 정보 chips */}
         <div className="flex flex-wrap gap-2 mt-4">
           {project.workType && (
-            <span className="flex items-center gap-1.5 text-xs text-white/80 bg-white/10 px-3 py-1.5 rounded-full">
+            <span className="flex items-center gap-1.5 text-xs text-zinc-300 bg-zinc-800 border border-zinc-700/50 px-3 py-1.5 rounded-full">
               <Clock className="h-3 w-3" />
               {formatWorkType(project.workType)}
             </span>
           )}
           {project.location && (
-            <span className="flex items-center gap-1.5 text-xs text-white/80 bg-white/10 px-3 py-1.5 rounded-full">
+            <span className="flex items-center gap-1.5 text-xs text-zinc-300 bg-zinc-800 border border-zinc-700/50 px-3 py-1.5 rounded-full">
               <MapPin className="h-3 w-3" />
               {project.location}
             </span>
           )}
           {project.headcount !== null && (
-            <span className="flex items-center gap-1.5 text-xs text-white/80 bg-white/10 px-3 py-1.5 rounded-full">
+            <span className="flex items-center gap-1.5 text-xs text-zinc-300 bg-zinc-800 border border-zinc-700/50 px-3 py-1.5 rounded-full">
               <Users className="h-3 w-3" />
               {project.headcount}명 모집
             </span>
           )}
           {(project.duration.startDate || project.duration.endDate) && (
-            <span className="flex items-center gap-1.5 text-xs text-white/80 bg-white/10 px-3 py-1.5 rounded-full">
+            <span className="flex items-center gap-1.5 text-xs text-zinc-300 bg-zinc-800 border border-zinc-700/50 px-3 py-1.5 rounded-full">
               <Calendar className="h-3 w-3" />
               {formatDate(project.duration.startDate)} ~ {formatDate(project.duration.endDate)}
             </span>
@@ -101,7 +101,7 @@ export default async function ProjectDetailPage({ params }: ProjectDetailPagePro
             {project.techStack.map((tech) => (
               <span
                 key={tech}
-                className="text-sm bg-indigo-50 text-indigo-600 px-3 py-1 rounded-lg font-medium"
+                className="text-sm bg-zinc-700 text-zinc-100 px-3 py-1 rounded-lg font-medium"
               >
                 {tech}
               </span>
@@ -137,19 +137,19 @@ export default async function ProjectDetailPage({ params }: ProjectDetailPagePro
 
       {/* 마감일 */}
       {project.deadline && (
-        <div className="px-4 py-5 border-b bg-zinc-50">
+        <div className="px-5 py-4 border-b bg-zinc-50">
           <div className="flex items-center justify-between">
             <div>
-              <p className="text-xs text-muted-foreground mb-0.5">지원 마감일</p>
-              <p className="font-semibold">{formatDate(project.deadline)}</p>
+              <p className="text-[10px] text-zinc-400 font-medium mb-0.5">지원 마감일</p>
+              <p className="text-sm font-semibold text-zinc-800">{formatDate(project.deadline)}</p>
             </div>
             <span
-              className={`text-sm font-bold px-3 py-1 rounded-full ${
+              className={`text-xs font-bold px-3 py-1 rounded-full ${
                 isExpired
-                  ? "bg-zinc-100 text-zinc-400"
+                  ? "bg-zinc-100 text-zinc-500"
                   : isUrgent
                   ? "bg-red-50 text-red-500"
-                  : "bg-orange-50 text-orange-500"
+                  : "bg-zinc-100 text-zinc-600"
               }`}
             >
               {deadlineText}

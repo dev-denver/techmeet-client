@@ -1,4 +1,4 @@
-import { Bell, CheckCircle, XCircle, Clock, Megaphone, User, FolderOpen } from "lucide-react";
+import { CheckCircle, XCircle, Clock, Megaphone, User, FolderOpen, Bell } from "lucide-react";
 import { getAlimtalkLogs } from "@/lib/supabase/queries/notifications";
 import { AlimtalkServiceType } from "@/types";
 import { formatDate } from "@/lib/utils/format";
@@ -12,23 +12,23 @@ const SERVICE_TYPE_CONFIG: Record<AlimtalkServiceType, { label: string; icon: Re
 function StatusBadge({ isSuccess }: { isSuccess: boolean | null }) {
   if (isSuccess === null) {
     return (
-      <span className="flex items-center gap-1 text-xs text-zinc-400">
-        <Clock className="h-3.5 w-3.5" />
+      <span className="flex items-center gap-1 text-[10px] text-zinc-400 bg-zinc-100 px-2 py-0.5 rounded-full">
+        <Clock className="h-3 w-3" />
         처리중
       </span>
     );
   }
   if (isSuccess) {
     return (
-      <span className="flex items-center gap-1 text-xs text-green-600">
-        <CheckCircle className="h-3.5 w-3.5" />
+      <span className="flex items-center gap-1 text-[10px] text-status-success bg-status-success/10 px-2 py-0.5 rounded-full">
+        <CheckCircle className="h-3 w-3" />
         발송 완료
       </span>
     );
   }
   return (
-    <span className="flex items-center gap-1 text-xs text-red-500">
-      <XCircle className="h-3.5 w-3.5" />
+    <span className="flex items-center gap-1 text-[10px] text-status-danger bg-status-danger/10 px-2 py-0.5 rounded-full">
+      <XCircle className="h-3 w-3" />
       발송 실패
     </span>
   );
@@ -39,42 +39,44 @@ export default async function NotificationsPage() {
 
   return (
     <div className="pb-6">
-      <div className="px-4 py-3 border-b">
-        <p className="text-xs text-muted-foreground">
-          카카오 알림톡으로 발송된 내역입니다. 총 {total}건
+      <div className="px-5 py-3.5 border-b border-zinc-100">
+        <p className="text-[11px] text-zinc-400 font-medium">
+          카카오 알림톡 발송 내역 · 총 {total}건
         </p>
       </div>
 
       {logs.length === 0 ? (
         <div className="flex flex-col items-center justify-center py-20 gap-3">
-          <Bell className="h-10 w-10 text-zinc-200" />
-          <p className="text-sm text-muted-foreground">받은 알림이 없습니다</p>
+          <div className="w-12 h-12 rounded-2xl bg-zinc-100 flex items-center justify-center">
+            <Bell className="h-5 w-5 text-zinc-400" />
+          </div>
+          <p className="text-sm text-zinc-500">받은 알림이 없습니다</p>
         </div>
       ) : (
-        <ul className="divide-y divide-border">
+        <div className="px-4 pt-4 space-y-2">
           {logs.map((log) => {
             const typeConfig = SERVICE_TYPE_CONFIG[log.serviceType] ?? SERVICE_TYPE_CONFIG[AlimtalkServiceType.Individual];
             const TypeIcon = typeConfig.icon;
             const displayTime = log.sentAt ?? log.createdAt;
 
             return (
-              <li key={log.id} className="px-4 py-4">
-                <div className="flex items-start gap-3">
-                  <div className="mt-0.5 flex h-8 w-8 shrink-0 items-center justify-center rounded-full bg-zinc-100">
+              <div key={log.id} className="rounded-xl border border-zinc-100 bg-white overflow-hidden">
+                <div className="flex items-start gap-3 px-4 py-3.5">
+                  <div className="mt-0.5 flex h-8 w-8 shrink-0 items-center justify-center rounded-xl bg-zinc-100">
                     <TypeIcon className="h-4 w-4 text-zinc-500" />
                   </div>
                   <div className="flex-1 min-w-0">
-                    <p className="text-sm font-medium leading-snug">{log.templateName}</p>
-                    <div className="flex items-center justify-between mt-1.5 gap-2">
-                      <span className="text-xs text-muted-foreground">{formatDate(displayTime)}</span>
+                    <p className="text-sm font-medium text-zinc-800 leading-snug">{log.templateName}</p>
+                    <div className="flex items-center justify-between mt-2 gap-2">
+                      <span className="text-[11px] text-zinc-400">{formatDate(displayTime)}</span>
                       <StatusBadge isSuccess={log.isSuccess} />
                     </div>
                   </div>
                 </div>
-              </li>
+              </div>
             );
           })}
-        </ul>
+        </div>
       )}
     </div>
   );

@@ -11,6 +11,12 @@ export const AccountStatus = {
 } as const;
 export type AccountStatus = typeof AccountStatus[keyof typeof AccountStatus];
 
+export const Gender = {
+  Male: "male",
+  Female: "female",
+} as const;
+export type Gender = typeof Gender[keyof typeof Gender];
+
 export interface Career {
   id: string;
   company: string;
@@ -22,6 +28,41 @@ export interface Career {
   techStack: string[];
 }
 
+export interface Education {
+  id: string;
+  schoolName: string;
+  degree: string | null;
+  major: string | null;
+  startDate: string | null;
+  endDate: string | null;
+  isGraduated: boolean;
+}
+
+export interface Certification {
+  id: string;
+  name: string;
+  acquiredDate: string | null;
+}
+
+export interface SkillInventory {
+  id: string;
+  projectName: string;
+  startDate: string | null;
+  endDate: string | null;
+  client: string | null;
+  company: string | null;
+  industry: string | null;
+  application: string | null;
+  role: string | null;
+  hardwareType: string | null;
+  os: string | null;
+  languages: string[];
+  dbms: string | null;
+  tools: string[];
+  others: string | null;
+  sortOrder: number;
+}
+
 export interface FreelancerProfile {
   id: string;
   name: string;
@@ -30,8 +71,20 @@ export interface FreelancerProfile {
   bio: string | null;
   techStack: string[];
   careers: Career[];
+  educations: Education[];
+  certifications: Certification[];
+  skillInventories: SkillInventory[];
   availabilityStatus: AvailabilityStatus | null;
   experienceYears: number | null;
+  birthDate: string | null;
+  gender: Gender | null;
+  joiningDate: string | null;
+  affiliation: string | null;
+  department: string | null;
+  positionTitle: string | null;
+  militaryService: string | null;
+  address: string | null;
+  availableFromDate: string | null;
   kakaoId?: string;
   referrerId?: string;
   referrerName?: string;

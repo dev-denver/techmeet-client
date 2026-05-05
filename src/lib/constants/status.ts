@@ -57,7 +57,7 @@ export const AVAILABILITY_STATUS_CONFIG: Record<AvailabilityStatus, StatusConfig
     className: "bg-status-success/10 text-status-success border-status-success/20",
   },
   [AvailabilityStatus.Partial]: {
-    label: "일부 가능",
+    label: "투입 가능 예정",
     className: "bg-status-warning/10 text-status-warning border-status-warning/20",
   },
   [AvailabilityStatus.Unavailable]: {
@@ -72,7 +72,7 @@ export const AVAILABILITY_TOGGLE_CONFIG: Record<AvailabilityStatus, StatusConfig
     className: "bg-status-success text-white",
   },
   [AvailabilityStatus.Partial]: {
-    label: "일부 가능",
+    label: "투입 가능 예정",
     className: "bg-status-warning text-yellow-900",
   },
   [AvailabilityStatus.Unavailable]: {

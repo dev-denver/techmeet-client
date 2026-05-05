@@ -299,7 +299,7 @@ export function CareerSectionClient({ careers }: CareerSectionClientProps) {
                       {career.techStack.map((tech) => (
                         <span
                           key={tech}
-                          className="text-xs bg-indigo-50 text-indigo-600 px-2 py-0.5 rounded-md font-medium"
+                          className="text-xs bg-zinc-700 text-zinc-100 px-2 py-0.5 rounded-md font-medium"
                         >
                           {tech}
                         </span>

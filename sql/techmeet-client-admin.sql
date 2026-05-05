@@ -59,6 +59,15 @@ create table if not exists public.profiles (
   kakao_id                         text,                                                                  -- 카카오 ID
   availability_status              text                                                                   -- 투입 가능 상태 (available/partial/unavailable)
     check (availability_status in ('available', 'partial', 'unavailable')),
+  available_from_date              date,                                                                   -- 투입 가능 예정일 (partial 상태 시)
+  birth_date                       date,                                                                   -- 생년월일
+  gender                           text check (gender in ('male', 'female')),                             -- 성별
+  joining_date                     date,                                                                   -- 입사일
+  affiliation                      text,                                                                   -- 소속
+  department                       text,                                                                   -- 부서
+  position_title                   text,                                                                   -- 직위
+  military_service                 text,                                                                   -- 병역 (역종)
+  address                          text,                                                                   -- 주소
   notification_new_project         boolean     not null default true,                                     -- 새 프로젝트 알림 수신 여부
   notification_application_update  boolean     not null default true,                                     -- 지원 상태 변경 알림 수신 여부
   notification_marketing           boolean     not null default false,                                    -- 마케팅 알림 수신 여부
@@ -426,3 +435,79 @@ create index if not exists idx_audit_logs_action            on public.admin_audi
 --   'admin@techmeet.com',
 --   'superadmin'
 -- ) on conflict (auth_user_id) do nothing;
+
+
+-- ============================================================
+-- [CLIENT] 이력서 관련 테이블 (마이그레이션: add_resume_tables)
+-- ============================================================
+
+-- ------------------------------------------------------------
+-- educations (학력)
+-- ------------------------------------------------------------
+create table if not exists public.educations (
+  id           uuid        default gen_random_uuid() primary key,
+  profile_id   uuid        references public.profiles(id) on delete cascade not null,
+  school_name  text        not null,
+  degree       text,
+  major        text,
+  start_date   date,
+  end_date     date,
+  is_graduated boolean     not null default true,
+  created_at   timestamptz not null default now(),
+  updated_at   timestamptz not null default now()
+);
+alter table public.educations enable row level security;
+create policy "educations_select_own" on public.educations for select using (auth.uid() = profile_id);
+create policy "educations_insert_own" on public.educations for insert with check (auth.uid() = profile_id);
+create policy "educations_update_own" on public.educations for update using (auth.uid() = profile_id);
+create policy "educations_delete_own" on public.educations for delete using (auth.uid() = profile_id);
+create trigger educations_updated_at before update on public.educations for each row execute function public.set_updated_at();
+
+-- ------------------------------------------------------------
+-- certifications (자격증)
+-- ------------------------------------------------------------
+create table if not exists public.certifications (
+  id            uuid        default gen_random_uuid() primary key,
+  profile_id    uuid        references public.profiles(id) on delete cascade not null,
+  name          text        not null,
+  acquired_date date,
+  created_at    timestamptz not null default now(),
+  updated_at    timestamptz not null default now()
+);
+alter table public.certifications enable row level security;
+create policy "certifications_select_own" on public.certifications for select using (auth.uid() = profile_id);
+create policy "certifications_insert_own" on public.certifications for insert with check (auth.uid() = profile_id);
+create policy "certifications_update_own" on public.certifications for update using (auth.uid() = profile_id);
+create policy "certifications_delete_own" on public.certifications for delete using (auth.uid() = profile_id);
+create trigger certifications_updated_at before update on public.certifications for each row execute function public.set_updated_at();
+
+-- ------------------------------------------------------------
+-- skill_inventories (스킬 인벤토리)
+-- ------------------------------------------------------------
+create table if not exists public.skill_inventories (
+  id            uuid        default gen_random_uuid() primary key,
+  profile_id    uuid        references public.profiles(id) on delete cascade not null,
+  project_name  text        not null,
+  start_date    date,
+  end_date      date,
+  client        text,
+  company       text,
+  industry      text,
+  application   text,
+  role          text,
+  hardware_type text,
+  os            text,
+  languages     text[]      not null default array[]::text[],
+  dbms          text,
+  tools         text[]      not null default array[]::text[],
+  others        text,
+  sort_order    integer     not null default 0,
+  created_at    timestamptz not null default now(),
+  updated_at    timestamptz not null default now()
+);
+alter table public.skill_inventories enable row level security;
+create policy "skill_inventories_select_own" on public.skill_inventories for select using (auth.uid() = profile_id);
+create policy "skill_inventories_insert_own" on public.skill_inventories for insert with check (auth.uid() = profile_id);
+create policy "skill_inventories_update_own" on public.skill_inventories for update using (auth.uid() = profile_id);
+create policy "skill_inventories_delete_own" on public.skill_inventories for delete using (auth.uid() = profile_id);
+create trigger skill_inventories_updated_at before update on public.skill_inventories for each row execute function public.set_updated_at();

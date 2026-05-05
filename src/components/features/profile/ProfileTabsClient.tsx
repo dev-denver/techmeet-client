@@ -1,0 +1,208 @@
+"use client";
+
+import Link from "next/link";
+import { useState } from "react";
+import type { FreelancerProfile } from "@/types";
+import { AvailabilityStatus } from "@/types";
+import { AVAILABILITY_TOGGLE_CONFIG } from "@/lib/constants";
+import { AvailabilityToggle } from "./AvailabilityToggle";
+import { EducationTab } from "./tabs/EducationTab";
+import { SkillTab } from "./tabs/SkillTab";
+import { CareerSectionClient } from "./CareerSectionClient";
+import { CardWrap, FieldRow, SectionHeader } from "./tabs/TabShared";
+import { Pencil } from "lucide-react";
+
+type Tab = "basic" | "education" | "career" | "skill";
+
+const TABS: { key: Tab; label: string }[] = [
+  { key: "basic", label: "기본정보" },
+  { key: "education", label: "학력/자격증" },
+  { key: "career", label: "경력사항" },
+  { key: "skill", label: "스킬 인벤토리" },
+];
+
+interface BasicInfoTabProps {
+  profile: FreelancerProfile;
+  availStatus: AvailabilityStatus;
+  availFromDate: string | null;
+  onStatusChange: (status: AvailabilityStatus, date?: string | null) => void;
+}
+
+function BasicInfoTab({ profile, availStatus, availFromDate, onStatusChange }: BasicInfoTabProps) {
+  const genderLabel = profile.gender === "male" ? "남" : profile.gender === "female" ? "여" : null;
+
+  return (
+    <div className="space-y-5">
+      <div>
+        <SectionHeader title="기본 정보" />
+        <CardWrap>
+          <div className="grid grid-cols-2">
+            <div className="px-4 py-3 border-b border-r border-zinc-100">
+              <p className="text-[10px] text-zinc-400 font-medium mb-0.5">이름</p>
+              <p className="text-sm text-zinc-800 font-medium">{profile.name}</p>
+            </div>
+            <div className="px-4 py-3 border-b border-zinc-100">
+              <p className="text-[10px] text-zinc-400 font-medium mb-0.5">성별</p>
+              <p className="text-sm text-zinc-800 font-medium">{genderLabel || "-"}</p>
+            </div>
+            <div className="px-4 py-3 border-b border-r border-zinc-100">
+              <p className="text-[10px] text-zinc-400 font-medium mb-0.5">생년월일</p>
+              <p className="text-sm text-zinc-800 font-medium">
+                {profile.birthDate ? profile.birthDate.slice(0, 10).replace(/-/g, ". ") : "-"}
+              </p>
+            </div>
+            <div className="px-4 py-3 border-b border-zinc-100">
+              <p className="text-[10px] text-zinc-400 font-medium mb-0.5">경력</p>
+              <p className="text-sm text-zinc-800 font-medium">
+                {profile.experienceYears !== null ? `${profile.experienceYears}년` : "-"}
+              </p>
+            </div>
+          </div>
+          <FieldRow label="병역 (역종)" value={profile.militaryService} />
+        </CardWrap>
+      </div>
+
+      <div>
+        <SectionHeader title="소속 정보" />
+        <CardWrap>
+          <div className="grid grid-cols-2">
+            <div className="px-4 py-3 border-b border-r border-zinc-100">
+              <p className="text-[10px] text-zinc-400 font-medium mb-0.5">소속</p>
+              <p className="text-sm text-zinc-800 font-medium">{profile.affiliation || "-"}</p>
+            </div>
+            <div className="px-4 py-3 border-b border-zinc-100">
+              <p className="text-[10px] text-zinc-400 font-medium mb-0.5">입사일</p>
+              <p className="text-sm text-zinc-800 font-medium">
+                {profile.joiningDate ? profile.joiningDate.slice(0, 10).replace(/-/g, ". ") : "-"}
+              </p>
+            </div>
+            <div className="px-4 py-3 border-r border-zinc-100">
+              <p className="text-[10px] text-zinc-400 font-medium mb-0.5">부서</p>
+              <p className="text-sm text-zinc-800 font-medium">{profile.department || "-"}</p>
+            </div>
+            <div className="px-4 py-3">
+              <p className="text-[10px] text-zinc-400 font-medium mb-0.5">직위</p>
+              <p className="text-sm text-zinc-800 font-medium">{profile.positionTitle || "-"}</p>
+            </div>
+          </div>
+        </CardWrap>
+      </div>
+
+      <div>
+        <SectionHeader title="연락처 및 주소" />
+        <CardWrap>
+          <div className="divide-y divide-zinc-100">
+            <FieldRow label="휴대폰번호" value={profile.phone} />
+            <FieldRow label="이메일" value={profile.email} />
+            <FieldRow label="주소" value={profile.address} />
+          </div>
+        </CardWrap>
+      </div>
+
+      {/* 투입 가능 상태 — controlled */}
+      <div>
+        <SectionHeader title="투입 가능 상태" />
+        <AvailabilityToggle
+          status={availStatus}
+          availableFromDate={availFromDate}
+          onStatusChange={onStatusChange}
+        />
+      </div>
+
+      <Link
+        href="/settings/profile"
+        className="flex items-center justify-center gap-2 w-full py-3.5 rounded-xl bg-zinc-900 text-white text-sm font-semibold hover:bg-zinc-700 transition-colors"
+      >
+        <Pencil className="h-4 w-4" />
+        기본정보 수정
+      </Link>
+    </div>
+  );
+}
+
+function CareerTab({ profile }: { profile: FreelancerProfile }) {
+  return <CareerSectionClient careers={profile.careers} />;
+}
+
+interface ProfileTabsClientProps {
+  profile: FreelancerProfile;
+}
+
+export function ProfileTabsClient({ profile }: ProfileTabsClientProps) {
+  const [tab, setTab] = useState<Tab>("basic");
+  const [availStatus, setAvailStatus] = useState<AvailabilityStatus>(
+    profile.availabilityStatus ?? AvailabilityStatus.Unavailable
+  );
+  const [availFromDate, setAvailFromDate] = useState<string | null>(profile.availableFromDate);
+
+  function handleStatusChange(status: AvailabilityStatus, date?: string | null) {
+    setAvailStatus(status);
+    setAvailFromDate(date ?? null);
+  }
+
+  const availConfig = AVAILABILITY_TOGGLE_CONFIG[availStatus];
+
+  const fromDateLabel = (() => {
+    if (availStatus !== AvailabilityStatus.Partial || !availFromDate) return null;
+    const d = new Date(availFromDate);
+    if (isNaN(d.getTime())) return null;
+    return `${d.getFullYear()}. ${d.getMonth() + 1}. ${d.getDate()}~`;
+  })();
+
+  return (
+    <div>
+      {/* 다크 헤더 */}
+      <div className="bg-zinc-950 px-5 pt-6 pb-6">
+        <p className="text-zinc-500 text-xs font-medium tracking-wide">내 정보</p>
+        <div className="flex items-center gap-2 mt-0.5">
+          <p className="text-white font-bold text-[17px] leading-tight">{profile.name}님</p>
+          <span className={`text-[10px] font-semibold px-2 py-0.5 rounded-full ${availConfig?.className ?? ""}`}>
+            {availConfig?.label}
+            {fromDateLabel && ` · ${fromDateLabel}`}
+          </span>
+        </div>
+        {profile.positionTitle && (
+          <p className="text-zinc-500 text-sm mt-1">
+            {profile.positionTitle}{profile.affiliation ? ` · ${profile.affiliation}` : ""}
+          </p>
+        )}
+      </div>
+
+      {/* 탭 네비게이션 */}
+      <div className="sticky top-14 z-40 bg-white border-b border-zinc-100">
+        <div className="flex overflow-x-auto scrollbar-none">
+          {TABS.map(({ key, label }) => (
+            <button
+              key={key}
+              onClick={() => setTab(key)}
+              className={`flex-1 min-w-fit py-3 px-3 text-xs font-medium whitespace-nowrap transition-colors border-b-2 ${
+                tab === key
+                  ? "text-zinc-900 border-zinc-900"
+                  : "text-zinc-400 border-transparent hover:text-zinc-600"
+              }`}
+            >
+              {label}
+            </button>
+          ))}
+        </div>
+      </div>
+
+      {/* 탭 콘텐츠 */}
+      <div className="px-4 pt-5 pb-8">
+        {tab === "basic" && (
+          <BasicInfoTab
+            profile={profile}
+            availStatus={availStatus}
+            availFromDate={availFromDate}
+            onStatusChange={handleStatusChange}
+          />
+        )}
+        {tab === "education" && (
+          <EducationTab educations={profile.educations} certifications={profile.certifications} />
+        )}
+        {tab === "career" && <CareerTab profile={profile} />}
+        {tab === "skill" && <SkillTab skills={profile.skillInventories} />}
+      </div>
+    </div>
+  );
+}

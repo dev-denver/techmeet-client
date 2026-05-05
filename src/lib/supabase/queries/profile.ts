@@ -1,5 +1,5 @@
 import { createServerClient } from "@/lib/supabase/server";
-import type { FreelancerProfile, Career, AvailabilityStatus } from "@/types";
+import type { FreelancerProfile, Career, AvailabilityStatus, Gender } from "@/types";
 import type {
   GetProfileResponse,
   UpdateProfileRequest,
@@ -7,6 +7,11 @@ import type {
   AddCareerRequest,
   UpdateCareerRequest,
 } from "@/types";
+import {
+  getEducations,
+  getCertifications,
+  getSkillInventories,
+} from "./resume";
 
 interface CareerRow {
   id: string;
@@ -27,7 +32,16 @@ interface ProfileRow {
   bio: string | null;
   tech_stack: string[];
   availability_status: AvailabilityStatus | null;
+  available_from_date: string | null;
   experience_years: number | null;
+  birth_date: string | null;
+  gender: Gender | null;
+  joining_date: string | null;
+  affiliation: string | null;
+  department: string | null;
+  position_title: string | null;
+  military_service: string | null;
+  address: string | null;
   kakao_id: string | null;
   referrer_id: string | null;
   referrer: { name: string } | null;
@@ -49,7 +63,7 @@ function mapRowToCareer(row: CareerRow): Career {
   };
 }
 
-function mapRowToProfile(row: ProfileRow): FreelancerProfile {
+function mapRowToProfile(row: ProfileRow, profile: Partial<FreelancerProfile> = {}): FreelancerProfile {
   return {
     id: row.id,
     name: row.name,
@@ -58,8 +72,20 @@ function mapRowToProfile(row: ProfileRow): FreelancerProfile {
     bio: row.bio,
     techStack: row.tech_stack,
     careers: row.careers.map(mapRowToCareer),
+    educations: profile.educations ?? [],
+    certifications: profile.certifications ?? [],
+    skillInventories: profile.skillInventories ?? [],
     availabilityStatus: row.availability_status,
+    availableFromDate: row.available_from_date,
     experienceYears: row.experience_years,
+    birthDate: row.birth_date,
+    gender: row.gender,
+    joiningDate: row.joining_date,
+    affiliation: row.affiliation,
+    department: row.department,
+    positionTitle: row.position_title,
+    militaryService: row.military_service,
+    address: row.address,
     kakaoId: row.kakao_id ?? undefined,
     referrerId: row.referrer_id ?? undefined,
     referrerName: row.referrer?.name ?? undefined,
@@ -74,21 +100,24 @@ export async function getProfile(): Promise<GetProfileResponse | null> {
   const { data: { user } } = await supabase.auth.getUser();
   if (!user) return null;
 
-  // 1단계: 기본 프로필 + careers
-  const { data, error } = await supabase
-    .from("profiles")
-    .select("*, careers(*)")
-    .eq("id", user.id)
-    .single();
+  const [profileResult, educations, certifications, skillInventories] = await Promise.all([
+    supabase
+      .from("profiles")
+      .select("*, careers(*)")
+      .eq("id", user.id)
+      .single(),
+    getEducations(),
+    getCertifications(),
+    getSkillInventories(),
+  ]);
 
-  if (error) {
-    console.warn("[getProfile]", error);
+  if (profileResult.error) {
+    console.warn("[getProfile]", profileResult.error);
     return null;
   }
 
-  const row = data as ProfileRow;
+  const row = profileResult.data as ProfileRow;
 
-  // 2단계: referrer 이름 (referrer_id가 있을 때만, 컬럼 미존재 시 무시)
   let referrerName: string | undefined;
   if (row.referrer_id) {
     const { data: referrer } = await supabase
@@ -99,7 +128,12 @@ export async function getProfile(): Promise<GetProfileResponse | null> {
     referrerName = referrer?.name ?? undefined;
   }
 
-  return { data: mapRowToProfile({ ...row, referrer: referrerName ? { name: referrerName } : null }) };
+  return {
+    data: mapRowToProfile(
+      { ...row, referrer: referrerName ? { name: referrerName } : null },
+      { educations, certifications, skillInventories }
+    ),
+  };
 }
 
 export async function updateProfile(payload: UpdateProfileRequest): Promise<void> {
@@ -114,6 +148,14 @@ export async function updateProfile(payload: UpdateProfileRequest): Promise<void
   if (payload.bio !== undefined) updateData.bio = payload.bio;
   if (payload.techStack !== undefined) updateData.tech_stack = payload.techStack;
   if (payload.experienceYears !== undefined) updateData.experience_years = payload.experienceYears;
+  if ("birthDate" in payload) updateData.birth_date = (payload as Record<string, unknown>).birthDate;
+  if ("gender" in payload) updateData.gender = (payload as Record<string, unknown>).gender;
+  if ("joiningDate" in payload) updateData.joining_date = (payload as Record<string, unknown>).joiningDate;
+  if ("affiliation" in payload) updateData.affiliation = (payload as Record<string, unknown>).affiliation;
+  if ("department" in payload) updateData.department = (payload as Record<string, unknown>).department;
+  if ("positionTitle" in payload) updateData.position_title = (payload as Record<string, unknown>).positionTitle;
+  if ("militaryService" in payload) updateData.military_service = (payload as Record<string, unknown>).militaryService;
+  if ("address" in payload) updateData.address = (payload as Record<string, unknown>).address;
 
   const { error } = await supabase
     .from("profiles")
@@ -129,9 +171,14 @@ export async function updateAvailability(payload: UpdateAvailabilityRequest): Pr
   const { data: { user } } = await supabase.auth.getUser();
   if (!user) throw new Error("인증이 필요합니다");
 
+  const updateData: Record<string, unknown> = { availability_status: payload.status };
+  if ("availableFromDate" in payload) {
+    updateData.available_from_date = payload.availableFromDate ?? null;
+  }
+
   const { error } = await supabase
     .from("profiles")
-    .update({ availability_status: payload.status })
+    .update(updateData)
     .eq("id", user.id);
 
   if (error) throw error;
