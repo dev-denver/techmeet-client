@@ -59,6 +59,9 @@ export async function getProjects(params?: GetProjectsParams): Promise<GetProjec
   if (params?.status && params.status !== "all") {
     query = query.eq("status", params.status);
   }
+  if (params?.search) {
+    query = query.ilike("title", `%${params.search}%`);
+  }
 
   const { data, count, error } = await query;
 

@@ -2,6 +2,7 @@
 
 import { Plus, Pencil, Trash2, ChevronDown, ChevronUp } from "lucide-react";
 export { Plus, Pencil, Trash2, ChevronDown, ChevronUp };
+import { SaveButton } from "@/components/ui/save-button";
 
 export function Tag({ children }: { children: React.ReactNode }) {
   return (
@@ -165,13 +166,7 @@ export function BottomSheetForm({
             {error && (
               <p className="text-xs text-red-500 bg-red-50 rounded-lg px-3 py-2">{error}</p>
             )}
-            <button
-              type="submit"
-              disabled={isLoading}
-              className="w-full py-3 rounded-xl bg-zinc-900 text-white text-sm font-semibold hover:bg-zinc-700 transition-colors disabled:opacity-50"
-            >
-              {isLoading ? "저장 중..." : "저장"}
-            </button>
+            <SaveButton isLoading={isLoading} />
           </div>
         </form>
       </div>

@@ -20,7 +20,7 @@ export default async function ApplicationsPage() {
   return (
     <div>
       {/* 히어로 */}
-      <div className="bg-zinc-950 px-5 pt-6 pb-5">
+      <div className="bg-zinc-800 px-5 pt-6 pb-5">
         <div className="flex items-baseline gap-2">
           <p className="text-zinc-500 text-xs font-medium tracking-wide">총 지원 건수</p>
         </div>
@@ -29,7 +29,7 @@ export default async function ApplicationsPage() {
           <span className="text-base font-medium text-zinc-500 ml-1">건</span>
         </p>
 
-        <div className="mt-5 grid grid-cols-3 divide-x divide-zinc-800 bg-zinc-900/60 border border-zinc-800 rounded-2xl overflow-hidden">
+        <div className="mt-5 grid grid-cols-3 divide-x divide-zinc-700 bg-zinc-700/40 border border-zinc-600/50 rounded-2xl overflow-hidden">
           {[
             { label: "검토 중", value: reviewingCount },
             { label: "면접 예정", value: interviewCount },

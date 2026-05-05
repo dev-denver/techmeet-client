@@ -1,7 +1,7 @@
 "use client";
 
-import Link from "next/link";
 import { useState } from "react";
+import { useRouter } from "next/navigation";
 import type { FreelancerProfile } from "@/types";
 import { AvailabilityStatus } from "@/types";
 import { AVAILABILITY_TOGGLE_CONFIG } from "@/lib/constants";
@@ -10,7 +10,8 @@ import { EducationTab } from "./tabs/EducationTab";
 import { SkillTab } from "./tabs/SkillTab";
 import { CareerSectionClient } from "./CareerSectionClient";
 import { CardWrap, FieldRow, SectionHeader } from "./tabs/TabShared";
-import { Pencil } from "lucide-react";
+import { Pencil, Save } from "lucide-react";
+import { cn } from "@/lib/utils/cn";
 
 type Tab = "basic" | "education" | "career" | "skill";
 
@@ -25,10 +26,13 @@ interface BasicInfoTabProps {
   profile: FreelancerProfile;
   availStatus: AvailabilityStatus;
   availFromDate: string | null;
+  isDirty: boolean;
+  isSaving: boolean;
   onStatusChange: (status: AvailabilityStatus, date?: string | null) => void;
+  onSaveAndEdit: () => void;
 }
 
-function BasicInfoTab({ profile, availStatus, availFromDate, onStatusChange }: BasicInfoTabProps) {
+function BasicInfoTab({ profile, availStatus, availFromDate, isDirty, isSaving, onStatusChange, onSaveAndEdit }: BasicInfoTabProps) {
   const genderLabel = profile.gender === "male" ? "남" : profile.gender === "female" ? "여" : null;
 
   return (
@@ -99,23 +103,48 @@ function BasicInfoTab({ profile, availStatus, availFromDate, onStatusChange }: B
         </CardWrap>
       </div>
 
-      {/* 투입 가능 상태 — controlled */}
+      {/* 투입 가능 상태 — 수동 저장 방식 */}
       <div>
         <SectionHeader title="투입 가능 상태" />
         <AvailabilityToggle
           status={availStatus}
           availableFromDate={availFromDate}
+          isDirty={isDirty}
           onStatusChange={onStatusChange}
         />
       </div>
 
-      <Link
-        href="/settings/profile"
-        className="flex items-center justify-center gap-2 w-full py-3.5 rounded-xl bg-zinc-900 text-white text-sm font-semibold hover:bg-zinc-700 transition-colors"
+      {/* 기본정보 수정 버튼 */}
+      <button
+        type="button"
+        onClick={onSaveAndEdit}
+        disabled={isSaving}
+        className={cn(
+          "w-full flex items-center justify-center gap-2.5 rounded-xl py-3.5 text-[15px] font-semibold transition-all",
+          "focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2",
+          "disabled:opacity-50",
+          isDirty
+            ? "bg-status-info text-white hover:opacity-90 active:opacity-80"
+            : "bg-zinc-900 text-white hover:bg-zinc-700 active:bg-zinc-800"
+        )}
       >
-        <Pencil className="h-4 w-4" />
-        기본정보 수정
-      </Link>
+        {isSaving ? (
+          <>
+            <span className="w-4 h-4 border-2 border-white/30 border-t-white rounded-full animate-spin shrink-0" />
+            저장 중...
+          </>
+        ) : isDirty ? (
+          <>
+            <Save className="h-4 w-4 shrink-0" />
+            변경사항 저장 후 수정
+          </>
+        ) : (
+          <>
+            <Pencil className="h-4 w-4 shrink-0" />
+            기본정보 수정
+          </>
+        )}
+      </button>
     </div>
   );
 }
@@ -129,15 +158,37 @@ interface ProfileTabsClientProps {
 }
 
 export function ProfileTabsClient({ profile }: ProfileTabsClientProps) {
+  const router = useRouter();
   const [tab, setTab] = useState<Tab>("basic");
   const [availStatus, setAvailStatus] = useState<AvailabilityStatus>(
     profile.availabilityStatus ?? AvailabilityStatus.Unavailable
   );
   const [availFromDate, setAvailFromDate] = useState<string | null>(profile.availableFromDate);
+  const [isSaving, setIsSaving] = useState(false);
+
+  const isDirty =
+    availStatus !== (profile.availabilityStatus ?? AvailabilityStatus.Unavailable) ||
+    availFromDate !== profile.availableFromDate;
 
   function handleStatusChange(status: AvailabilityStatus, date?: string | null) {
     setAvailStatus(status);
     setAvailFromDate(date ?? null);
+  }
+
+  async function handleSaveAndEdit() {
+    if (isDirty) {
+      setIsSaving(true);
+      try {
+        await fetch("/api/profile/availability", {
+          method: "PUT",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ status: availStatus, availableFromDate: availFromDate }),
+        });
+      } finally {
+        setIsSaving(false);
+      }
+    }
+    router.push("/settings/profile");
   }
 
   const availConfig = AVAILABILITY_TOGGLE_CONFIG[availStatus];
@@ -152,14 +203,19 @@ export function ProfileTabsClient({ profile }: ProfileTabsClientProps) {
   return (
     <div>
       {/* 다크 헤더 */}
-      <div className="bg-zinc-950 px-5 pt-6 pb-6">
-        <p className="text-zinc-500 text-xs font-medium tracking-wide">내 정보</p>
+      <div className="bg-zinc-800 px-5 pt-6 pb-6">
+        <p className="text-zinc-400 text-xs font-medium tracking-wide">내 정보</p>
         <div className="flex items-center gap-2 mt-0.5">
           <p className="text-white font-bold text-[17px] leading-tight">{profile.name}님</p>
           <span className={`text-[10px] font-semibold px-2 py-0.5 rounded-full ${availConfig?.className ?? ""}`}>
             {availConfig?.label}
             {fromDateLabel && ` · ${fromDateLabel}`}
           </span>
+          {isDirty && (
+            <span className="text-[9px] font-semibold px-1.5 py-0.5 rounded-full bg-amber-400/20 text-amber-300 border border-amber-400/30">
+              미저장
+            </span>
+          )}
         </div>
         {profile.positionTitle && (
           <p className="text-zinc-500 text-sm mt-1">
@@ -169,7 +225,7 @@ export function ProfileTabsClient({ profile }: ProfileTabsClientProps) {
       </div>
 
       {/* 탭 네비게이션 */}
-      <div className="sticky top-14 z-40 bg-white border-b border-zinc-100">
+      <div className="sticky top-0 z-40 bg-white border-b border-zinc-100">
         <div className="flex overflow-x-auto scrollbar-none">
           {TABS.map(({ key, label }) => (
             <button
@@ -194,7 +250,10 @@ export function ProfileTabsClient({ profile }: ProfileTabsClientProps) {
             profile={profile}
             availStatus={availStatus}
             availFromDate={availFromDate}
+            isDirty={isDirty}
+            isSaving={isSaving}
             onStatusChange={handleStatusChange}
+            onSaveAndEdit={handleSaveAndEdit}
           />
         )}
         {tab === "education" && (

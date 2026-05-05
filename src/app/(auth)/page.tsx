@@ -39,7 +39,7 @@ export default async function HomePage() {
   return (
     <div>
       {/* 히어로 배너 */}
-      <section className="px-5 pt-6 pb-5 bg-zinc-950">
+      <section className="px-5 pt-6 pb-5 bg-zinc-800">
         <div className="flex items-center justify-between">
           <div>
             <p className="text-zinc-500 text-xs font-medium tracking-wide">안녕하세요</p>
@@ -55,7 +55,7 @@ export default async function HomePage() {
         </div>
 
         {/* 지원 현황 요약 */}
-        <div className="mt-5 grid grid-cols-3 divide-x divide-zinc-800 bg-zinc-900/60 border border-zinc-800 rounded-2xl overflow-hidden">
+        <div className="mt-5 grid grid-cols-3 divide-x divide-zinc-700 bg-zinc-700/40 border border-zinc-600/50 rounded-2xl overflow-hidden">
           {[
             { label: "전체 지원", value: allApplications.length },
             { label: "검토 중", value: reviewingCount },

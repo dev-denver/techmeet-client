@@ -52,7 +52,7 @@ export default async function SettingsPage() {
   return (
     <div className="pb-8">
       {/* 프로필 요약 */}
-      <div className="bg-zinc-950 px-5 pt-6 pb-6">
+      <div className="bg-zinc-800 px-5 pt-6 pb-6">
         <p className="text-zinc-500 text-xs font-medium tracking-wide">설정</p>
         <p className="text-white font-bold text-[17px] leading-tight mt-0.5">{profile?.name ?? "-"}</p>
         <p className="text-zinc-600 text-sm mt-1">{profile?.email ?? "-"}</p>
@@ -88,13 +88,13 @@ export default async function SettingsPage() {
         </div>
 
         {/* 로그아웃 / 회원탈퇴 */}
-        <div className="pt-1 space-y-2.5">
+        <div className="pt-2 flex items-center justify-between px-1">
           <LogoutButton />
           <Link
             href="/settings/withdraw"
-            className="flex w-full items-center justify-center gap-2 rounded-xl border border-red-200 py-3 text-sm font-medium text-red-500 hover:bg-red-50 active:bg-red-100 transition-colors"
+            className="flex items-center gap-1.5 text-xs text-zinc-400 hover:text-red-400 transition-colors px-1 py-1"
           >
-            <UserX className="h-4 w-4" />
+            <UserX className="h-3.5 w-3.5" />
             회원 탈퇴
           </Link>
         </div>

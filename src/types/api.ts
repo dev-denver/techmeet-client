@@ -39,6 +39,7 @@ export interface GetProjectsParams {
   status?: ProjectFilterValue;
   page?: number;
   pageSize?: number;
+  search?: string;
 }
 
 export type GetProjectsResponse = PaginatedResponse<Project>;

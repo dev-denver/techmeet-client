@@ -34,7 +34,7 @@ export default async function ProjectDetailPage({ params }: ProjectDetailPagePro
   return (
     <div>
       {/* 히어로 */}
-      <div className="bg-zinc-950 px-5 pt-6 pb-5">
+      <div className="bg-zinc-800 px-5 pt-6 pb-5">
         <div className="flex items-center justify-between gap-2 mb-3">
           <ProjectStatusBadge status={project.status} />
           <div className="flex items-center gap-2">

@@ -8,6 +8,7 @@ import { AvailabilityStatus } from "@/types";
 interface AvailabilityToggleProps {
   status: AvailabilityStatus;
   availableFromDate: string | null;
+  isDirty: boolean;
   onStatusChange: (status: AvailabilityStatus, availableFromDate?: string | null) => void;
 }
 
@@ -15,34 +16,15 @@ const options = (
   Object.entries(AVAILABILITY_TOGGLE_CONFIG) as [AvailabilityStatus, { label: string; className: string }][]
 ).map(([value, config]) => ({ value, ...config }));
 
-export function AvailabilityToggle({ status, availableFromDate, onStatusChange }: AvailabilityToggleProps) {
-  const [isUpdating, setIsUpdating] = useState(false);
+export function AvailabilityToggle({ status, availableFromDate, isDirty, onStatusChange }: AvailabilityToggleProps) {
+  // 날짜 확인 전에도 버튼을 즉시 파란색으로 표시하기 위한 시각적 상태
+  const [visualStatus, setVisualStatus] = useState<AvailabilityStatus>(status);
   const [showDatePicker, setShowDatePicker] = useState(false);
   const [dateInput, setDateInput] = useState(availableFromDate ?? "");
   const [dateError, setDateError] = useState("");
 
-  async function callApi(newStatus: AvailabilityStatus, date?: string | null) {
-    setIsUpdating(true);
-    try {
-      const res = await fetch("/api/profile/availability", {
-        method: "PUT",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ status: newStatus, availableFromDate: date }),
-      });
-      if (res.ok) {
-        onStatusChange(newStatus, date);
-        return true;
-      }
-    } catch {
-      // ignore
-    } finally {
-      setIsUpdating(false);
-    }
-    return false;
-  }
-
-  async function handleButtonClick(newStatus: AvailabilityStatus) {
-    if (isUpdating) return;
+  function handleButtonClick(newStatus: AvailabilityStatus) {
+    setVisualStatus(newStatus);
     if (newStatus === AvailabilityStatus.Partial) {
       setShowDatePicker(true);
       setDateInput(availableFromDate ?? "");
@@ -50,17 +32,22 @@ export function AvailabilityToggle({ status, availableFromDate, onStatusChange }
       return;
     }
     setShowDatePicker(false);
-    await callApi(newStatus, null);
+    onStatusChange(newStatus, null);
   }
 
-  async function handleDateSave() {
+  function handleDateConfirm() {
     if (!dateInput) {
       setDateError("투입 가능 예정일을 선택해주세요");
       return;
     }
     setDateError("");
-    const ok = await callApi(AvailabilityStatus.Partial, dateInput);
-    if (ok) setShowDatePicker(false);
+    setShowDatePicker(false);
+    onStatusChange(AvailabilityStatus.Partial, dateInput);
+  }
+
+  function handleDateCancel() {
+    setShowDatePicker(false);
+    setVisualStatus(status); // 취소 시 원래 상태로 복원
   }
 
   const fromDateLabel = (() => {
@@ -77,11 +64,11 @@ export function AvailabilityToggle({ status, availableFromDate, onStatusChange }
           {options.map((option) => (
             <button
               key={option.value}
+              type="button"
               onClick={() => handleButtonClick(option.value)}
-              disabled={isUpdating}
               className={cn(
-                "flex-1 py-2.5 px-2 rounded-lg text-xs font-semibold transition-all focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:opacity-60",
-                status === option.value
+                "flex-1 py-2.5 px-2 rounded-lg text-xs font-semibold transition-all focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2",
+                visualStatus === option.value
                   ? option.className
                   : "bg-zinc-100 text-zinc-500 hover:bg-zinc-200"
               )}
@@ -93,28 +80,29 @@ export function AvailabilityToggle({ status, availableFromDate, onStatusChange }
 
         {/* 날짜 선택 (투입 가능 예정 선택 시) */}
         {showDatePicker && (
-          <div className="pt-1 space-y-2">
-            <label className="block text-xs font-medium text-zinc-600">
-              투입 가능 예정일 <span className="text-red-400">*</span>
+          <div className="rounded-xl bg-status-info/5 border border-status-info/20 p-3 space-y-2.5">
+            <label className="block text-xs font-semibold text-status-info">
+              투입 가능 예정일을 선택해주세요
             </label>
             <input
               type="date"
               value={dateInput}
               onChange={(e) => { setDateInput(e.target.value); setDateError(""); }}
               min={new Date().toISOString().slice(0, 10)}
-              className="w-full px-3 py-2.5 rounded-lg border border-zinc-200 text-sm text-zinc-800 focus:outline-none focus:ring-2 focus:ring-zinc-900 focus:border-transparent"
+              className="w-full px-3 py-2.5 rounded-lg border border-zinc-200 text-sm text-zinc-800 bg-white focus:outline-none focus:ring-2 focus:ring-status-info focus:border-transparent"
             />
             {dateError && <p className="text-xs text-red-500">{dateError}</p>}
             <div className="flex gap-2">
               <button
-                onClick={handleDateSave}
-                disabled={isUpdating}
-                className="flex-1 py-2 rounded-lg bg-zinc-900 text-white text-xs font-semibold hover:bg-zinc-700 transition-colors disabled:opacity-50"
+                type="button"
+                onClick={handleDateConfirm}
+                className="flex-1 py-2 rounded-lg bg-status-info text-white text-xs font-semibold hover:opacity-90 transition-opacity"
               >
-                {isUpdating ? "저장 중..." : "저장"}
+                확인
               </button>
               <button
-                onClick={() => setShowDatePicker(false)}
+                type="button"
+                onClick={handleDateCancel}
                 className="flex-1 py-2 rounded-lg bg-zinc-100 text-zinc-600 text-xs font-semibold hover:bg-zinc-200 transition-colors"
               >
                 취소
@@ -123,9 +111,16 @@ export function AvailabilityToggle({ status, availableFromDate, onStatusChange }
           </div>
         )}
 
-        {/* 날짜 표시 */}
+        {/* 날짜 표시 (투입 가능 예정 + 날짜 확정 시) */}
         {!showDatePicker && fromDateLabel && (
-          <p className="text-xs text-zinc-500">{fromDateLabel}</p>
+          <p className="text-xs text-status-info font-medium">{fromDateLabel}</p>
+        )}
+
+        {/* 변경 안내 */}
+        {isDirty && !showDatePicker && (
+          <p className="text-[11px] text-status-info bg-status-info/8 border border-status-info/20 rounded-lg px-2.5 py-1.5">
+            아래 버튼을 눌러야 변경 내용이 저장됩니다.
+          </p>
         )}
 
         <p className="text-[11px] text-zinc-400">

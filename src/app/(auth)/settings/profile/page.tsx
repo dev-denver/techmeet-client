@@ -2,14 +2,14 @@
 
 import { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
-import { Minus, Plus, CheckCircle2 } from "lucide-react";
+import { Minus, Plus } from "lucide-react";
+import { SaveButton } from "@/components/ui/save-button";
 import { validatePhone, formatPhone } from "@/lib/utils/validation";
 import { TechStackInput } from "@/components/features/profile/TechStackInput";
 import { Skeleton } from "@/components/ui/skeleton";
 import { FormField } from "@/components/ui/form-field";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
-import { cn } from "@/lib/utils/cn";
 import type { FreelancerProfile } from "@/types";
 
 function SectionDivider({ label }: { label: string }) {
@@ -256,18 +256,7 @@ export default function EditProfilePage() {
           <p className="text-sm text-red-500 bg-red-50 rounded-lg px-3 py-2.5">{serverError}</p>
         )}
 
-        <button
-          type="submit"
-          disabled={isSaving || saveSuccess}
-          className={cn(
-            "w-full rounded-xl py-3.5 text-[15px] font-semibold transition-all flex items-center justify-center gap-2",
-            saveSuccess
-              ? "bg-green-600 text-white"
-              : "bg-zinc-900 text-white hover:opacity-90 active:opacity-80 disabled:opacity-50"
-          )}
-        >
-          {saveSuccess ? (<><CheckCircle2 className="h-5 w-5" />저장되었습니다</>) : isSaving ? "저장 중..." : "저장"}
-        </button>
+        <SaveButton isLoading={isSaving} isSuccess={saveSuccess} />
       </div>
     </form>
   );
