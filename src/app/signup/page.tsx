@@ -43,9 +43,8 @@ function PasswordStrength({ password }: { password: string }) {
         {checks.map((c) => (
           <span
             key={c.label}
-            className={`text-xs px-1.5 py-0.5 rounded ${
-              c.ok ? "bg-green-100 text-green-700" : "bg-zinc-100 text-zinc-400"
-            }`}
+            className={`text-xs px-1.5 py-0.5 rounded ${c.ok ? "bg-green-100 text-green-700" : "bg-zinc-100 text-zinc-400"
+              }`}
           >
             {c.label}
           </span>
@@ -458,7 +457,7 @@ function SignupForm() {
 export default function SignupPage() {
   return (
     <div className="flex min-h-screen items-center justify-center bg-page-bg">
-      <div className="w-full max-w-[430px] min-h-screen bg-background shadow-[0_0_0_1px_rgba(0,0,0,0.06)] md:shadow-xl flex flex-col px-6 py-12 overflow-y-auto">
+      <div className="w-full max-w-[600px] min-h-screen bg-background shadow-[0_0_0_1px_rgba(0,0,0,0.06)] md:shadow-xl flex flex-col px-6 py-12 overflow-y-auto">
         <div className="flex flex-col items-center gap-3 mb-8">
           <div className="w-14 h-14 rounded-2xl bg-zinc-900 flex items-center justify-center">
             <span className="text-white text-xl font-bold">T</span>

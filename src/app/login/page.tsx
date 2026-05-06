@@ -83,7 +83,7 @@ function LoginForm() {
 
   return (
     <div className="flex min-h-screen items-center justify-center bg-page-bg">
-      <div className="w-full max-w-[430px] min-h-screen bg-background shadow-[0_0_0_1px_rgba(0,0,0,0.06)] md:shadow-xl flex flex-col items-center justify-between px-6 py-16">
+      <div className="w-full max-w-[600px] min-h-screen bg-background shadow-[0_0_0_1px_rgba(0,0,0,0.06)] md:shadow-xl flex flex-col items-center justify-between px-6 py-16">
         <div className="flex-1 flex flex-col items-center justify-center w-full gap-8">
           {/* 로고 */}
           <div className="flex flex-col items-center gap-3">

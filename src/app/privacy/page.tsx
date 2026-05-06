@@ -2,7 +2,7 @@ import { BackButton } from "@/components/ui/back-button";
 
 export default function PrivacyPage() {
   return (
-    <div className="min-h-screen bg-background mx-auto max-w-[430px]">
+    <div className="min-h-screen bg-background mx-auto max-w-[600px]">
       <BackButton label="개인정보 처리방침" />
       <div className="px-6 py-8 space-y-6 text-sm text-foreground leading-relaxed">
         <p>
