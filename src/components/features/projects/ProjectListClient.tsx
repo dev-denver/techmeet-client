@@ -75,21 +75,21 @@ export function ProjectListClient({ initialProjects, initialTotal }: ProjectList
   return (
     <div>
       {/* 검색 + 필터 바 */}
-      <div className="sticky top-0 z-40 bg-white border-b">
+      <div className="sticky top-0 z-40 bg-background border-b border-border">
         {/* 검색창 */}
         <div className="px-4 pt-3 pb-2">
-          <div className="flex items-center gap-2 px-3 py-2 rounded-xl bg-zinc-100 border border-zinc-200 focus-within:border-zinc-400 focus-within:bg-white transition-colors">
-            <Search className="h-4 w-4 text-zinc-400 shrink-0" />
+          <div className="flex items-center gap-2 px-3 py-2 rounded-xl bg-muted border border-border focus-within:border-muted-foreground/50 focus-within:bg-background transition-colors">
+            <Search className="h-4 w-4 text-muted-foreground shrink-0" />
             <input
               ref={searchRef}
               type="text"
               value={search}
               onChange={(e) => handleSearch(e.target.value)}
               placeholder="프로젝트 검색..."
-              className="flex-1 text-sm bg-transparent text-zinc-800 placeholder:text-zinc-400 outline-none"
+              className="flex-1 text-sm bg-transparent text-foreground placeholder:text-muted-foreground outline-none"
             />
             {search && (
-              <button onClick={handleClearSearch} className="text-zinc-400 hover:text-zinc-600 transition-colors">
+              <button onClick={handleClearSearch} className="text-muted-foreground hover:text-foreground transition-colors">
                 <X className="h-4 w-4" />
               </button>
             )}
@@ -106,21 +106,21 @@ export function ProjectListClient({ initialProjects, initialTotal }: ProjectList
         {!isLoading && (
           <p className="text-xs text-muted-foreground">
             총 <span className="font-semibold text-foreground">{total}</span>개 프로젝트
-            {search && <span className="ml-1 text-zinc-400">— &ldquo;{search}&rdquo; 검색 결과</span>}
+            {search && <span className="ml-1 text-muted-foreground">— &ldquo;{search}&rdquo; 검색 결과</span>}
           </p>
         )}
 
         {isLoading && projects.length === 0 ? (
           <div className="flex justify-center py-20">
-            <Loader2 className="h-6 w-6 animate-spin text-zinc-400" />
+            <Loader2 className="h-6 w-6 animate-spin text-muted-foreground" />
           </div>
         ) : projects.length === 0 ? (
           <div className="flex flex-col items-center justify-center py-16 gap-3">
-            <div className="w-14 h-14 rounded-2xl bg-zinc-100 flex items-center justify-center">
-              <FolderOpen className="h-6 w-6 text-zinc-400" />
+            <div className="w-14 h-14 rounded-2xl bg-muted flex items-center justify-center">
+              <FolderOpen className="h-6 w-6 text-muted-foreground" />
             </div>
             <div className="text-center">
-              <p className="text-sm font-medium text-zinc-600">
+              <p className="text-sm font-medium text-muted-foreground">
                 {search ? `"${search}"에 해당하는 프로젝트가 없습니다` : "해당하는 프로젝트가 없습니다"}
               </p>
               <p className="text-xs text-muted-foreground mt-1">
@@ -139,7 +139,7 @@ export function ProjectListClient({ initialProjects, initialTotal }: ProjectList
               <button
                 onClick={handleLoadMore}
                 disabled={isLoading}
-                className="w-full mt-1 py-3 text-sm font-medium text-zinc-600 border border-zinc-200 rounded-xl hover:bg-zinc-50 active:bg-zinc-100 transition-colors disabled:opacity-50 flex items-center justify-center gap-2"
+                className="w-full mt-1 py-3 text-sm font-medium text-muted-foreground border border-border rounded-xl hover:bg-muted/50 active:bg-muted transition-colors disabled:opacity-50 flex items-center justify-center gap-2"
               >
                 {isLoading ? (
                   <><Loader2 className="h-4 w-4 animate-spin" />불러오는 중...</>

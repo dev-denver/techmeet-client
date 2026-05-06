@@ -14,14 +14,6 @@ interface ApplicationCardProps {
   compact?: boolean;
 }
 
-const STATUS_ACCENT: Record<ApplicationStatus, string> = {
-  [ApplicationStatus.Pending]:   "border-l-zinc-300",
-  [ApplicationStatus.Reviewing]: "border-l-blue-400",
-  [ApplicationStatus.Interview]: "border-l-purple-400",
-  [ApplicationStatus.Accepted]:  "border-l-green-400",
-  [ApplicationStatus.Rejected]:  "border-l-red-300",
-  [ApplicationStatus.Withdrawn]: "border-l-zinc-200",
-};
 
 export function ApplicationCard({
   application,
@@ -63,7 +55,7 @@ export function ApplicationCard({
   if (compact) {
     return (
       <Link href={`/projects/${application.projectId}`}>
-        <div className="rounded-xl bg-zinc-50 border border-zinc-100 hover:border-zinc-300 hover:shadow-sm transition-all cursor-pointer min-w-[180px] max-w-[200px] p-3.5 space-y-2.5">
+        <div className="rounded-xl bg-card border border-border hover:border-muted-foreground/40 hover:shadow-sm transition-all cursor-pointer min-w-[180px] max-w-[200px] p-3.5 space-y-2.5">
           <span className={`text-xs font-semibold px-2 py-0.5 rounded-full w-fit inline-block ${config.className}`}>
             {config.label}
           </span>
@@ -80,7 +72,7 @@ export function ApplicationCard({
 
   /* ─── full ─── */
   const canCancel = application.status === ApplicationStatus.Pending;
-  const accent = STATUS_ACCENT[application.status];
+  const accent = config.borderLeft ?? "border-l-border";
 
   return (
     <div className="relative">
@@ -100,13 +92,13 @@ export function ApplicationCard({
             </div>
 
             {/* 프로젝트 제목 */}
-            <h3 className="font-bold text-[15px] leading-snug line-clamp-2">
+            <h3 className="font-bold text-base leading-snug line-clamp-2">
               {application.projectTitle}
             </h3>
 
             {/* 지원 동기 */}
             {application.coverLetter && (
-              <p className="text-xs text-zinc-500 line-clamp-2 leading-relaxed bg-zinc-50 rounded-lg px-3 py-2">
+              <p className="text-xs text-muted-foreground line-clamp-2 leading-relaxed bg-muted/40 rounded-lg px-3 py-2">
                 {application.coverLetter}
               </p>
             )}
@@ -125,12 +117,12 @@ export function ApplicationCard({
           {/* 지원 취소 영역 */}
           {canCancel && (
             <div
-              className="border-t px-4 py-2.5 flex items-center gap-2 bg-zinc-50"
+              className="border-t border-border px-4 py-2.5 flex items-center gap-2 bg-muted/30"
               onClick={(e) => e.preventDefault()}
             >
               {confirmCancel ? (
                 <>
-                  <span className="text-xs text-red-500 flex-1">지원을 취소할까요?</span>
+                  <span className="text-xs text-destructive flex-1">지원을 취소할까요?</span>
                   <Button
                     size="sm"
                     variant="destructive"
@@ -143,7 +135,7 @@ export function ApplicationCard({
                   <Button
                     size="sm"
                     variant="outline"
-                    className="h-7 text-xs px-3 bg-white"
+                    className="h-7 text-xs px-3 bg-background"
                     onClick={handleCancelAbort}
                   >
                     돌아가기
@@ -153,7 +145,7 @@ export function ApplicationCard({
                 <Button
                   size="sm"
                   variant="ghost"
-                  className="h-7 text-xs px-3 text-red-500 hover:bg-red-50 hover:text-red-600 ml-auto"
+                  className="h-7 text-xs px-3 text-destructive hover:bg-destructive/10 hover:text-destructive ml-auto"
                   onClick={handleCancel}
                 >
                   지원 취소

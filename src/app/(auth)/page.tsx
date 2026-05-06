@@ -43,11 +43,11 @@ export default async function HomePage() {
   return (
     <div>
       {/* 히어로 배너 */}
-      <section className="px-5 pt-6 pb-5 bg-zinc-800">
+      <section className="px-5 pt-6 pb-5 bg-primary">
         <div className="flex items-center justify-between">
           <div>
-            <p className="text-zinc-500 text-xs font-medium tracking-wide">안녕하세요</p>
-            <h2 className="text-white text-[17px] font-bold leading-tight mt-0.5">
+            <p className="text-primary-foreground/50 text-xs font-medium tracking-wide">안녕하세요</p>
+            <h2 className="text-primary-foreground text-lg font-bold leading-tight mt-0.5">
               {profile ? `${profile.name}님` : "로그인 후 이용해주세요"}
             </h2>
           </div>
@@ -60,14 +60,14 @@ export default async function HomePage() {
 
         {/* 투입 가능 예정일 (partial 상태일 때만) */}
         {profile?.availabilityStatus === AvailabilityStatus.Partial && profile.availableFromDate && (
-          <div className="mt-3 flex items-center gap-1.5 text-zinc-400 text-xs">
+          <div className="mt-3 flex items-center gap-1.5 text-primary-foreground/60 text-xs">
             <CalendarClock className="h-3.5 w-3.5 shrink-0" />
-            <span>투입 가능 예정일: <span className="text-zinc-200 font-medium">{formatShortDate(profile.availableFromDate)}</span></span>
+            <span>투입 가능 예정일: <span className="text-primary-foreground font-medium">{formatShortDate(profile.availableFromDate)}</span></span>
           </div>
         )}
 
         {/* 지원 현황 요약 */}
-        <div className="mt-5 grid grid-cols-4 divide-x divide-zinc-700 bg-zinc-700/40 border border-zinc-600/50 rounded-2xl overflow-hidden">
+        <div className="mt-5 grid grid-cols-4 divide-x divide-primary-foreground/20 bg-primary-foreground/10 border border-primary-foreground/15 rounded-2xl overflow-hidden">
           {[
             { label: "전체", value: allApplications.length },
             { label: "검토 중", value: reviewingCount },
@@ -75,8 +75,8 @@ export default async function HomePage() {
             { label: "합격", value: acceptedCount },
           ].map((stat) => (
             <div key={stat.label} className="text-center py-4">
-              <p className="text-white font-bold text-xl leading-none tabular-nums">{stat.value}</p>
-              <p className="text-zinc-500 text-[10px] mt-2 font-medium">{stat.label}</p>
+              <p className="text-primary-foreground font-bold text-xl leading-none tabular-nums">{stat.value}</p>
+              <p className="text-primary-foreground/50 text-[10px] mt-2 font-medium">{stat.label}</p>
             </div>
           ))}
         </div>
@@ -101,7 +101,7 @@ export default async function HomePage() {
             ))}
           </div>
         ) : (
-          <div className="mx-4 rounded-xl bg-zinc-50 border border-dashed border-zinc-200 px-4 py-5 text-center">
+          <div className="mx-4 rounded-xl bg-muted/50 border border-dashed border-border px-4 py-5 text-center">
             <p className="text-sm text-muted-foreground">아직 지원한 프로젝트가 없습니다.</p>
             <Link
               href="/projects"
@@ -132,7 +132,7 @@ export default async function HomePage() {
             ))}
           </div>
         ) : (
-          <div className="mx-4 rounded-xl bg-zinc-50 border border-dashed border-zinc-200 px-4 py-5 text-center">
+          <div className="mx-4 rounded-xl bg-muted/50 border border-dashed border-border px-4 py-5 text-center">
             <p className="text-sm text-muted-foreground">현재 모집 중인 프로젝트가 없습니다.</p>
           </div>
         )}
@@ -141,22 +141,22 @@ export default async function HomePage() {
       {/* 공지사항 */}
       {notices.length > 0 && (
         <section className="pt-4 pb-6 px-4">
-          <div className="rounded-xl border border-zinc-100 bg-zinc-50 overflow-hidden">
-            <div className="flex items-center justify-between px-4 py-3 border-b border-zinc-100">
-              <span className="text-xs font-medium text-zinc-500 flex items-center gap-1.5">
+          <div className="rounded-xl border border-border bg-muted/40 overflow-hidden">
+            <div className="flex items-center justify-between px-4 py-3 border-b border-border">
+              <span className="text-xs font-medium text-muted-foreground flex items-center gap-1.5">
                 <Megaphone className="h-3.5 w-3.5" />
                 공지사항
               </span>
             </div>
-            <div className="divide-y divide-zinc-100">
+            <div className="divide-y divide-border">
               {notices.slice(0, 2).map((notice) => (
                 <Link key={notice.id} href={`/notices/${notice.id}`}>
-                  <div className="flex items-center gap-3 px-4 py-3 hover:bg-zinc-100/60 transition-colors active:bg-zinc-100">
-                    {notice.isImportant && <Bell className="h-3.5 w-3.5 text-zinc-400 shrink-0" />}
-                    <p className="flex-1 text-xs text-zinc-600 leading-snug line-clamp-1">
+                  <div className="flex items-center gap-3 px-4 py-3 hover:bg-muted/60 transition-colors active:bg-muted">
+                    {notice.isImportant && <Bell className="h-3.5 w-3.5 text-muted-foreground shrink-0" />}
+                    <p className="flex-1 text-xs text-foreground leading-snug line-clamp-1">
                       {notice.title}
                     </p>
-                    <span className="text-[10px] text-zinc-400 shrink-0">
+                    <span className="text-[10px] text-muted-foreground shrink-0">
                       {formatDate(notice.createdAt)}
                     </span>
                   </div>

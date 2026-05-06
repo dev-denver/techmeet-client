@@ -58,7 +58,7 @@ export function AvailabilityToggle({ status, availableFromDate, isDirty, onStatu
   })();
 
   return (
-    <div className="rounded-xl border border-zinc-100 bg-white overflow-hidden">
+    <div className="rounded-xl border border-border bg-card overflow-hidden">
       <div className="px-4 pt-4 pb-3 space-y-3">
         <div className="flex gap-2">
           {options.map((option) => (
@@ -70,7 +70,7 @@ export function AvailabilityToggle({ status, availableFromDate, isDirty, onStatu
                 "flex-1 py-2.5 px-2 rounded-lg text-xs font-semibold transition-all focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2",
                 visualStatus === option.value
                   ? option.className
-                  : "bg-zinc-100 text-zinc-500 hover:bg-zinc-200"
+                  : "bg-muted text-muted-foreground hover:bg-muted/80"
               )}
             >
               {option.label}
@@ -89,9 +89,9 @@ export function AvailabilityToggle({ status, availableFromDate, isDirty, onStatu
               value={dateInput}
               onChange={(e) => { setDateInput(e.target.value); setDateError(""); }}
               min={new Date().toISOString().slice(0, 10)}
-              className="w-full px-3 py-2.5 rounded-lg border border-zinc-200 text-sm text-zinc-800 bg-white focus:outline-none focus:ring-2 focus:ring-status-info focus:border-transparent"
+              className="w-full px-3 py-2.5 rounded-lg border border-input text-sm text-foreground bg-background focus:outline-none focus:ring-2 focus:ring-status-info focus:border-transparent"
             />
-            {dateError && <p className="text-xs text-red-500">{dateError}</p>}
+            {dateError && <p className="text-xs text-destructive">{dateError}</p>}
             <div className="flex gap-2">
               <button
                 type="button"
@@ -103,7 +103,7 @@ export function AvailabilityToggle({ status, availableFromDate, isDirty, onStatu
               <button
                 type="button"
                 onClick={handleDateCancel}
-                className="flex-1 py-2 rounded-lg bg-zinc-100 text-zinc-600 text-xs font-semibold hover:bg-zinc-200 transition-colors"
+                className="flex-1 py-2 rounded-lg bg-muted text-muted-foreground text-xs font-semibold hover:bg-muted/80 transition-colors"
               >
                 취소
               </button>
@@ -123,7 +123,7 @@ export function AvailabilityToggle({ status, availableFromDate, isDirty, onStatu
           </p>
         )}
 
-        <p className="text-[11px] text-zinc-400">
+        <p className="text-[11px] text-muted-foreground">
           * 투입 상태는 담당 매니저에게 공유됩니다.
         </p>
       </div>

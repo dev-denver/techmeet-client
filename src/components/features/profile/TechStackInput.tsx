@@ -33,12 +33,12 @@ export function TechStackInput({ value, onChange }: TechStackInputProps) {
             }
           }}
           placeholder="기술 입력 후 Enter"
-          className="flex-1 rounded-lg border border-zinc-200 bg-white px-3 py-2 text-sm focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2"
+          className="flex-1 rounded-lg border border-input bg-background px-3 py-2 text-sm text-foreground placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2"
         />
         <button
           type="button"
           onClick={addTech}
-          className="px-3 py-2 rounded-lg bg-zinc-900 text-white text-sm font-medium"
+          className="px-3 py-2 rounded-lg bg-primary text-primary-foreground text-sm font-medium"
         >
           추가
         </button>
@@ -48,7 +48,7 @@ export function TechStackInput({ value, onChange }: TechStackInputProps) {
           {value.map((tech) => (
             <span
               key={tech}
-              className="flex items-center gap-1 px-2.5 py-1 bg-zinc-100 text-zinc-700 text-xs rounded-full"
+              className="flex items-center gap-1 px-2.5 py-1 bg-muted text-muted-foreground text-xs rounded-full"
             >
               {tech}
               <button

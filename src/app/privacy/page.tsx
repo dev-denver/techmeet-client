@@ -1,9 +1,10 @@
+import { BackButton } from "@/components/ui/back-button";
+
 export default function PrivacyPage() {
   return (
-    <div className="min-h-screen bg-white mx-auto max-w-[430px] px-6 py-10">
-      <h1 className="text-xl font-bold mb-6">개인정보 처리방침</h1>
-
-      <div className="space-y-6 text-sm text-zinc-700 leading-relaxed">
+    <div className="min-h-screen bg-background mx-auto max-w-[430px]">
+      <BackButton label="개인정보 처리방침" />
+      <div className="px-6 py-8 space-y-6 text-sm text-foreground leading-relaxed">
         <p>
           테크밋(이하 &quot;회사&quot;)은 정보통신망 이용촉진 및 정보보호 등에 관한 법률,
           개인정보 보호법 등 관련 법령에 따라 이용자의 개인정보를 보호하고
@@ -68,21 +69,21 @@ export default function PrivacyPage() {
         <section>
           <h2 className="font-semibold text-base mb-2">제5조 (개인정보 처리 위탁)</h2>
           <div className="overflow-x-auto -mx-4 px-4">
-            <table className="w-full text-xs border-collapse border border-zinc-200 mt-2">
+            <table className="w-full text-xs border-collapse border border-border mt-2">
               <thead>
-                <tr className="bg-zinc-50">
-                  <th className="border border-zinc-200 px-3 py-2 text-left">수탁업체</th>
-                  <th className="border border-zinc-200 px-3 py-2 text-left">위탁 업무</th>
+                <tr className="bg-muted/50">
+                  <th className="border border-border px-3 py-2 text-left">수탁업체</th>
+                  <th className="border border-border px-3 py-2 text-left">위탁 업무</th>
                 </tr>
               </thead>
               <tbody>
                 <tr>
-                  <td className="border border-zinc-200 px-3 py-2">Supabase Inc.</td>
-                  <td className="border border-zinc-200 px-3 py-2">데이터베이스 및 인증 서비스</td>
+                  <td className="border border-border px-3 py-2">Supabase Inc.</td>
+                  <td className="border border-border px-3 py-2">데이터베이스 및 인증 서비스</td>
                 </tr>
                 <tr>
-                  <td className="border border-zinc-200 px-3 py-2">카카오(주)</td>
-                  <td className="border border-zinc-200 px-3 py-2">소셜 로그인, 알림톡 발송</td>
+                  <td className="border border-border px-3 py-2">카카오(주)</td>
+                  <td className="border border-border px-3 py-2">소셜 로그인, 알림톡 발송</td>
                 </tr>
               </tbody>
             </table>

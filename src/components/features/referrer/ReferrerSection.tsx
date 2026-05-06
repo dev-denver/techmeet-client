@@ -45,7 +45,7 @@ export function ReferrerSection({ currentReferrerName }: Props) {
         <span className="text-sm text-muted-foreground">추천인</span>
         <div className="flex items-center gap-2">
           <span className="text-sm font-medium">{currentReferrerName}</span>
-          <span className="flex items-center gap-1 text-xs text-green-600 bg-green-50 px-2 py-0.5 rounded-full">
+          <span className="flex items-center gap-1 text-xs text-status-success bg-status-success/10 px-2 py-0.5 rounded-full">
             <UserCheck className="h-3 w-3" />
             등록 완료
           </span>
@@ -63,12 +63,12 @@ export function ReferrerSection({ currentReferrerName }: Props) {
             type="button"
             onClick={() => setShowModal(true)}
             disabled={isLoading}
-            className="text-sm font-medium text-zinc-900 underline underline-offset-2 hover:opacity-70 disabled:opacity-50 transition-opacity"
+            className="text-sm font-medium text-foreground underline underline-offset-2 hover:opacity-70 disabled:opacity-50 transition-opacity"
           >
             {isLoading ? "처리 중..." : "추천인 등록"}
           </button>
         </div>
-        {error && <p className="text-xs text-red-500 mt-1">{error}</p>}
+        {error && <p className="text-xs text-destructive mt-1">{error}</p>}
       </div>
 
       {showModal && (

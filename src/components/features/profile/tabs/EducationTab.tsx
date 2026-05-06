@@ -95,15 +95,15 @@ function EducationCard({ edu, onEdit }: { edu: Education; onEdit: (e: Education)
     <CardWrap>
       <div className="flex items-start gap-3 px-4 py-3.5">
         <div className="flex-1 min-w-0">
-          <p className="text-sm font-bold text-zinc-800">{edu.schoolName}</p>
-          <p className="text-xs text-zinc-500 mt-0.5">
+          <p className="text-sm font-bold text-foreground">{edu.schoolName}</p>
+          <p className="text-xs text-muted-foreground mt-0.5">
             {[edu.major, edu.degree, status].filter(Boolean).join(" · ")}
           </p>
-          {period && <p className="text-[11px] text-zinc-400 mt-1.5">{period}</p>}
+          {period && <p className="text-xs text-muted-foreground mt-1.5">{period}</p>}
         </div>
         <EditDeleteActions onEdit={() => onEdit(edu)} onDelete={handleDelete} />
       </div>
-      {deleting && <div className="px-4 py-1 text-xs text-zinc-400">삭제 중...</div>}
+      {deleting && <div className="px-4 py-1 text-xs text-muted-foreground">삭제 중...</div>}
     </CardWrap>
   );
 }
@@ -154,17 +154,17 @@ function CertCard({ cert }: { cert: Certification }) {
     <CardWrap>
       <div className="p-3.5">
         <div className="flex items-start justify-between gap-1 mb-2">
-          <p className="text-xs font-semibold text-zinc-800 leading-snug">{cert.name}</p>
+          <p className="text-xs font-semibold text-foreground leading-snug">{cert.name}</p>
           <button
             onClick={handleDelete}
             disabled={deleting}
-            className="p-1 text-zinc-400 hover:text-red-500 hover:bg-red-50 rounded-md transition-colors shrink-0 -mt-0.5 -mr-0.5"
+            className="p-1 text-muted-foreground hover:text-destructive hover:bg-destructive/10 rounded-md transition-colors shrink-0 -mt-0.5 -mr-0.5"
           >
             ×
           </button>
         </div>
         {cert.acquiredDate && (
-          <p className="text-[11px] text-zinc-400">
+          <p className="text-xs text-muted-foreground">
             취득 {formatMonthYear(cert.acquiredDate.slice(0, 7))}
           </p>
         )}

@@ -23,7 +23,7 @@ export function LogoutButton() {
     <button
       onClick={handleLogout}
       disabled={isLoading}
-      className="flex items-center gap-2 text-sm text-zinc-500 hover:text-zinc-700 transition-colors disabled:opacity-50 px-1 py-1"
+      className="flex items-center gap-2 text-sm text-muted-foreground hover:text-foreground transition-colors disabled:opacity-50 px-1 py-1"
     >
       <LogOut className="h-3.5 w-3.5" />
       {isLoading ? "로그아웃 중..." : "로그아웃"}

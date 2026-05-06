@@ -16,7 +16,7 @@ import type { FreelancerProfile } from "@/types";
 function SectionDivider({ label }: { label: string }) {
   return (
     <div className="pt-2 pb-1">
-      <p className="text-[11px] font-semibold text-zinc-400 uppercase tracking-wider">{label}</p>
+      <p className="text-xs font-semibold text-muted-foreground uppercase tracking-wider">{label}</p>
     </div>
   );
 }
@@ -167,7 +167,7 @@ export default function EditProfilePage() {
             <select
               value={gender}
               onChange={(e) => setGender(e.target.value as "male" | "female" | "")}
-              className="w-full h-11 px-3 rounded-lg border border-zinc-200 text-sm text-zinc-800 focus:outline-none focus:ring-2 focus:ring-zinc-900 bg-white"
+              className="w-full h-11 px-3 rounded-lg border border-input text-sm text-foreground focus:outline-none focus:ring-2 focus:ring-ring bg-background"
             >
               <option value="">선택 안함</option>
               <option value="male">남</option>
@@ -226,11 +226,11 @@ export default function EditProfilePage() {
         <FormField label="경력">
           <div className="flex items-center gap-3">
             {/* 연 스테퍼 */}
-            <div className="flex items-center gap-0 border border-zinc-200 rounded-lg overflow-hidden">
+            <div className="flex items-center gap-0 border border-border rounded-lg overflow-hidden">
               <button
                 type="button"
                 onClick={() => setExperienceYears((y) => Math.max(0, y - 1))}
-                className="h-11 w-11 flex items-center justify-center text-zinc-500 hover:bg-zinc-50 active:bg-zinc-100 transition-colors border-r border-zinc-200"
+                className="h-11 w-11 flex items-center justify-center text-muted-foreground hover:bg-muted/50 active:bg-muted transition-colors border-r border-border"
                 aria-label="연수 감소"
               >
                 <Minus className="h-4 w-4" />
@@ -239,7 +239,7 @@ export default function EditProfilePage() {
               <button
                 type="button"
                 onClick={() => setExperienceYears((y) => Math.min(50, y + 1))}
-                className="h-11 w-11 flex items-center justify-center text-zinc-500 hover:bg-zinc-50 active:bg-zinc-100 transition-colors border-l border-zinc-200"
+                className="h-11 w-11 flex items-center justify-center text-muted-foreground hover:bg-muted/50 active:bg-muted transition-colors border-l border-border"
                 aria-label="연수 증가"
               >
                 <Plus className="h-4 w-4" />
@@ -247,11 +247,11 @@ export default function EditProfilePage() {
             </div>
 
             {/* 월 스테퍼 */}
-            <div className="flex items-center gap-0 border border-zinc-200 rounded-lg overflow-hidden">
+            <div className="flex items-center gap-0 border border-border rounded-lg overflow-hidden">
               <button
                 type="button"
                 onClick={() => setExperienceMonths((m) => Math.max(0, m - 1))}
-                className="h-11 w-11 flex items-center justify-center text-zinc-500 hover:bg-zinc-50 active:bg-zinc-100 transition-colors border-r border-zinc-200"
+                className="h-11 w-11 flex items-center justify-center text-muted-foreground hover:bg-muted/50 active:bg-muted transition-colors border-r border-border"
                 aria-label="개월 감소"
               >
                 <Minus className="h-4 w-4" />
@@ -260,7 +260,7 @@ export default function EditProfilePage() {
               <button
                 type="button"
                 onClick={() => setExperienceMonths((m) => Math.min(11, m + 1))}
-                className="h-11 w-11 flex items-center justify-center text-zinc-500 hover:bg-zinc-50 active:bg-zinc-100 transition-colors border-l border-zinc-200"
+                className="h-11 w-11 flex items-center justify-center text-muted-foreground hover:bg-muted/50 active:bg-muted transition-colors border-l border-border"
                 aria-label="개월 증가"
               >
                 <Plus className="h-4 w-4" />
@@ -284,7 +284,7 @@ export default function EditProfilePage() {
         </FormField>
 
         {serverError && (
-          <p className="text-sm text-red-500 bg-red-50 rounded-lg px-3 py-2.5">{serverError}</p>
+          <p className="text-sm text-destructive bg-destructive/10 rounded-lg px-3 py-2.5">{serverError}</p>
         )}
 
         <SaveButton isLoading={isSaving} isSuccess={saveSuccess} />

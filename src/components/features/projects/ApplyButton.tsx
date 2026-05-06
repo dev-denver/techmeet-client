@@ -108,7 +108,7 @@ export function ApplyButton({ projectId }: ApplyButtonProps) {
         footer={
           <div className="px-5 pt-3 pb-6 space-y-2.5">
             {serverError && (
-              <p className="text-sm text-red-500 bg-red-50 rounded-lg px-3 py-2.5">
+              <p className="text-sm text-destructive bg-destructive/10 rounded-lg px-3 py-2.5">
                 {serverError}
               </p>
             )}
@@ -146,12 +146,12 @@ export function ApplyButton({ projectId }: ApplyButtonProps) {
                   }}
                   placeholder="해당 프로젝트에 지원하는 이유와 관련 경험을 간략히 적어주세요"
                   rows={5}
-                  className={cn("pb-7", coverLetterError ? "border-red-300" : "")}
+                  className={cn("pb-7", coverLetterError ? "border-destructive/50" : "")}
                 />
                 <span
                   className={cn(
                     "absolute bottom-2.5 right-3 text-xs tabular-nums pointer-events-none",
-                    charOk ? "text-green-600" : "text-zinc-400"
+                    charOk ? "text-status-success" : "text-muted-foreground"
                   )}
                 >
                   {charCount}자
@@ -170,7 +170,7 @@ export function ApplyButton({ projectId }: ApplyButtonProps) {
                   }}
                   placeholder="예: 600"
                   min={1}
-                  className={cn("pr-16", rateError ? "border-red-300" : "")}
+                  className={cn("pr-16", rateError ? "border-destructive/50" : "")}
                 />
                 <span className="absolute right-3 top-1/2 -translate-y-1/2 text-sm text-muted-foreground pointer-events-none">
                   만원/월

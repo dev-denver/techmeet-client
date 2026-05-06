@@ -1,9 +1,10 @@
+import { BackButton } from "@/components/ui/back-button";
+
 export default function TermsPage() {
   return (
-    <div className="min-h-screen bg-white mx-auto max-w-[430px] px-6 py-10">
-      <h1 className="text-xl font-bold mb-6">이용약관</h1>
-
-      <div className="space-y-6 text-sm text-zinc-700 leading-relaxed">
+    <div className="min-h-screen bg-background mx-auto max-w-[430px]">
+      <BackButton label="이용약관" />
+      <div className="px-6 py-8 space-y-6 text-sm text-foreground leading-relaxed">
         <section>
           <h2 className="font-semibold text-base mb-2">제1조 (목적)</h2>
           <p>

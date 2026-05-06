@@ -23,16 +23,16 @@ export function FormField({
     <div className={cn("flex flex-col gap-1.5", className)}>
       {label && (
         <div className="flex items-center gap-1.5">
-          <span className="text-sm font-medium text-zinc-700">{label}</span>
-          {required && <span className="text-red-500 text-xs leading-none">*</span>}
-          {optional && <span className="text-xs text-zinc-400 font-normal">(선택)</span>}
+          <span className="text-sm font-medium text-foreground">{label}</span>
+          {required && <span className="text-destructive text-xs leading-none">*</span>}
+          {optional && <span className="text-xs text-muted-foreground font-normal">(선택)</span>}
         </div>
       )}
       {children}
       {error ? (
-        <p className="text-xs text-red-500">{error}</p>
+        <p className="text-xs text-destructive">{error}</p>
       ) : hint ? (
-        <p className="text-xs text-zinc-400">{hint}</p>
+        <p className="text-xs text-muted-foreground">{hint}</p>
       ) : null}
     </div>
   );

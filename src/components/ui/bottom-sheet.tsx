@@ -22,19 +22,19 @@ export function BottomSheet({ open, onClose, hasBottomNav = false, footer, child
     >
       <div
         className={cn(
-          "w-full max-w-[600px] rounded-t-2xl bg-white flex flex-col max-h-[85vh] overflow-hidden animate-in slide-in-from-bottom duration-300",
+          "w-full max-w-[600px] rounded-t-2xl bg-card flex flex-col max-h-[85vh] overflow-hidden animate-in slide-in-from-bottom duration-300",
           hasBottomNav && "mb-16"
         )}
         onClick={(e) => e.stopPropagation()}
       >
         <div className="flex justify-center pt-3 pb-1 shrink-0">
-          <div className="w-10 h-1 rounded-full bg-zinc-200" />
+          <div className="w-10 h-1 rounded-full bg-muted" />
         </div>
         <div className="overflow-y-auto overscroll-contain flex-1">
           {children}
         </div>
         {footer && (
-          <div className="shrink-0 border-t border-zinc-100">
+          <div className="shrink-0 border-t border-border">
             {footer}
           </div>
         )}

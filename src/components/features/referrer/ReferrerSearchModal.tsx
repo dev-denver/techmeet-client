@@ -60,10 +60,10 @@ export function ReferrerSearchModal({ onSelect, onClose, hasBottomNav = false }:
           <button
             type="button"
             onClick={onClose}
-            className="p-1 rounded-full hover:bg-zinc-100 transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2"
+            className="p-1 rounded-full hover:bg-muted transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2"
             aria-label="닫기"
           >
-            <X className="h-5 w-5 text-zinc-500" />
+            <X className="h-5 w-5 text-muted-foreground" />
           </button>
         </div>
 
@@ -75,29 +75,29 @@ export function ReferrerSearchModal({ onSelect, onClose, hasBottomNav = false }:
             onChange={(e) => setQuery(e.target.value)}
             onKeyDown={(e) => { if (e.key === "Enter") { e.preventDefault(); void handleSearch(); } }}
             placeholder="이름 또는 010-XXXX-XXXX"
-            className="flex-1 rounded-lg border border-zinc-200 bg-white px-3 py-2.5 text-sm focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2"
+            className="flex-1 rounded-lg border border-input bg-background px-3 py-2.5 text-sm text-foreground placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2"
           />
           <button
             type="button"
             onClick={() => void handleSearch()}
             disabled={isLoading}
-            className="flex items-center gap-1.5 rounded-lg bg-zinc-900 px-4 py-2.5 text-sm font-medium text-white hover:opacity-90 disabled:opacity-50 transition-opacity"
+            className="flex items-center gap-1.5 rounded-lg bg-primary px-4 py-2.5 text-sm font-medium text-primary-foreground hover:opacity-90 disabled:opacity-50 transition-opacity"
           >
             <Search className="h-4 w-4" />
             검색
           </button>
         </div>
 
-        {error && <p className="text-sm text-red-500">{error}</p>}
+        {error && <p className="text-sm text-destructive">{error}</p>}
 
         {/* 검색 결과 */}
         {(isLoading || searched) && (
           <div className="overflow-y-auto overscroll-contain max-h-[240px] -mx-1 px-1">
             {isLoading && (
-              <p className="text-sm text-zinc-400 text-center py-6">검색 중...</p>
+              <p className="text-sm text-muted-foreground text-center py-6">검색 중...</p>
             )}
             {!isLoading && searched && results.length === 0 && (
-              <p className="text-sm text-zinc-400 text-center py-6">검색 결과가 없습니다</p>
+              <p className="text-sm text-muted-foreground text-center py-6">검색 결과가 없습니다</p>
             )}
             {!isLoading && results.length > 0 && (
               <ul className="space-y-1">
@@ -108,13 +108,13 @@ export function ReferrerSearchModal({ onSelect, onClose, hasBottomNav = false }:
                       onClick={() => setSelected(item)}
                       className={`w-full flex items-center justify-between px-3 py-3 rounded-lg text-left transition-colors ${
                         selected?.id === item.id
-                          ? "bg-zinc-900 text-white"
-                          : "hover:bg-zinc-50 text-zinc-800"
+                          ? "bg-primary text-primary-foreground"
+                          : "hover:bg-muted text-foreground"
                       }`}
                     >
                       <div className="min-w-0">
                         <p className="text-sm font-medium truncate">{item.name}</p>
-                        <p className={`text-xs mt-0.5 ${selected?.id === item.id ? "text-zinc-300" : "text-zinc-400"}`}>
+                        <p className={`text-xs mt-0.5 ${selected?.id === item.id ? "text-primary-foreground/70" : "text-muted-foreground"}`}>
                           {item.maskedPhone}
                         </p>
                       </div>
@@ -132,7 +132,7 @@ export function ReferrerSearchModal({ onSelect, onClose, hasBottomNav = false }:
           type="button"
           onClick={handleConfirm}
           disabled={!selected}
-          className="w-full rounded-xl bg-zinc-900 py-3 text-sm font-semibold text-white transition-opacity hover:opacity-90 disabled:opacity-40"
+          className="w-full rounded-xl bg-primary py-3 text-sm font-semibold text-primary-foreground transition-opacity hover:opacity-90 disabled:opacity-40"
         >
           선택 완료
         </button>

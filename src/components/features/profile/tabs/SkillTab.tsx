@@ -74,7 +74,7 @@ function SkillForm({ open, onClose, initial }: { open: boolean; onClose: () => v
       <FormInput label="역할" name="role" defaultValue={initial?.role ?? ""} placeholder="ex. 백엔드 개발 리드" />
 
       <div className="pt-1">
-        <p className="text-[11px] font-semibold text-zinc-400 uppercase tracking-wider mb-3">개발환경</p>
+        <p className="text-xs font-semibold text-muted-foreground uppercase tracking-wider mb-3">개발환경</p>
         <div className="space-y-3">
           <FormInput label="기종" name="hardwareType" defaultValue={initial?.hardwareType ?? ""} placeholder="ex. Dell PowerEdge R740" />
           <FormInput label="OS" name="os" defaultValue={initial?.os ?? ""} placeholder="ex. Linux (CentOS 7)" />
@@ -113,19 +113,19 @@ function SkillCard({ skill, onEdit }: { skill: SkillInventory; onEdit: () => voi
         onClick={() => setOpen(!open)}
       >
         <div className="flex-1 min-w-0 mr-3">
-          <p className="text-sm font-semibold text-zinc-800 leading-snug line-clamp-1">{skill.projectName}</p>
-          {period && <p className="text-[11px] text-zinc-400 mt-0.5">{period}</p>}
+          <p className="text-sm font-semibold text-foreground leading-snug line-clamp-1">{skill.projectName}</p>
+          {period && <p className="text-xs text-muted-foreground mt-0.5">{period}</p>}
         </div>
         <div className="flex items-center gap-1 shrink-0">
           <EditDeleteActions onEdit={onEdit} onDelete={handleDelete} />
-          {open ? <ChevronUp className="h-4 w-4 text-zinc-400 ml-1" /> : <ChevronDown className="h-4 w-4 text-zinc-400 ml-1" />}
+          {open ? <ChevronUp className="h-4 w-4 text-muted-foreground ml-1" /> : <ChevronDown className="h-4 w-4 text-muted-foreground ml-1" />}
         </div>
       </button>
 
       {open && (
-        <div className="border-t border-zinc-100">
+        <div className="border-t border-border">
           {/* 기본 메타 */}
-          <div className="grid grid-cols-2 border-b border-zinc-100">
+          <div className="grid grid-cols-2 border-b border-border">
             {[
               { label: "고객사", value: skill.client },
               { label: "근무회사", value: skill.company },
@@ -134,23 +134,23 @@ function SkillCard({ skill, onEdit }: { skill: SkillInventory; onEdit: () => voi
             ].map(({ label, value }, i) => (
               <div
                 key={label}
-                className={`px-4 py-2.5 ${i % 2 === 0 ? "border-r border-zinc-100" : ""} ${i >= 2 ? "border-t border-zinc-100" : ""}`}
+                className={`px-4 py-2.5 ${i % 2 === 0 ? "border-r border-border" : ""} ${i >= 2 ? "border-t border-border" : ""}`}
               >
-                <p className="text-[10px] text-zinc-400 mb-0.5">{label}</p>
-                <p className="text-xs font-medium text-zinc-700">{value || "-"}</p>
+                <p className="text-[10px] text-muted-foreground mb-0.5">{label}</p>
+                <p className="text-xs font-medium text-foreground">{value || "-"}</p>
               </div>
             ))}
           </div>
           {skill.role && (
-            <div className="px-4 py-2.5 border-b border-zinc-100">
-              <p className="text-[10px] text-zinc-400 mb-0.5">역할</p>
-              <p className="text-xs font-medium text-zinc-700">{skill.role}</p>
+            <div className="px-4 py-2.5 border-b border-border">
+              <p className="text-[10px] text-muted-foreground mb-0.5">역할</p>
+              <p className="text-xs font-medium text-foreground">{skill.role}</p>
             </div>
           )}
 
           {/* 개발환경 */}
           <div className="px-4 pt-3.5 pb-4">
-            <p className="text-[10px] font-semibold text-zinc-400 uppercase tracking-wider mb-3">개발환경</p>
+            <p className="text-xs font-semibold text-muted-foreground uppercase tracking-wider mb-3">개발환경</p>
             <div className="space-y-2.5">
               {[
                 { label: "기종", value: skill.hardwareType },
@@ -159,19 +159,19 @@ function SkillCard({ skill, onEdit }: { skill: SkillInventory; onEdit: () => voi
                 { label: "기타", value: skill.others },
               ].filter(({ value }) => value).map(({ label, value }) => (
                 <div key={label} className="flex items-start gap-3">
-                  <span className="text-[10px] text-zinc-400 w-10 shrink-0 pt-0.5 font-medium">{label}</span>
-                  <p className="text-xs text-zinc-700">{value}</p>
+                  <span className="text-[10px] text-muted-foreground w-10 shrink-0 pt-0.5 font-medium">{label}</span>
+                  <p className="text-xs text-foreground">{value}</p>
                 </div>
               ))}
               {skill.languages.length > 0 && (
                 <div className="flex items-start gap-3">
-                  <span className="text-[10px] text-zinc-400 w-10 shrink-0 pt-0.5 font-medium">언어</span>
+                  <span className="text-[10px] text-muted-foreground w-10 shrink-0 pt-0.5 font-medium">언어</span>
                   <div className="flex flex-wrap gap-1">{skill.languages.map((l) => <Tag key={l}>{l}</Tag>)}</div>
                 </div>
               )}
               {skill.tools.length > 0 && (
                 <div className="flex items-start gap-3">
-                  <span className="text-[10px] text-zinc-400 w-10 shrink-0 pt-0.5 font-medium">TOOL</span>
+                  <span className="text-[10px] text-muted-foreground w-10 shrink-0 pt-0.5 font-medium">TOOL</span>
                   <div className="flex flex-wrap gap-1">{skill.tools.map((t) => <Tag key={t}>{t}</Tag>)}</div>
                 </div>
               )}
@@ -179,7 +179,7 @@ function SkillCard({ skill, onEdit }: { skill: SkillInventory; onEdit: () => voi
           </div>
         </div>
       )}
-      {deleting && <div className="px-4 py-1 text-xs text-zinc-400 border-t border-zinc-100">삭제 중...</div>}
+      {deleting && <div className="px-4 py-1 text-xs text-muted-foreground border-t border-border">삭제 중...</div>}
     </CardWrap>
   );
 }

@@ -1,6 +1,7 @@
 @import "tailwindcss";
 
 @theme inline {
+  --color-page-bg: var(--page-bg);
   --color-background: var(--background);
   --color-foreground: var(--foreground);
   --color-card: var(--card);
@@ -36,6 +37,7 @@
 
 :root {
   --radius: 0.625rem;
+  --page-bg: oklch(0.91 0.005 286);
   --background: oklch(1 0 0);
   --foreground: oklch(0.141 0.005 285.823);
   --card: oklch(1 0 0);
@@ -64,6 +66,7 @@
 }
 
 .dark {
+  --page-bg: oklch(0.08 0.005 285.823);
   --background: oklch(0.141 0.005 285.823);
   --foreground: oklch(0.985 0 0);
   --card: oklch(0.21 0.006 285.885);

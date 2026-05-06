@@ -28,11 +28,11 @@ export function SaveButton({
       type={type}
       disabled={disabled ?? isLoading ?? isSuccess}
       className={cn(
-        "w-full rounded-xl py-3.5 text-[15px] font-semibold transition-all flex items-center justify-center gap-2",
+        "w-full rounded-xl py-3.5 text-base font-semibold transition-all flex items-center justify-center gap-2",
         "focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2",
         isSuccess
-          ? "bg-emerald-600 text-white cursor-default"
-          : "bg-zinc-900 text-white hover:bg-zinc-700 active:bg-zinc-800 disabled:opacity-50",
+          ? "bg-status-success text-white cursor-default"
+          : "bg-primary text-primary-foreground hover:opacity-90 active:opacity-80 disabled:opacity-50",
         className
       )}
       {...props}

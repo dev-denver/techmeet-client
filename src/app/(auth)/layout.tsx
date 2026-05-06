@@ -7,7 +7,7 @@ export default function AuthLayout({
   children: React.ReactNode;
 }) {
   return (
-    <div className="relative mx-auto max-w-[600px] min-h-screen bg-white">
+    <div className="relative mx-auto max-w-[600px] min-h-screen bg-background shadow-[0_0_0_1px_rgba(0,0,0,0.06)] md:shadow-xl">
       <TopBar />
       <main className="overflow-y-auto h-screen pt-14 pb-16">
         {children}

@@ -257,7 +257,7 @@ export function CareerSectionClient({ careers }: CareerSectionClientProps) {
                                 type="button"
                                 onClick={() => handleDelete(career.id)}
                                 disabled={isSubmitting}
-                                className="p-1 text-red-500 hover:text-red-700 transition-colors"
+                                className="p-1 text-destructive hover:text-destructive/80 transition-colors"
                                 aria-label="삭제 확인"
                               >
                                 <Check className="h-3.5 w-3.5" />
@@ -275,7 +275,7 @@ export function CareerSectionClient({ careers }: CareerSectionClientProps) {
                             <button
                               type="button"
                               onClick={() => handleDelete(career.id)}
-                              className="p-1 text-muted-foreground hover:text-red-500 transition-colors"
+                              className="p-1 text-muted-foreground hover:text-destructive transition-colors"
                               aria-label="경력 삭제"
                             >
                               <Trash2 className="h-3.5 w-3.5" />
@@ -293,13 +293,13 @@ export function CareerSectionClient({ careers }: CareerSectionClientProps) {
                       ? formatMonthYear(career.endDate)
                       : ""}
                   </p>
-                  <p className="text-xs text-zinc-600 leading-relaxed">{career.description}</p>
+                  <p className="text-xs text-muted-foreground leading-relaxed">{career.description}</p>
                   {career.techStack.length > 0 && (
                     <div className="flex flex-wrap gap-1.5">
                       {career.techStack.map((tech) => (
                         <span
                           key={tech}
-                          className="text-xs bg-zinc-700 text-zinc-100 px-2 py-0.5 rounded-md font-medium"
+                          className="text-xs bg-primary text-primary-foreground px-2 py-0.5 rounded-md font-medium"
                         >
                           {tech}
                         </span>
@@ -356,12 +356,12 @@ function CareerForm({
 }: CareerFormProps) {
   const inputClass = (error?: string) =>
     cn(
-      "w-full rounded-lg border bg-white px-3 py-2 text-sm focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2",
-      error ? "border-red-300" : "border-zinc-200"
+      "w-full rounded-lg border bg-background px-3 py-2 text-sm text-foreground placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2",
+      error ? "border-destructive/50" : "border-input"
     );
 
   return (
-    <form onSubmit={onSubmit} className="space-y-3.5 bg-zinc-50 rounded-xl p-4">
+    <form onSubmit={onSubmit} className="space-y-3.5 bg-muted/50 rounded-xl p-4">
       <p className="text-sm font-semibold">{isEdit ? "경력 수정" : "경력 추가"}</p>
 
       <div className="grid grid-cols-2 gap-3">
@@ -412,7 +412,7 @@ function CareerForm({
           onChange={(e) => onUpdate("isCurrent", e.target.checked)}
           className="rounded"
         />
-        <span className="text-sm text-zinc-700">현재 재직 중</span>
+        <span className="text-sm text-foreground">현재 재직 중</span>
       </label>
 
       <FormField label="업무 설명" required error={fieldErrors.description}>
@@ -421,7 +421,7 @@ function CareerForm({
           onChange={(e) => onUpdate("description", e.target.value)}
           placeholder="담당한 업무와 성과를 간략히 적어주세요"
           rows={3}
-          className={fieldErrors.description ? "border-red-300" : ""}
+          className={fieldErrors.description ? "border-destructive/50" : ""}
         />
       </FormField>
 
@@ -435,7 +435,7 @@ function CareerForm({
       </FormField>
 
       {serverError && (
-        <p className="text-xs text-red-500 bg-red-50 rounded-lg px-3 py-2">{serverError}</p>
+        <p className="text-xs text-destructive bg-destructive/10 rounded-lg px-3 py-2">{serverError}</p>
       )}
 
       <div className="flex gap-2">

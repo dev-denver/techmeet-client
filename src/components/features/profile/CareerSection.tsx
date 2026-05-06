@@ -37,7 +37,7 @@ export function CareerSection({ careers }: CareerSectionProps) {
                 {formatMonthYear(career.startDate)} ~{" "}
                 {career.isCurrent ? "현재" : career.endDate ? formatMonthYear(career.endDate) : ""}
               </p>
-              <p className="text-xs text-zinc-600 leading-relaxed">
+              <p className="text-xs text-muted-foreground leading-relaxed">
                 {career.description}
               </p>
               <div className="flex flex-wrap gap-1.5">

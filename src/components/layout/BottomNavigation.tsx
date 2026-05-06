@@ -16,7 +16,7 @@ export function BottomNavigation() {
   const pathname = usePathname();
 
   return (
-    <nav className="fixed bottom-0 left-1/2 -translate-x-1/2 w-full max-w-[600px] h-16 bg-white border-t border-border z-50">
+    <nav className="fixed bottom-0 left-1/2 -translate-x-1/2 w-full max-w-[600px] h-16 bg-background border-t border-border z-50">
       <div className="flex h-full">
         {navItems.map(({ href, label, icon: Icon }) => {
           const isActive =

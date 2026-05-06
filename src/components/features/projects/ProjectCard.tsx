@@ -29,8 +29,8 @@ export function ProjectCard({ project }: ProjectCardProps) {
               <span
                 className={`text-xs font-semibold px-2.5 py-0.5 rounded-full ${
                   isUrgent
-                    ? "bg-red-50 text-red-500"
-                    : "bg-zinc-100 text-zinc-500"
+                    ? "bg-status-danger/10 text-status-danger"
+                    : "bg-muted text-muted-foreground"
                 }`}
               >
                 {deadlineText}
@@ -40,7 +40,7 @@ export function ProjectCard({ project }: ProjectCardProps) {
 
           {/* 제목 + 클라이언트 */}
           <div>
-            <h3 className="font-bold text-[15px] leading-snug line-clamp-2">
+            <h3 className="font-bold text-base leading-snug line-clamp-2">
               {project.title}
             </h3>
             {project.clientName && (
@@ -54,13 +54,13 @@ export function ProjectCard({ project }: ProjectCardProps) {
               {project.techStack.slice(0, 4).map((tech) => (
                 <span
                   key={tech}
-                  className="text-xs bg-zinc-700 text-zinc-100 px-2 py-0.5 rounded-md font-medium"
+                  className="text-xs bg-primary text-primary-foreground px-2 py-0.5 rounded-md font-medium"
                 >
                   {tech}
                 </span>
               ))}
               {project.techStack.length > 4 && (
-                <span className="text-xs bg-zinc-100 text-zinc-500 px-2 py-0.5 rounded-md">
+                <span className="text-xs bg-muted text-muted-foreground px-2 py-0.5 rounded-md">
                   +{project.techStack.length - 4}
                 </span>
               )}
@@ -71,13 +71,13 @@ export function ProjectCard({ project }: ProjectCardProps) {
           {(period || project.projectType) && (
             <div className="flex items-center gap-2 flex-wrap">
               {period && (
-                <span className="flex items-center gap-1 text-xs text-zinc-500 bg-zinc-50 px-2.5 py-1 rounded-full border border-zinc-200">
+                <span className="flex items-center gap-1 text-xs text-muted-foreground bg-muted/50 px-2.5 py-1 rounded-full border border-border">
                   <CalendarRange className="h-3 w-3" />
                   {period}
                 </span>
               )}
               {project.projectType && (
-                <span className="flex items-center gap-1 text-xs text-zinc-500 bg-zinc-50 px-2.5 py-1 rounded-full border border-zinc-200">
+                <span className="flex items-center gap-1 text-xs text-muted-foreground bg-muted/50 px-2.5 py-1 rounded-full border border-border">
                   <Layers className="h-3 w-3" />
                   {formatProjectType(project.projectType)}
                 </span>
@@ -89,19 +89,19 @@ export function ProjectCard({ project }: ProjectCardProps) {
           {(project.location || project.workType || project.headcount !== null) && (
             <div className="flex items-center gap-2 flex-wrap">
               {project.workType && (
-                <span className="flex items-center gap-1 text-xs text-zinc-500 bg-zinc-50 px-2.5 py-1 rounded-full border border-zinc-200">
+                <span className="flex items-center gap-1 text-xs text-muted-foreground bg-muted/50 px-2.5 py-1 rounded-full border border-border">
                   <Clock className="h-3 w-3" />
                   {formatWorkType(project.workType)}
                 </span>
               )}
               {project.location && (
-                <span className="flex items-center gap-1 text-xs text-zinc-500 bg-zinc-50 px-2.5 py-1 rounded-full border border-zinc-200">
+                <span className="flex items-center gap-1 text-xs text-muted-foreground bg-muted/50 px-2.5 py-1 rounded-full border border-border">
                   <MapPin className="h-3 w-3" />
                   {project.location}
                 </span>
               )}
               {project.headcount !== null && (
-                <span className="flex items-center gap-1 text-xs text-zinc-500 bg-zinc-50 px-2.5 py-1 rounded-full border border-zinc-200">
+                <span className="flex items-center gap-1 text-xs text-muted-foreground bg-muted/50 px-2.5 py-1 rounded-full border border-border">
                   <Users className="h-3 w-3" />
                   {project.headcount}명
                 </span>

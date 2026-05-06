@@ -42,23 +42,23 @@ function BasicInfoTab({ profile, availStatus, availFromDate, isDirty, isSaving, 
         <SectionHeader title="기본 정보" />
         <CardWrap>
           <div className="grid grid-cols-2">
-            <div className="px-4 py-3 border-b border-r border-zinc-100">
-              <p className="text-[10px] text-zinc-400 font-medium mb-0.5">이름</p>
-              <p className="text-sm text-zinc-800 font-medium">{profile.name}</p>
+            <div className="px-4 py-3 border-b border-r border-border">
+              <p className="text-[10px] text-muted-foreground font-medium mb-0.5">이름</p>
+              <p className="text-sm text-foreground font-medium">{profile.name}</p>
             </div>
-            <div className="px-4 py-3 border-b border-zinc-100">
-              <p className="text-[10px] text-zinc-400 font-medium mb-0.5">성별</p>
-              <p className="text-sm text-zinc-800 font-medium">{genderLabel || "-"}</p>
+            <div className="px-4 py-3 border-b border-border">
+              <p className="text-[10px] text-muted-foreground font-medium mb-0.5">성별</p>
+              <p className="text-sm text-foreground font-medium">{genderLabel || "-"}</p>
             </div>
-            <div className="px-4 py-3 border-b border-r border-zinc-100">
-              <p className="text-[10px] text-zinc-400 font-medium mb-0.5">생년월일</p>
-              <p className="text-sm text-zinc-800 font-medium">
+            <div className="px-4 py-3 border-b border-r border-border">
+              <p className="text-[10px] text-muted-foreground font-medium mb-0.5">생년월일</p>
+              <p className="text-sm text-foreground font-medium">
                 {profile.birthDate ? profile.birthDate.slice(0, 10).replace(/-/g, ". ") : "-"}
               </p>
             </div>
-            <div className="px-4 py-3 border-b border-zinc-100">
-              <p className="text-[10px] text-zinc-400 font-medium mb-0.5">경력</p>
-              <p className="text-sm text-zinc-800 font-medium">
+            <div className="px-4 py-3 border-b border-border">
+              <p className="text-[10px] text-muted-foreground font-medium mb-0.5">경력</p>
+              <p className="text-sm text-foreground font-medium">
                 {profile.experienceYears !== null || profile.experienceMonths > 0
                   ? formatExperience(profile.experienceYears, profile.experienceMonths)
                   : "-"}
@@ -73,23 +73,23 @@ function BasicInfoTab({ profile, availStatus, availFromDate, isDirty, isSaving, 
         <SectionHeader title="소속 정보" />
         <CardWrap>
           <div className="grid grid-cols-2">
-            <div className="px-4 py-3 border-b border-r border-zinc-100">
-              <p className="text-[10px] text-zinc-400 font-medium mb-0.5">소속</p>
-              <p className="text-sm text-zinc-800 font-medium">{profile.affiliation || "-"}</p>
+            <div className="px-4 py-3 border-b border-r border-border">
+              <p className="text-[10px] text-muted-foreground font-medium mb-0.5">소속</p>
+              <p className="text-sm text-foreground font-medium">{profile.affiliation || "-"}</p>
             </div>
-            <div className="px-4 py-3 border-b border-zinc-100">
-              <p className="text-[10px] text-zinc-400 font-medium mb-0.5">입사일</p>
-              <p className="text-sm text-zinc-800 font-medium">
+            <div className="px-4 py-3 border-b border-border">
+              <p className="text-[10px] text-muted-foreground font-medium mb-0.5">입사일</p>
+              <p className="text-sm text-foreground font-medium">
                 {profile.joiningDate ? profile.joiningDate.slice(0, 10).replace(/-/g, ". ") : "-"}
               </p>
             </div>
-            <div className="px-4 py-3 border-r border-zinc-100">
-              <p className="text-[10px] text-zinc-400 font-medium mb-0.5">부서</p>
-              <p className="text-sm text-zinc-800 font-medium">{profile.department || "-"}</p>
+            <div className="px-4 py-3 border-r border-border">
+              <p className="text-[10px] text-muted-foreground font-medium mb-0.5">부서</p>
+              <p className="text-sm text-foreground font-medium">{profile.department || "-"}</p>
             </div>
             <div className="px-4 py-3">
-              <p className="text-[10px] text-zinc-400 font-medium mb-0.5">직위</p>
-              <p className="text-sm text-zinc-800 font-medium">{profile.positionTitle || "-"}</p>
+              <p className="text-[10px] text-muted-foreground font-medium mb-0.5">직위</p>
+              <p className="text-sm text-foreground font-medium">{profile.positionTitle || "-"}</p>
             </div>
           </div>
         </CardWrap>
@@ -98,7 +98,7 @@ function BasicInfoTab({ profile, availStatus, availFromDate, isDirty, isSaving, 
       <div>
         <SectionHeader title="연락처 및 주소" />
         <CardWrap>
-          <div className="divide-y divide-zinc-100">
+          <div className="divide-y divide-border">
             <FieldRow label="휴대폰번호" value={profile.phone} />
             <FieldRow label="이메일" value={profile.email} />
             <FieldRow label="주소" value={profile.address} />
@@ -123,12 +123,12 @@ function BasicInfoTab({ profile, availStatus, availFromDate, isDirty, isSaving, 
         onClick={onSaveAndEdit}
         disabled={isSaving}
         className={cn(
-          "w-full flex items-center justify-center gap-2.5 rounded-xl py-3.5 text-[15px] font-semibold transition-all",
+          "w-full flex items-center justify-center gap-2.5 rounded-xl py-3.5 text-base font-semibold transition-all",
           "focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2",
           "disabled:opacity-50",
           isDirty
             ? "bg-status-info text-white hover:opacity-90 active:opacity-80"
-            : "bg-zinc-900 text-white hover:bg-zinc-700 active:bg-zinc-800"
+            : "bg-primary text-primary-foreground hover:opacity-90 active:opacity-80"
         )}
       >
         {isSaving ? (
@@ -210,29 +210,29 @@ export function ProfileTabsClient({ profile }: ProfileTabsClientProps) {
   return (
     <div>
       {/* 다크 헤더 */}
-      <div className="bg-zinc-800 px-5 pt-6 pb-6">
-        <p className="text-zinc-400 text-xs font-medium tracking-wide">내 정보</p>
+      <div className="bg-primary px-5 pt-6 pb-6">
+        <p className="text-primary-foreground/60 text-xs font-medium tracking-wide">내 정보</p>
         <div className="flex items-center gap-2 mt-0.5">
-          <p className="text-white font-bold text-[17px] leading-tight">{profile.name}님</p>
+          <p className="text-primary-foreground font-bold text-lg leading-tight">{profile.name}님</p>
           <span className={`text-[10px] font-semibold px-2 py-0.5 rounded-full ${availConfig?.className ?? ""}`}>
             {availConfig?.label}
             {fromDateLabel && ` · ${fromDateLabel}`}
           </span>
           {isDirty && (
-            <span className="text-[9px] font-semibold px-1.5 py-0.5 rounded-full bg-amber-400/20 text-amber-300 border border-amber-400/30">
+            <span className="text-[10px] font-semibold px-1.5 py-0.5 rounded-full bg-status-warning/20 text-status-warning border border-status-warning/30">
               미저장
             </span>
           )}
         </div>
         {profile.positionTitle && (
-          <p className="text-zinc-500 text-sm mt-1">
+          <p className="text-primary-foreground/60 text-sm mt-1">
             {profile.positionTitle}{profile.affiliation ? ` · ${profile.affiliation}` : ""}
           </p>
         )}
       </div>
 
       {/* 탭 네비게이션 */}
-      <div className="sticky top-0 z-40 bg-white border-b border-zinc-100">
+      <div className="sticky top-0 z-40 bg-background border-b border-border">
         <div className="flex overflow-x-auto scrollbar-none">
           {TABS.map(({ key, label }) => (
             <button
@@ -240,8 +240,8 @@ export function ProfileTabsClient({ profile }: ProfileTabsClientProps) {
               onClick={() => setTab(key)}
               className={`flex-1 min-w-fit py-3 px-3 text-xs font-medium whitespace-nowrap transition-colors border-b-2 ${
                 tab === key
-                  ? "text-zinc-900 border-zinc-900"
-                  : "text-zinc-400 border-transparent hover:text-zinc-600"
+                  ? "text-foreground border-foreground"
+                  : "text-muted-foreground border-transparent hover:text-foreground/70"
               }`}
             >
               {label}

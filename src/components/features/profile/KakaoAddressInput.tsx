@@ -103,12 +103,12 @@ export function KakaoAddressInput({ value, onChange }: KakaoAddressInputProps) {
             readOnly
             placeholder="주소 찾기 버튼을 눌러 검색하세요"
             onClick={() => setIsOpen(true)}
-            className="flex-1 h-11 px-3 rounded-lg border border-zinc-200 bg-zinc-50 text-sm text-zinc-800 placeholder:text-zinc-400 cursor-pointer focus:outline-none focus:ring-2 focus:ring-zinc-900 focus-visible:ring-2 focus-visible:ring-zinc-900"
+            className="flex-1 h-11 px-3 rounded-lg border border-input bg-muted/50 text-sm text-foreground placeholder:text-muted-foreground cursor-pointer focus:outline-none focus:ring-2 focus:ring-ring focus-visible:ring-2 focus-visible:ring-ring"
           />
           <button
             type="button"
             onClick={() => setIsOpen(true)}
-            className="flex items-center gap-1.5 shrink-0 h-11 px-3 rounded-lg border border-zinc-200 text-sm font-medium text-zinc-600 hover:bg-zinc-50 active:bg-zinc-100 transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2"
+            className="flex items-center gap-1.5 shrink-0 h-11 px-3 rounded-lg border border-border text-sm font-medium text-muted-foreground hover:bg-muted/50 active:bg-muted transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2"
           >
             <MapPin className="h-3.5 w-3.5" />
             주소 찾기
@@ -122,20 +122,20 @@ export function KakaoAddressInput({ value, onChange }: KakaoAddressInputProps) {
             value={detail}
             onChange={handleDetailChange}
             placeholder="상세 주소 입력 (동/호수 등, 선택)"
-            className="w-full h-11 px-3 rounded-lg border border-zinc-200 text-sm text-zinc-800 placeholder:text-zinc-400 focus:outline-none focus:ring-2 focus:ring-zinc-900 focus-visible:ring-2 focus-visible:ring-zinc-900"
+            className="w-full h-11 px-3 rounded-lg border border-input text-sm text-foreground placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-ring focus-visible:ring-2 focus-visible:ring-ring bg-background"
           />
         )}
       </div>
 
       {/* 카카오 주소 검색 전체화면 오버레이 */}
       {isOpen && (
-        <div className="fixed inset-0 z-[70] flex flex-col bg-white">
-          <div className="flex items-center justify-between px-4 h-14 border-b border-zinc-200 shrink-0">
+        <div className="fixed inset-0 z-[70] flex flex-col bg-background">
+          <div className="flex items-center justify-between px-4 h-14 border-b border-border shrink-0">
             <h3 className="text-base font-semibold">주소 검색</h3>
             <button
               type="button"
               onClick={() => setIsOpen(false)}
-              className="p-1.5 rounded-md hover:bg-zinc-100 text-zinc-500 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
+              className="p-1.5 rounded-md hover:bg-muted text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
               aria-label="닫기"
             >
               <X className="h-5 w-5" />

@@ -19,7 +19,7 @@ function Toggle({ checked, onChange, disabled }: ToggleProps) {
       disabled={disabled}
       className={cn(
         "relative inline-flex h-6 w-11 shrink-0 cursor-pointer rounded-full border-2 border-transparent transition-colors duration-200 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:opacity-50",
-        checked ? "bg-primary" : "bg-zinc-200"
+        checked ? "bg-primary" : "bg-muted"
       )}
     >
       <span
@@ -91,7 +91,7 @@ export function NotificationSettings() {
 
   if (loadError) {
     return (
-      <p className="p-4 text-sm text-red-500">
+      <p className="p-4 text-sm text-destructive">
         알림 설정을 불러오지 못했습니다.
       </p>
     );

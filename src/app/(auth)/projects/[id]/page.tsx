@@ -137,19 +137,19 @@ export default async function ProjectDetailPage({ params }: ProjectDetailPagePro
 
       {/* 마감일 */}
       {project.deadline && (
-        <div className="px-5 py-4 border-b bg-zinc-50">
+        <div className="px-5 py-4 border-b bg-muted/30">
           <div className="flex items-center justify-between">
             <div>
-              <p className="text-[10px] text-zinc-400 font-medium mb-0.5">지원 마감일</p>
-              <p className="text-sm font-semibold text-zinc-800">{formatDate(project.deadline)}</p>
+              <p className="text-[10px] text-muted-foreground font-medium mb-0.5">지원 마감일</p>
+              <p className="text-sm font-semibold text-foreground">{formatDate(project.deadline)}</p>
             </div>
             <span
               className={`text-xs font-bold px-3 py-1 rounded-full ${
                 isExpired
-                  ? "bg-zinc-100 text-zinc-500"
+                  ? "bg-muted text-muted-foreground"
                   : isUrgent
-                  ? "bg-red-50 text-red-500"
-                  : "bg-zinc-100 text-zinc-600"
+                  ? "bg-status-danger/10 text-status-danger"
+                  : "bg-muted text-muted-foreground"
               }`}
             >
               {deadlineText}
@@ -162,7 +162,7 @@ export default async function ProjectDetailPage({ params }: ProjectDetailPagePro
       <div className="h-20" />
 
       {/* CTA - BottomNav 바로 위에 고정 */}
-      <div className="fixed bottom-16 left-1/2 -translate-x-1/2 w-full max-w-[600px] z-30 bg-white border-t px-4 py-3">
+      <div className="fixed bottom-16 left-1/2 -translate-x-1/2 w-full max-w-[600px] z-30 bg-background border-t border-border px-4 py-3">
         {isRecruiting ? (
           <ApplyButton projectId={project.id} />
         ) : (

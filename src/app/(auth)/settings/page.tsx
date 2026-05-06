@@ -34,13 +34,13 @@ function LinkRow({
   return (
     <Link
       href={href}
-      className="flex items-center justify-between px-4 py-3.5 hover:bg-zinc-50 active:bg-zinc-100 transition-colors"
+      className="flex items-center justify-between px-4 py-3.5 hover:bg-muted/50 active:bg-muted transition-colors"
     >
-      <span className={`flex items-center gap-2.5 text-sm ${danger ? "text-red-500" : ""}`}>
-        <span className={danger ? "text-red-400" : "text-muted-foreground"}>{icon}</span>
+      <span className={`flex items-center gap-2.5 text-sm ${danger ? "text-destructive" : ""}`}>
+        <span className={danger ? "text-destructive/80" : "text-muted-foreground"}>{icon}</span>
         {label}
       </span>
-      <ChevronRight className={`h-4 w-4 ${danger ? "text-red-300" : "text-muted-foreground"}`} />
+      <ChevronRight className={`h-4 w-4 ${danger ? "text-destructive/50" : "text-muted-foreground"}`} />
     </Link>
   );
 }
@@ -52,10 +52,10 @@ export default async function SettingsPage() {
   return (
     <div className="pb-8">
       {/* 프로필 요약 */}
-      <div className="bg-zinc-800 px-5 pt-6 pb-6">
-        <p className="text-zinc-500 text-xs font-medium tracking-wide">설정</p>
-        <p className="text-white font-bold text-[17px] leading-tight mt-0.5">{profile?.name ?? "-"}</p>
-        <p className="text-zinc-600 text-sm mt-1">{profile?.email ?? "-"}</p>
+      <div className="bg-primary px-5 pt-6 pb-6">
+        <p className="text-primary-foreground/50 text-xs font-medium tracking-wide">설정</p>
+        <p className="text-primary-foreground font-bold text-lg leading-tight mt-0.5">{profile?.name ?? "-"}</p>
+        <p className="text-primary-foreground/60 text-sm mt-1">{profile?.email ?? "-"}</p>
       </div>
 
       <div className="px-4 pt-4 space-y-4">
@@ -92,7 +92,7 @@ export default async function SettingsPage() {
           <LogoutButton />
           <Link
             href="/settings/withdraw"
-            className="flex items-center gap-1.5 text-xs text-zinc-400 hover:text-red-400 transition-colors px-1 py-1"
+            className="flex items-center gap-1.5 text-xs text-muted-foreground hover:text-destructive transition-colors px-1 py-1"
           >
             <UserX className="h-3.5 w-3.5" />
             회원 탈퇴
