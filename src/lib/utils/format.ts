@@ -4,7 +4,7 @@ function parseDate(dateString: string): Date {
     throw new Error(`Invalid date string: "${dateString}"`);
   }
   return date;
-}
+} 
 
 export function formatDate(dateString: string | null | undefined): string {
   if (!dateString) return "-";
