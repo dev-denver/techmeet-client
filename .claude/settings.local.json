@@ -9,7 +9,8 @@
       "Bash(git -C /mnt/c/Users/denver/denver/techmeet-client ls-files)",
       "Bash(git -C /mnt/c/Users/denver/denver/techmeet-client show HEAD:middleware.ts)",
       "Bash(git -C /mnt/c/Users/denver/denver/techmeet-client show 1962b3b7:src/middleware.ts)",
-      "Bash(git -C /mnt/c/Users/denver/denver/techmeet-client diff 1962b3b7..HEAD -- src/)"
+      "Bash(git -C /mnt/c/Users/denver/denver/techmeet-client diff 1962b3b7..HEAD -- src/)",
+      "Bash(git *)"
     ]
   }
 }
