@@ -1,0 +1,15 @@
+{
+  "permissions": {
+    "allow": [
+      "mcp__supabase__execute_sql",
+      "mcp__vercel__get_runtime_logs",
+      "mcp__vercel__list_deployments",
+      "mcp__vercel__get_project",
+      "mcp__vercel__get_deployment_build_logs",
+      "Bash(git -C /mnt/c/Users/denver/denver/techmeet-client ls-files)",
+      "Bash(git -C /mnt/c/Users/denver/denver/techmeet-client show HEAD:middleware.ts)",
+      "Bash(git -C /mnt/c/Users/denver/denver/techmeet-client show 1962b3b7:src/middleware.ts)",
+      "Bash(git -C /mnt/c/Users/denver/denver/techmeet-client diff 1962b3b7..HEAD -- src/)"
+    ]
+  }
+}

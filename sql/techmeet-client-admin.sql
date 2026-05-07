@@ -6,20 +6,25 @@
 -- 테이블 구성:
 --   [CLIENT]  1. profiles          — 프리랜서 프로필 (id = auth.users.id) / client CRUD
 --             2. careers           — 경력 / client CRUD
+--             3. educations        — 학력 / client CRUD
+--             4. certifications    — 자격증 / client CRUD
+--             5. skill_inventories — 스킬 인벤토리(경력기술서) / client CRUD
 --
---   [SHARED]  3. projects          — 프로젝트 / admin 관리, client 읽기
---             4. notices           — 공지사항 (예약 공지 포함) / admin 관리, client 읽기
+--   [SHARED]  6. projects          — 프로젝트 / admin 관리, client 읽기
+--             7. notices           — 공지사항 (예약 공지 포함) / admin 관리, client 읽기
 --
---   [CLIENT]  5. applications      — 지원 내역 / client CRUD (projects FK로 인해 SHARED 이후 정의)
+--   [CLIENT]  8. applications      — 지원 내역 / client CRUD (projects FK로 인해 SHARED 이후 정의)
 --
---   [ADMIN]   6. admin_users       — 관리자 계정
---             7. alimtalk_templates — 카카오 알림톡 서식
---             8. alimtalk_logs     — 카카오 알림톡 발송 이력
---             9. admin_audit_logs  — 관리자 감사 로그
+--   [ADMIN]   9. admin_users       — 관리자 계정
+--            10. alimtalk_templates — 카카오 알림톡 서식
+--            11. alimtalk_logs     — 카카오 알림톡 발송 이력
+--            12. admin_audit_logs  — 관리자 감사 로그
 --
 -- 설계 원칙:
 --   - profiles.id = auth.users.id (client 코드 호환)
 --   - admin_users는 별도 UUID PK + auth_user_id FK 구조
+--   - seq_id: admin 표시용 순번 (bigint, 고유, 애플리케이션에서 직접 할당)
+--   - deleted_at: 소프트 삭제 (projects, notices)
 --   - RLS: client 앱은 anon key + JWT, admin API는 service_role로 RLS 우회
 --   - [ADMIN] 테이블은 RLS 활성화 + 정책 없음 = service_role 전용
 --   - 비즈니스 유효성 검사(날짜 역전·값 범위 등)는 API zod 스키마에서 처리
@@ -77,7 +82,8 @@ create table if not exists public.profiles (
   withdrawn_at                     timestamptz,                                                           -- 탈퇴 일시
   referrer_id                      uuid        references public.profiles(id) on delete set null,         -- 추천인 프로필 ID
   created_at                       timestamptz not null default now(),                                    -- 생성 일시
-  updated_at                       timestamptz not null default now()                                     -- 수정 일시
+  updated_at                       timestamptz not null default now(),                                    -- 수정 일시
+  seq_id                           bigint      not null                                                   -- admin 표시용 순번
 );
 
 alter table public.profiles enable row level security;
@@ -113,6 +119,7 @@ create table if not exists public.careers (
   tech_stack  text[]      not null default array[]::text[],                                 -- 사용 기술 스택
   created_at  timestamptz not null default now(),                                           -- 생성 일시
   updated_at  timestamptz not null default now(),                                           -- 수정 일시
+  seq_id      bigint      not null,                                                         -- admin 표시용 순번
   check ((is_current = false) or (is_current = true and end_date is null))
 );
 
@@ -136,12 +143,122 @@ create trigger careers_updated_at
   for each row execute function public.set_updated_at();
 
 
+-- ------------------------------------------------------------
+-- 3. educations (학력)
+-- ------------------------------------------------------------
+create table if not exists public.educations (
+  id           uuid        default gen_random_uuid() primary key,                            -- 고유 식별자
+  profile_id   uuid        references public.profiles(id) on delete cascade not null,        -- 프로필 ID
+  school_name  text        not null,                                                         -- 학교명
+  degree       text,                                                                         -- 학위
+  major        text,                                                                         -- 전공
+  start_date   date,                                                                         -- 입학일
+  end_date     date,                                                                         -- 졸업일
+  is_graduated boolean     not null default true,                                            -- 졸업 여부
+  created_at   timestamptz not null default now(),                                           -- 생성 일시
+  updated_at   timestamptz not null default now()                                            -- 수정 일시
+);
+
+alter table public.educations enable row level security;
+
+create policy "educations_select_own" on public.educations
+  for select using (auth.uid() = profile_id);
+
+create policy "educations_insert_own" on public.educations
+  for insert with check (auth.uid() = profile_id);
+
+create policy "educations_update_own" on public.educations
+  for update using (auth.uid() = profile_id);
+
+create policy "educations_delete_own" on public.educations
+  for delete using (auth.uid() = profile_id);
+
+create trigger educations_updated_at
+  before update on public.educations
+  for each row execute function public.set_updated_at();
+
+
+-- ------------------------------------------------------------
+-- 4. certifications (자격증)
+-- ------------------------------------------------------------
+create table if not exists public.certifications (
+  id            uuid        default gen_random_uuid() primary key,                           -- 고유 식별자
+  profile_id    uuid        references public.profiles(id) on delete cascade not null,       -- 프로필 ID
+  name          text        not null,                                                        -- 자격증명
+  acquired_date date,                                                                        -- 취득일
+  created_at    timestamptz not null default now(),                                          -- 생성 일시
+  updated_at    timestamptz not null default now()                                           -- 수정 일시
+);
+
+alter table public.certifications enable row level security;
+
+create policy "certifications_select_own" on public.certifications
+  for select using (auth.uid() = profile_id);
+
+create policy "certifications_insert_own" on public.certifications
+  for insert with check (auth.uid() = profile_id);
+
+create policy "certifications_update_own" on public.certifications
+  for update using (auth.uid() = profile_id);
+
+create policy "certifications_delete_own" on public.certifications
+  for delete using (auth.uid() = profile_id);
+
+create trigger certifications_updated_at
+  before update on public.certifications
+  for each row execute function public.set_updated_at();
+
+
+-- ------------------------------------------------------------
+-- 5. skill_inventories (스킬 인벤토리 / 경력기술서)
+-- ------------------------------------------------------------
+create table if not exists public.skill_inventories (
+  id            uuid        default gen_random_uuid() primary key,                           -- 고유 식별자
+  profile_id    uuid        references public.profiles(id) on delete cascade not null,       -- 프로필 ID
+  project_name  text        not null,                                                        -- 프로젝트명
+  start_date    date,                                                                        -- 시작일
+  end_date      date,                                                                        -- 종료일
+  client        text,                                                                        -- 고객사
+  company       text,                                                                        -- 수행사
+  industry      text,                                                                        -- 업종
+  application   text,                                                                        -- 업무 분류
+  role          text,                                                                        -- 역할
+  hardware_type text,                                                                        -- 하드웨어
+  os            text,                                                                        -- OS
+  languages     text[]      not null default array[]::text[],                                -- 사용 언어
+  dbms          text,                                                                        -- DBMS
+  tools         text[]      not null default array[]::text[],                                -- 사용 툴
+  others        text,                                                                        -- 기타
+  sort_order    integer     not null default 0,                                              -- 정렬 순서
+  created_at    timestamptz not null default now(),                                          -- 생성 일시
+  updated_at    timestamptz not null default now()                                           -- 수정 일시
+);
+
+alter table public.skill_inventories enable row level security;
+
+create policy "skill_inventories_select_own" on public.skill_inventories
+  for select using (auth.uid() = profile_id);
+
+create policy "skill_inventories_insert_own" on public.skill_inventories
+  for insert with check (auth.uid() = profile_id);
+
+create policy "skill_inventories_update_own" on public.skill_inventories
+  for update using (auth.uid() = profile_id);
+
+create policy "skill_inventories_delete_own" on public.skill_inventories
+  for delete using (auth.uid() = profile_id);
+
+create trigger skill_inventories_updated_at
+  before update on public.skill_inventories
+  for each row execute function public.set_updated_at();
+
+
 -- ============================================================
 -- [SHARED] 공유 테이블 (admin 관리 / client 읽기)
 -- ============================================================
 
 -- ------------------------------------------------------------
--- 3. projects (프로젝트)
+-- 6. projects (프로젝트)
 -- ------------------------------------------------------------
 create table if not exists public.projects (
   id                  uuid        default gen_random_uuid() primary key,                    -- 고유 식별자
@@ -162,9 +279,12 @@ create table if not exists public.projects (
     check (work_type in ('remote', 'onsite', 'hybrid')),
   location            text,                                                                 -- 근무 위치
   headcount           integer,                                                              -- 모집 인원
+  is_visible          boolean     not null default true,                                   -- 노출 여부
+  deleted_at          timestamptz,                                                          -- 소프트 삭제 일시
   created_by          uuid        references public.profiles(id) on delete set null,        -- 등록 관리자 프로필 ID
   created_at          timestamptz not null default now(),                                   -- 생성 일시
-  updated_at          timestamptz not null default now()                                    -- 수정 일시
+  updated_at          timestamptz not null default now(),                                   -- 수정 일시
+  seq_id              bigint      not null                                                  -- admin 표시용 순번
 );
 
 alter table public.projects enable row level security;
@@ -179,7 +299,7 @@ create trigger projects_updated_at
 
 
 -- ------------------------------------------------------------
--- 4. notices (공지사항)
+-- 7. notices (공지사항)
 -- ------------------------------------------------------------
 create table if not exists public.notices (
   id           uuid        default gen_random_uuid() primary key,                           -- 고유 식별자
@@ -193,7 +313,9 @@ create table if not exists public.notices (
   end_at       timestamptz,                                                                 -- 게시 종료 일시 (예약 공지)
   created_by   uuid        references public.profiles(id) on delete set null,               -- 작성 관리자 프로필 ID
   created_at   timestamptz not null default now(),                                          -- 생성 일시
-  updated_at   timestamptz not null default now()                                           -- 수정 일시
+  updated_at   timestamptz not null default now(),                                          -- 수정 일시
+  seq_id       bigint      not null,                                                        -- admin 표시용 순번
+  deleted_at   timestamptz                                                                  -- 소프트 삭제 일시
 );
 
 alter table public.notices enable row level security;
@@ -222,7 +344,7 @@ create trigger notices_updated_at
 
 
 -- ------------------------------------------------------------
--- 5. applications (지원) [CLIENT — projects FK로 인해 SHARED 이후 정의]
+-- 8. applications (지원) [CLIENT — projects FK로 인해 SHARED 이후 정의]
 -- ------------------------------------------------------------
 create table if not exists public.applications (
   id                   uuid        default gen_random_uuid() primary key,                               -- 고유 식별자
@@ -237,6 +359,7 @@ create table if not exists public.applications (
   applied_at           timestamptz not null default now(),                                               -- 지원 일시
   created_at           timestamptz not null default now(),                                               -- 생성 일시
   updated_at           timestamptz not null default now(),                                               -- 수정 일시
+  seq_id               bigint      not null,                                                             -- admin 표시용 순번
   unique (project_id, freelancer_id)
 );
 
@@ -266,7 +389,7 @@ create trigger applications_updated_at
 -- ============================================================
 
 -- ------------------------------------------------------------
--- 6. admin_users (관리자 계정)
+-- 9. admin_users (관리자 계정)
 -- ------------------------------------------------------------
 -- profiles와 달리 별도 UUID PK + auth_user_id FK 구조 유지
 -- (관리자 계정은 프리랜서 profiles와 완전히 분리)
@@ -279,7 +402,9 @@ create table if not exists public.admin_users (
   role         text        not null default 'admin'                                         -- 권한 (superadmin/admin)
     check (role in ('superadmin', 'admin')),
   created_at   timestamptz not null default now(),                                          -- 생성 일시
-  updated_at   timestamptz not null default now()                                           -- 수정 일시
+  updated_at   timestamptz not null default now(),                                          -- 수정 일시
+  seq_id       bigint      not null,                                                        -- admin 표시용 순번
+  phone        text                                                                         -- 관리자 전화번호
 );
 
 alter table public.admin_users enable row level security;
@@ -294,7 +419,7 @@ create trigger admin_users_updated_at
 
 
 -- ------------------------------------------------------------
--- 7. alimtalk_templates (카카오 알림톡 서식)
+-- 10. alimtalk_templates (카카오 알림톡 서식)
 -- ------------------------------------------------------------
 create table if not exists public.alimtalk_templates (
   id           uuid        default gen_random_uuid() primary key,                           -- 고유 식별자
@@ -306,7 +431,8 @@ create table if not exists public.alimtalk_templates (
     check (service_type in ('project', 'notice', 'individual', 'all')),
   is_active    boolean     not null default true,                                           -- 사용 여부
   created_at   timestamptz not null default now(),                                          -- 생성 일시
-  updated_at   timestamptz not null default now()                                           -- 수정 일시
+  updated_at   timestamptz not null default now(),                                          -- 수정 일시
+  seq_id       bigint      not null                                                         -- admin 표시용 순번
 );
 
 alter table public.alimtalk_templates enable row level security;
@@ -318,7 +444,7 @@ create trigger alimtalk_templates_updated_at
 
 
 -- ------------------------------------------------------------
--- 8. alimtalk_logs (카카오 알림톡 발송 이력)
+-- 11. alimtalk_logs (카카오 알림톡 발송 이력)
 -- ------------------------------------------------------------
 create table if not exists public.alimtalk_logs (
   id            uuid        default gen_random_uuid() primary key,                          -- 고유 식별자
@@ -333,7 +459,8 @@ create table if not exists public.alimtalk_logs (
   is_success    boolean,                                                                    -- 발송 성공 여부
   sent_at       timestamptz,                                                                -- 실제 발송 일시
   error_message text,                                                                       -- 오류 메시지
-  created_at    timestamptz not null default now()                                          -- 생성 일시
+  created_at    timestamptz not null default now(),                                         -- 생성 일시
+  seq_id        bigint      not null                                                        -- admin 표시용 순번
 );
 
 alter table public.alimtalk_logs enable row level security;
@@ -351,7 +478,7 @@ alter table public.alimtalk_logs
 
 
 -- ------------------------------------------------------------
--- 9. admin_audit_logs (관리자 감사 로그)
+-- 12. admin_audit_logs (관리자 감사 로그)
 -- ------------------------------------------------------------
 create table if not exists public.admin_audit_logs (
   id          uuid        default gen_random_uuid() primary key,                            -- 고유 식별자
@@ -363,7 +490,8 @@ create table if not exists public.admin_audit_logs (
   details     jsonb,                                                                        -- 상세 데이터 (JSON)
   ip_address  text,                                                                         -- 요청 IP 주소
   user_agent  text,                                                                         -- 요청 브라우저 정보
-  created_at  timestamptz not null default now()                                            -- 생성 일시
+  created_at  timestamptz not null default now(),                                           -- 생성 일시
+  seq_id      bigint      not null                                                          -- admin 표시용 순번
 );
 
 alter table public.admin_audit_logs enable row level security;
@@ -381,30 +509,38 @@ create index if not exists idx_profiles_account_status      on public.profiles(a
 create index if not exists idx_profiles_availability_status on public.profiles(availability_status);
 create index if not exists idx_profiles_kakao_id            on public.profiles(kakao_id);
 create index if not exists idx_profiles_referrer_id         on public.profiles(referrer_id);
+create unique index if not exists profiles_seq_id_idx       on public.profiles(seq_id);
 
 -- [CLIENT] careers
 create index if not exists idx_careers_profile_id           on public.careers(profile_id);
+create unique index if not exists careers_seq_id_idx        on public.careers(seq_id);
 
 -- [CLIENT] applications
 create index if not exists idx_applications_applied_at      on public.applications(applied_at desc);
 create index if not exists idx_applications_status          on public.applications(status);
 create index if not exists idx_applications_freelancer_id   on public.applications(freelancer_id);
 create index if not exists idx_applications_project_id      on public.applications(project_id);
+create unique index if not exists applications_seq_id_idx   on public.applications(seq_id);
 
 -- [SHARED] projects
 create index if not exists idx_projects_created_at          on public.projects(created_at desc);
 create index if not exists idx_projects_status              on public.projects(status);
 create index if not exists idx_projects_deadline            on public.projects(deadline);
 create index if not exists idx_projects_category            on public.projects(category);
+create index if not exists projects_is_visible_idx          on public.projects(is_visible);
+create index if not exists projects_deleted_at_idx          on public.projects(deleted_at);
+create unique index if not exists projects_seq_id_idx       on public.projects(seq_id);
 
 -- [SHARED] notices
 create index if not exists idx_notices_created_at           on public.notices(created_at desc);
 create index if not exists idx_notices_is_published         on public.notices(is_published);
+create unique index if not exists notices_seq_id_idx        on public.notices(seq_id);
 
 -- [ADMIN] alimtalk_templates
 create index if not exists idx_alimtalk_templates_code         on public.alimtalk_templates(code);
 create index if not exists idx_alimtalk_templates_service_type on public.alimtalk_templates(service_type);
 create index if not exists idx_alimtalk_templates_is_active    on public.alimtalk_templates(is_active);
+create unique index if not exists alimtalk_templates_seq_id_idx on public.alimtalk_templates(seq_id);
 
 -- [ADMIN] alimtalk_logs
 create index if not exists idx_alimtalk_created_at          on public.alimtalk_logs(created_at desc);
@@ -413,12 +549,17 @@ create index if not exists idx_alimtalk_user_id             on public.alimtalk_l
 create index if not exists idx_alimtalk_template_code       on public.alimtalk_logs(template_code);
 create index if not exists idx_alimtalk_service_type        on public.alimtalk_logs(service_type);
 create index if not exists idx_alimtalk_is_success          on public.alimtalk_logs(is_success);
+create unique index if not exists alimtalk_logs_seq_id_idx  on public.alimtalk_logs(seq_id);
+
+-- [ADMIN] admin_users
+create unique index if not exists admin_users_seq_id_idx    on public.admin_users(seq_id);
 
 -- [ADMIN] admin_audit_logs
 create index if not exists idx_audit_logs_created_at        on public.admin_audit_logs(created_at desc);
 create index if not exists idx_audit_logs_admin_id          on public.admin_audit_logs(admin_id);
 create index if not exists idx_audit_logs_resource          on public.admin_audit_logs(resource);
 create index if not exists idx_audit_logs_action            on public.admin_audit_logs(action);
+create unique index if not exists admin_audit_logs_seq_id_idx on public.admin_audit_logs(seq_id);
 
 
 -- ============================================================
@@ -429,86 +570,11 @@ create index if not exists idx_audit_logs_action            on public.admin_audi
 --      관리자 이메일/비밀번호로 Auth 계정을 먼저 생성
 --   2. 생성된 유저의 UUID를 아래 auth_user_id에 입력 후 실행
 -- ============================================================
--- insert into public.admin_users (auth_user_id, name, email, role)
+-- insert into public.admin_users (auth_user_id, name, email, role, seq_id)
 -- values (
 --   'xxxxxxxx-xxxx-xxxx-xxxx-xxxxxxxxxxxx',  -- Auth 유저 UUID 입력
 --   '마스터 관리자',
 --   'admin@techmeet.com',
---   'superadmin'
+--   'superadmin',
+--   1
 -- ) on conflict (auth_user_id) do nothing;
-
-
--- ============================================================
--- [CLIENT] 이력서 관련 테이블 (마이그레이션: add_resume_tables)
--- ============================================================
-
--- ------------------------------------------------------------
--- educations (학력)
--- ------------------------------------------------------------
-create table if not exists public.educations (
-  id           uuid        default gen_random_uuid() primary key,
-  profile_id   uuid        references public.profiles(id) on delete cascade not null,
-  school_name  text        not null,
-  degree       text,
-  major        text,
-  start_date   date,
-  end_date     date,
-  is_graduated boolean     not null default true,
-  created_at   timestamptz not null default now(),
-  updated_at   timestamptz not null default now()
-);
-alter table public.educations enable row level security;
-create policy "educations_select_own" on public.educations for select using (auth.uid() = profile_id);
-create policy "educations_insert_own" on public.educations for insert with check (auth.uid() = profile_id);
-create policy "educations_update_own" on public.educations for update using (auth.uid() = profile_id);
-create policy "educations_delete_own" on public.educations for delete using (auth.uid() = profile_id);
-create trigger educations_updated_at before update on public.educations for each row execute function public.set_updated_at();
-
--- ------------------------------------------------------------
--- certifications (자격증)
--- ------------------------------------------------------------
-create table if not exists public.certifications (
-  id            uuid        default gen_random_uuid() primary key,
-  profile_id    uuid        references public.profiles(id) on delete cascade not null,
-  name          text        not null,
-  acquired_date date,
-  created_at    timestamptz not null default now(),
-  updated_at    timestamptz not null default now()
-);
-alter table public.certifications enable row level security;
-create policy "certifications_select_own" on public.certifications for select using (auth.uid() = profile_id);
-create policy "certifications_insert_own" on public.certifications for insert with check (auth.uid() = profile_id);
-create policy "certifications_update_own" on public.certifications for update using (auth.uid() = profile_id);
-create policy "certifications_delete_own" on public.certifications for delete using (auth.uid() = profile_id);
-create trigger certifications_updated_at before update on public.certifications for each row execute function public.set_updated_at();
-
--- ------------------------------------------------------------
--- skill_inventories (스킬 인벤토리)
--- ------------------------------------------------------------
-create table if not exists public.skill_inventories (
-  id            uuid        default gen_random_uuid() primary key,
-  profile_id    uuid        references public.profiles(id) on delete cascade not null,
-  project_name  text        not null,
-  start_date    date,
-  end_date      date,
-  client        text,
-  company       text,
-  industry      text,
-  application   text,
-  role          text,
-  hardware_type text,
-  os            text,
-  languages     text[]      not null default array[]::text[],
-  dbms          text,
-  tools         text[]      not null default array[]::text[],
-  others        text,
-  sort_order    integer     not null default 0,
-  created_at    timestamptz not null default now(),
-  updated_at    timestamptz not null default now()
-);
-alter table public.skill_inventories enable row level security;
-create policy "skill_inventories_select_own" on public.skill_inventories for select using (auth.uid() = profile_id);
-create policy "skill_inventories_insert_own" on public.skill_inventories for insert with check (auth.uid() = profile_id);
-create policy "skill_inventories_update_own" on public.skill_inventories for update using (auth.uid() = profile_id);
-create policy "skill_inventories_delete_own" on public.skill_inventories for delete using (auth.uid() = profile_id);
-create trigger skill_inventories_updated_at before update on public.skill_inventories for each row execute function public.set_updated_at();
