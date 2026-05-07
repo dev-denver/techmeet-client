@@ -11,13 +11,27 @@ export async function GET(request: NextRequest) {
   const { searchParams } = new URL(request.url);
   const code = searchParams.get("code");
 
+  console.log("[카카오 콜백] 요청 수신", {
+    url: request.url,
+    hasCode: !!code,
+    KAKAO_REDIRECT_URI: process.env.KAKAO_REDIRECT_URI,
+    NEXT_PUBLIC_KAKAO_REDIRECT_URI: process.env.NEXT_PUBLIC_KAKAO_REDIRECT_URI,
+    KAKAO_REST_API_KEY: process.env.KAKAO_REST_API_KEY ? "SET" : "MISSING",
+    SUPABASE_URL: process.env.SUPABASE_URL ? "SET" : "MISSING",
+    SUPABASE_SERVICE_ROLE_KEY: process.env.SUPABASE_SERVICE_ROLE_KEY ? "SET" : "MISSING",
+    NEXT_PUBLIC_SUPABASE_URL: process.env.NEXT_PUBLIC_SUPABASE_URL ? "SET" : "MISSING",
+    NEXT_PUBLIC_SUPABASE_ANON_KEY: process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY ? "SET" : "MISSING",
+  });
+
   if (!code) {
     return NextResponse.redirect(new URL("/login?error=missing_code", request.url));
   }
 
   try {
     // Step 1: 카카오 인가 코드 → access_token 교환
-    console.log("[카카오 콜백] Step 1: 토큰 교환 시작");
+    console.log("[카카오 콜백] Step 1: 토큰 교환 시작", {
+      redirect_uri: process.env.KAKAO_REDIRECT_URI,
+    });
     const accessToken = await exchangeCodeForToken(code);
     console.log("[카카오 콜백] Step 1: 토큰 교환 성공");
 

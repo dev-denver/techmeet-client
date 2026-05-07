@@ -59,6 +59,11 @@ export async function exchangeCodeForToken(code: string): Promise<string> {
 
   if (!res.ok) {
     const errorBody = await res.text();
+    console.error("[카카오 oauth] 토큰 교환 실패", {
+      status: res.status,
+      body: errorBody,
+      redirect_uri: params.redirect_uri,
+    });
     throw new Error(`카카오 토큰 교환 실패 (${res.status}): ${errorBody}`);
   }
 
