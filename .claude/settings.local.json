@@ -10,7 +10,31 @@
       "Bash(git -C /mnt/c/Users/denver/denver/techmeet-client show HEAD:middleware.ts)",
       "Bash(git -C /mnt/c/Users/denver/denver/techmeet-client show 1962b3b7:src/middleware.ts)",
       "Bash(git -C /mnt/c/Users/denver/denver/techmeet-client diff 1962b3b7..HEAD -- src/)",
-      "Bash(git *)"
+      "Bash(git *)",
+      "mcp__vercel__list_teams",
+      "mcp__vercel__list_projects",
+      "mcp__vercel__get_deployment",
+      "mcp__supabase__list_projects",
+      "mcp__supabase__get_logs",
+      "Skill(update-config)",
+      "mcp__github__get_me",
+      "mcp__supabase__list_organizations",
+      "Bash(python3 -c \"import json,sys; d=json.load\\(sys.stdin\\); print\\(json.dumps\\(d.get\\('mcpServers', d.get\\('mcp', {}\\)\\), indent=2\\)\\)\")",
+      "Bash(curl *)",
+      "Bash(python3 -c \"import sys,json; d=json.load\\(sys.stdin\\); mcp=d.get\\('mcpServers',{}\\); [print\\(k, ':', list\\(v.keys\\(\\)\\)\\) for k,v in mcp.items\\(\\)]\")",
+      "Bash(python3 -c \"import sys,json; d=json.load\\(sys.stdin\\); gh=d['mcpServers']['github']; print\\('command:', gh['command']\\); print\\('args:', gh['args']\\); print\\('env keys:', list\\(gh['env'].keys\\(\\)\\)\\); token=gh['env'].get\\('GITHUB_PERSONAL_ACCESS_TOKEN',''\\); print\\('token prefix:', token[:10] + '...' if token else '\\(없음\\)'\\)\")",
+      "Bash(python3 -c \"import sys,json; d=json.load\\(sys.stdin\\); mcp=d.get\\('mcpServers',{}\\); gh=mcp.get\\('github',{}\\); print\\('command:', gh.get\\('command'\\)\\); print\\('env keys:', list\\(gh.get\\('env',{}\\).keys\\(\\)\\)\\)\")",
+      "Bash(python3 -c \"import sys,json; d=json.load\\(sys.stdin\\); mcp=d.get\\('mcpServers',{}\\); print\\(json.dumps\\(list\\(mcp.keys\\(\\)\\), indent=2\\)\\)\")",
+      "Bash(python3 -c \"import sys,json; d=json.load\\(sys.stdin\\); gh=d['mcpServers']['github']; print\\('command:', gh.get\\('command'\\)\\); print\\('args:', gh.get\\('args'\\)\\); print\\('env keys:', list\\(gh.get\\('env',{}\\).keys\\(\\)\\)\\); token=gh.get\\('env',{}\\).get\\('GITHUB_PERSONAL_ACCESS_TOKEN',''\\); print\\('token prefix:', token[:15]+'...' if token else '\\(없음\\)'\\)\")",
+      "mcp__supabase__list_branches",
+      "mcp__supabase__get_project_url",
+      "mcp__supabase__list_tables",
+      "mcp__supabase__get_publishable_keys",
+      "Bash(vercel --version)",
+      "Bash(npm install *)",
+      "mcp__vercel__web_fetch_vercel_url",
+      "mcp__supabase__get_project",
+      "mcp__supabase__get_advisors"
     ]
   }
 }

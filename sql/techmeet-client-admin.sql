@@ -8,7 +8,7 @@
 --             2. careers           — 경력 / client CRUD
 --             3. educations        — 학력 / client CRUD
 --             4. certifications    — 자격증 / client CRUD
---             5. skill_inventories — 스킬 인벤토리(경력기술서) / client CRUD
+--             5. skill_inventories — 스킬 인벤토리 (프로젝트 경험) / client CRUD
 --
 --   [SHARED]  6. projects          — 프로젝트 / admin 관리, client 읽기
 --             7. notices           — 공지사항 (예약 공지 포함) / admin 관리, client 읽기
@@ -23,11 +23,10 @@
 -- 설계 원칙:
 --   - profiles.id = auth.users.id (client 코드 호환)
 --   - admin_users는 별도 UUID PK + auth_user_id FK 구조
---   - seq_id: admin 표시용 순번 (bigint, 고유, 애플리케이션에서 직접 할당)
---   - deleted_at: 소프트 삭제 (projects, notices)
 --   - RLS: client 앱은 anon key + JWT, admin API는 service_role로 RLS 우회
 --   - [ADMIN] 테이블은 RLS 활성화 + 정책 없음 = service_role 전용
 --   - 비즈니스 유효성 검사(날짜 역전·값 범위 등)는 API zod 스키마에서 처리
+--   - seq_id: Supabase Realtime 내부 순서 관리 컬럼 (generated always as identity)
 -- ============================================================
 
 
@@ -61,19 +60,12 @@ create table if not exists public.profiles (
   bio                              text,                                                                  -- 자기소개
   tech_stack                       text[]      not null default array[]::text[],                          -- 기술 스택
   experience_years                 integer,                                                               -- 경력 연수
-  experience_months                integer     not null default 0 check (experience_months between 0 and 11), -- 경력 개월 (0~11)
+  experience_months                integer     not null default 0                                         -- 경력 개월수 (0~11)
+    check (experience_months >= 0 and experience_months <= 11),
   kakao_id                         text,                                                                  -- 카카오 ID
   availability_status              text                                                                   -- 투입 가능 상태 (available/partial/unavailable)
     check (availability_status in ('available', 'partial', 'unavailable')),
-  available_from_date              date,                                                                   -- 투입 가능 예정일 (partial 상태 시)
-  birth_date                       date,                                                                   -- 생년월일
-  gender                           text check (gender in ('male', 'female')),                             -- 성별
-  joining_date                     date,                                                                   -- 입사일
-  affiliation                      text,                                                                   -- 소속
-  department                       text,                                                                   -- 부서
-  position_title                   text,                                                                   -- 직위
-  military_service                 text,                                                                   -- 병역 (역종)
-  address                          text,                                                                   -- 주소
+  available_from_date              date,                                                                  -- 투입 가능 시작일
   notification_new_project         boolean     not null default true,                                     -- 새 프로젝트 알림 수신 여부
   notification_application_update  boolean     not null default true,                                     -- 지원 상태 변경 알림 수신 여부
   notification_marketing           boolean     not null default false,                                    -- 마케팅 알림 수신 여부
@@ -81,9 +73,18 @@ create table if not exists public.profiles (
     check (account_status in ('active', 'withdrawn')),
   withdrawn_at                     timestamptz,                                                           -- 탈퇴 일시
   referrer_id                      uuid        references public.profiles(id) on delete set null,         -- 추천인 프로필 ID
+  birth_date                       date,                                                                  -- 생년월일
+  gender                           text                                                                   -- 성별 (male/female)
+    check (gender in ('male', 'female')),
+  joining_date                     date,                                                                  -- 가입일 (커뮤니티 등록 기준)
+  affiliation                      text,                                                                  -- 소속사/소속 회사
+  department                       text,                                                                  -- 부서
+  position_title                   text,                                                                  -- 직함/직위
+  military_service                 text,                                                                  -- 병역 사항
+  address                          text,                                                                  -- 주소
+  seq_id                           bigint      generated always as identity unique,                       -- Supabase Realtime 순서 관리 (자동)
   created_at                       timestamptz not null default now(),                                    -- 생성 일시
-  updated_at                       timestamptz not null default now(),                                    -- 수정 일시
-  seq_id                           bigint      not null                                                   -- admin 표시용 순번
+  updated_at                       timestamptz not null default now()                                     -- 수정 일시
 );
 
 alter table public.profiles enable row level security;
@@ -117,9 +118,9 @@ create table if not exists public.careers (
   is_current  boolean     not null default false,                                           -- 현재 재직 여부
   description text,                                                                         -- 업무 설명
   tech_stack  text[]      not null default array[]::text[],                                 -- 사용 기술 스택
+  seq_id      bigint      generated always as identity unique,                              -- Supabase Realtime 순서 관리 (자동)
   created_at  timestamptz not null default now(),                                           -- 생성 일시
   updated_at  timestamptz not null default now(),                                           -- 수정 일시
-  seq_id      bigint      not null,                                                         -- admin 표시용 순번
   check ((is_current = false) or (is_current = true and end_date is null))
 );
 
@@ -147,20 +148,21 @@ create trigger careers_updated_at
 -- 3. educations (학력)
 -- ------------------------------------------------------------
 create table if not exists public.educations (
-  id           uuid        default gen_random_uuid() primary key,                            -- 고유 식별자
-  profile_id   uuid        references public.profiles(id) on delete cascade not null,        -- 프로필 ID
-  school_name  text        not null,                                                         -- 학교명
-  degree       text,                                                                         -- 학위
-  major        text,                                                                         -- 전공
-  start_date   date,                                                                         -- 입학일
-  end_date     date,                                                                         -- 졸업일
-  is_graduated boolean     not null default true,                                            -- 졸업 여부
-  created_at   timestamptz not null default now(),                                           -- 생성 일시
-  updated_at   timestamptz not null default now()                                            -- 수정 일시
+  id           uuid        default gen_random_uuid() primary key,                           -- 고유 식별자
+  profile_id   uuid        references public.profiles(id) on delete cascade not null,       -- 프로필 ID
+  school_name  text        not null,                                                        -- 학교명
+  degree       text,                                                                        -- 학위 (학사/석사/박사 등)
+  major        text,                                                                        -- 전공
+  start_date   date,                                                                        -- 입학일
+  end_date     date,                                                                        -- 졸업일
+  is_graduated boolean     not null default true,                                           -- 졸업 여부
+  created_at   timestamptz not null default now(),                                          -- 생성 일시
+  updated_at   timestamptz not null default now()                                           -- 수정 일시
 );
 
 alter table public.educations enable row level security;
 
+-- 본인 학력만 CRUD
 create policy "educations_select_own" on public.educations
   for select using (auth.uid() = profile_id);
 
@@ -182,16 +184,17 @@ create trigger educations_updated_at
 -- 4. certifications (자격증)
 -- ------------------------------------------------------------
 create table if not exists public.certifications (
-  id            uuid        default gen_random_uuid() primary key,                           -- 고유 식별자
-  profile_id    uuid        references public.profiles(id) on delete cascade not null,       -- 프로필 ID
+  id            uuid        default gen_random_uuid() primary key,                          -- 고유 식별자
+  profile_id    uuid        references public.profiles(id) on delete cascade not null,      -- 프로필 ID
   name          text        not null,                                                        -- 자격증명
-  acquired_date date,                                                                        -- 취득일
-  created_at    timestamptz not null default now(),                                          -- 생성 일시
-  updated_at    timestamptz not null default now()                                           -- 수정 일시
+  acquired_date date,                                                                       -- 취득일
+  created_at    timestamptz not null default now(),                                         -- 생성 일시
+  updated_at    timestamptz not null default now()                                          -- 수정 일시
 );
 
 alter table public.certifications enable row level security;
 
+-- 본인 자격증만 CRUD
 create policy "certifications_select_own" on public.certifications
   for select using (auth.uid() = profile_id);
 
@@ -210,32 +213,33 @@ create trigger certifications_updated_at
 
 
 -- ------------------------------------------------------------
--- 5. skill_inventories (스킬 인벤토리 / 경력기술서)
+-- 5. skill_inventories (스킬 인벤토리 - 프로젝트 경험)
 -- ------------------------------------------------------------
 create table if not exists public.skill_inventories (
-  id            uuid        default gen_random_uuid() primary key,                           -- 고유 식별자
-  profile_id    uuid        references public.profiles(id) on delete cascade not null,       -- 프로필 ID
+  id            uuid        default gen_random_uuid() primary key,                          -- 고유 식별자
+  profile_id    uuid        references public.profiles(id) on delete cascade not null,      -- 프로필 ID
   project_name  text        not null,                                                        -- 프로젝트명
-  start_date    date,                                                                        -- 시작일
-  end_date      date,                                                                        -- 종료일
-  client        text,                                                                        -- 고객사
-  company       text,                                                                        -- 수행사
-  industry      text,                                                                        -- 업종
-  application   text,                                                                        -- 업무 분류
-  role          text,                                                                        -- 역할
-  hardware_type text,                                                                        -- 하드웨어
-  os            text,                                                                        -- OS
-  languages     text[]      not null default array[]::text[],                                -- 사용 언어
-  dbms          text,                                                                        -- DBMS
-  tools         text[]      not null default array[]::text[],                                -- 사용 툴
-  others        text,                                                                        -- 기타
-  sort_order    integer     not null default 0,                                              -- 정렬 순서
-  created_at    timestamptz not null default now(),                                          -- 생성 일시
-  updated_at    timestamptz not null default now()                                           -- 수정 일시
+  start_date    date,                                                                       -- 시작일
+  end_date      date,                                                                       -- 종료일
+  client        text,                                                                       -- 클라이언트명
+  company       text,                                                                       -- 소속 회사
+  industry      text,                                                                       -- 산업군
+  application   text,                                                                       -- 적용 시스템/서비스
+  role          text,                                                                       -- 역할
+  hardware_type text,                                                                       -- 하드웨어 유형
+  os            text,                                                                       -- 운영체제
+  languages     text[]      not null default array[]::text[],                               -- 사용 언어
+  dbms          text,                                                                       -- DBMS
+  tools         text[]      not null default array[]::text[],                               -- 사용 도구
+  others        text,                                                                       -- 기타 사항
+  sort_order    integer     not null default 0,                                             -- 정렬 순서
+  created_at    timestamptz not null default now(),                                         -- 생성 일시
+  updated_at    timestamptz not null default now()                                          -- 수정 일시
 );
 
 alter table public.skill_inventories enable row level security;
 
+-- 본인 스킬 인벤토리만 CRUD
 create policy "skill_inventories_select_own" on public.skill_inventories
   for select using (auth.uid() = profile_id);
 
@@ -279,12 +283,12 @@ create table if not exists public.projects (
     check (work_type in ('remote', 'onsite', 'hybrid')),
   location            text,                                                                 -- 근무 위치
   headcount           integer,                                                              -- 모집 인원
-  is_visible          boolean     not null default true,                                   -- 노출 여부
-  deleted_at          timestamptz,                                                          -- 소프트 삭제 일시
+  is_visible          boolean     not null default true,                                    -- 노출 여부
   created_by          uuid        references public.profiles(id) on delete set null,        -- 등록 관리자 프로필 ID
+  seq_id              bigint      generated always as identity unique,                      -- Supabase Realtime 순서 관리 (자동)
+  deleted_at          timestamptz,                                                          -- soft delete 일시
   created_at          timestamptz not null default now(),                                   -- 생성 일시
-  updated_at          timestamptz not null default now(),                                   -- 수정 일시
-  seq_id              bigint      not null                                                  -- admin 표시용 순번
+  updated_at          timestamptz not null default now()                                    -- 수정 일시
 );
 
 alter table public.projects enable row level security;
@@ -312,10 +316,10 @@ create table if not exists public.notices (
   start_at     timestamptz,                                                                 -- 게시 시작 일시 (예약 공지)
   end_at       timestamptz,                                                                 -- 게시 종료 일시 (예약 공지)
   created_by   uuid        references public.profiles(id) on delete set null,               -- 작성 관리자 프로필 ID
+  seq_id       bigint      generated always as identity unique,                             -- Supabase Realtime 순서 관리 (자동)
+  deleted_at   timestamptz,                                                                 -- soft delete 일시
   created_at   timestamptz not null default now(),                                          -- 생성 일시
-  updated_at   timestamptz not null default now(),                                          -- 수정 일시
-  seq_id       bigint      not null,                                                        -- admin 표시용 순번
-  deleted_at   timestamptz                                                                  -- 소프트 삭제 일시
+  updated_at   timestamptz not null default now()                                           -- 수정 일시
 );
 
 alter table public.notices enable row level security;
@@ -357,9 +361,9 @@ create table if not exists public.applications (
   available_start_date date,                                                                             -- 투입 가능일 (admin 전용)
   admin_memo           text,                                                                             -- 관리자 메모 (admin 전용)
   applied_at           timestamptz not null default now(),                                               -- 지원 일시
+  seq_id               bigint      generated always as identity unique,                                  -- Supabase Realtime 순서 관리 (자동)
   created_at           timestamptz not null default now(),                                               -- 생성 일시
   updated_at           timestamptz not null default now(),                                               -- 수정 일시
-  seq_id               bigint      not null,                                                             -- admin 표시용 순번
   unique (project_id, freelancer_id)
 );
 
@@ -399,12 +403,12 @@ create table if not exists public.admin_users (
   auth_user_id uuid        references auth.users on delete cascade not null unique,        -- Supabase Auth 유저 UUID
   name         text        not null,                                                        -- 관리자 이름
   email        text        not null unique,                                                 -- 관리자 이메일
+  phone        text,                                                                        -- 관리자 전화번호
   role         text        not null default 'admin'                                         -- 권한 (superadmin/admin)
     check (role in ('superadmin', 'admin')),
+  seq_id       bigint      generated always as identity unique,                             -- Supabase Realtime 순서 관리 (자동)
   created_at   timestamptz not null default now(),                                          -- 생성 일시
-  updated_at   timestamptz not null default now(),                                          -- 수정 일시
-  seq_id       bigint      not null,                                                        -- admin 표시용 순번
-  phone        text                                                                         -- 관리자 전화번호
+  updated_at   timestamptz not null default now()                                           -- 수정 일시
 );
 
 alter table public.admin_users enable row level security;
@@ -430,9 +434,9 @@ create table if not exists public.alimtalk_templates (
   service_type text        not null                                                         -- 발송 대상 유형 (project/notice/individual/all)
     check (service_type in ('project', 'notice', 'individual', 'all')),
   is_active    boolean     not null default true,                                           -- 사용 여부
+  seq_id       bigint      generated always as identity unique,                             -- Supabase Realtime 순서 관리 (자동)
   created_at   timestamptz not null default now(),                                          -- 생성 일시
-  updated_at   timestamptz not null default now(),                                          -- 수정 일시
-  seq_id       bigint      not null                                                         -- admin 표시용 순번
+  updated_at   timestamptz not null default now()                                           -- 수정 일시
 );
 
 alter table public.alimtalk_templates enable row level security;
@@ -459,15 +463,15 @@ create table if not exists public.alimtalk_logs (
   is_success    boolean,                                                                    -- 발송 성공 여부
   sent_at       timestamptz,                                                                -- 실제 발송 일시
   error_message text,                                                                       -- 오류 메시지
-  created_at    timestamptz not null default now(),                                         -- 생성 일시
-  seq_id        bigint      not null                                                        -- admin 표시용 순번
+  seq_id        bigint      generated always as identity unique,                            -- Supabase Realtime 순서 관리 (자동)
+  created_at    timestamptz not null default now()                                          -- 생성 일시
 );
 
 alter table public.alimtalk_logs enable row level security;
 
--- 인증된 사용자: 자신의 알림 내역만 조회 가능
+-- 본인 수신 이력 조회 허용
 create policy "alimtalk_logs_select_own" on public.alimtalk_logs
-  for select to authenticated using (user_id = auth.uid());
+  for select using (user_id = auth.uid());
 
 -- alimtalk_logs.template_code → alimtalk_templates.code
 alter table public.alimtalk_logs
@@ -490,8 +494,8 @@ create table if not exists public.admin_audit_logs (
   details     jsonb,                                                                        -- 상세 데이터 (JSON)
   ip_address  text,                                                                         -- 요청 IP 주소
   user_agent  text,                                                                         -- 요청 브라우저 정보
-  created_at  timestamptz not null default now(),                                           -- 생성 일시
-  seq_id      bigint      not null                                                          -- admin 표시용 순번
+  seq_id      bigint      generated always as identity unique,                              -- Supabase Realtime 순서 관리 (자동)
+  created_at  timestamptz not null default now()                                            -- 생성 일시
 );
 
 alter table public.admin_audit_logs enable row level security;
@@ -509,18 +513,15 @@ create index if not exists idx_profiles_account_status      on public.profiles(a
 create index if not exists idx_profiles_availability_status on public.profiles(availability_status);
 create index if not exists idx_profiles_kakao_id            on public.profiles(kakao_id);
 create index if not exists idx_profiles_referrer_id         on public.profiles(referrer_id);
-create unique index if not exists profiles_seq_id_idx       on public.profiles(seq_id);
 
 -- [CLIENT] careers
 create index if not exists idx_careers_profile_id           on public.careers(profile_id);
-create unique index if not exists careers_seq_id_idx        on public.careers(seq_id);
 
 -- [CLIENT] applications
 create index if not exists idx_applications_applied_at      on public.applications(applied_at desc);
 create index if not exists idx_applications_status          on public.applications(status);
 create index if not exists idx_applications_freelancer_id   on public.applications(freelancer_id);
 create index if not exists idx_applications_project_id      on public.applications(project_id);
-create unique index if not exists applications_seq_id_idx   on public.applications(seq_id);
 
 -- [SHARED] projects
 create index if not exists idx_projects_created_at          on public.projects(created_at desc);
@@ -529,18 +530,15 @@ create index if not exists idx_projects_deadline            on public.projects(d
 create index if not exists idx_projects_category            on public.projects(category);
 create index if not exists projects_is_visible_idx          on public.projects(is_visible);
 create index if not exists projects_deleted_at_idx          on public.projects(deleted_at);
-create unique index if not exists projects_seq_id_idx       on public.projects(seq_id);
 
 -- [SHARED] notices
 create index if not exists idx_notices_created_at           on public.notices(created_at desc);
 create index if not exists idx_notices_is_published         on public.notices(is_published);
-create unique index if not exists notices_seq_id_idx        on public.notices(seq_id);
 
 -- [ADMIN] alimtalk_templates
 create index if not exists idx_alimtalk_templates_code         on public.alimtalk_templates(code);
 create index if not exists idx_alimtalk_templates_service_type on public.alimtalk_templates(service_type);
 create index if not exists idx_alimtalk_templates_is_active    on public.alimtalk_templates(is_active);
-create unique index if not exists alimtalk_templates_seq_id_idx on public.alimtalk_templates(seq_id);
 
 -- [ADMIN] alimtalk_logs
 create index if not exists idx_alimtalk_created_at          on public.alimtalk_logs(created_at desc);
@@ -549,17 +547,12 @@ create index if not exists idx_alimtalk_user_id             on public.alimtalk_l
 create index if not exists idx_alimtalk_template_code       on public.alimtalk_logs(template_code);
 create index if not exists idx_alimtalk_service_type        on public.alimtalk_logs(service_type);
 create index if not exists idx_alimtalk_is_success          on public.alimtalk_logs(is_success);
-create unique index if not exists alimtalk_logs_seq_id_idx  on public.alimtalk_logs(seq_id);
-
--- [ADMIN] admin_users
-create unique index if not exists admin_users_seq_id_idx    on public.admin_users(seq_id);
 
 -- [ADMIN] admin_audit_logs
 create index if not exists idx_audit_logs_created_at        on public.admin_audit_logs(created_at desc);
 create index if not exists idx_audit_logs_admin_id          on public.admin_audit_logs(admin_id);
 create index if not exists idx_audit_logs_resource          on public.admin_audit_logs(resource);
 create index if not exists idx_audit_logs_action            on public.admin_audit_logs(action);
-create unique index if not exists admin_audit_logs_seq_id_idx on public.admin_audit_logs(seq_id);
 
 
 -- ============================================================
@@ -570,11 +563,10 @@ create unique index if not exists admin_audit_logs_seq_id_idx on public.admin_au
 --      관리자 이메일/비밀번호로 Auth 계정을 먼저 생성
 --   2. 생성된 유저의 UUID를 아래 auth_user_id에 입력 후 실행
 -- ============================================================
--- insert into public.admin_users (auth_user_id, name, email, role, seq_id)
+-- insert into public.admin_users (auth_user_id, name, email, role)
 -- values (
 --   'xxxxxxxx-xxxx-xxxx-xxxx-xxxxxxxxxxxx',  -- Auth 유저 UUID 입력
 --   '마스터 관리자',
 --   'admin@techmeet.com',
---   'superadmin',
---   1
+--   'superadmin'
 -- ) on conflict (auth_user_id) do nothing;
