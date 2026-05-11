@@ -4,10 +4,18 @@ import { serverEnv } from "@/lib/config/env";
 export async function GET() {
   try {
     const rawKey = serverEnv.authRsaPublicKey;
-    const publicKey = rawKey
+    // 모든 줄바꿈 표현 방식 정규화 (literal \n, \r\n, 실제 개행 등)
+    const normalized = rawKey
       .replace(/\\r\\n/g, "\n")
       .replace(/\\r/g, "")
-      .replace(/\\n/g, "\n");
+      .replace(/\\n/g, "\n")
+      .replace(/\r\n/g, "\n")
+      .replace(/\r/g, "\n");
+    // PEM 헤더/푸터 제거 후 순수 base64만 추출
+    const publicKey = normalized
+      .split("\n")
+      .filter(line => !line.startsWith("-----") && line.trim() !== "")
+      .join("");
     return NextResponse.json({ publicKey });
   } catch (error) {
     console.error("[public-key] 공개키 조회 실패:", error);
