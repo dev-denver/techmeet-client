@@ -173,8 +173,17 @@ function SignupForm() {
     setIsLoading(true);
     try {
       const pkRes = await fetch("/api/auth/public-key");
-      const { publicKey } = (await pkRes.json()) as { publicKey: string };
-      const encryptedPassword = await encryptPassword(password, publicKey);
+      if (!pkRes.ok) {
+        const pkData = await pkRes.json().catch(() => ({})) as { error?: string };
+        setServerError(pkData.error ?? "서버 오류가 발생했습니다. 잠시 후 다시 시도해주세요.");
+        return;
+      }
+      const pkData = (await pkRes.json()) as { publicKey: string };
+      if (!pkData.publicKey) {
+        setServerError("서버 설정 오류가 발생했습니다. 관리자에게 문의해주세요.");
+        return;
+      }
+      const encryptedPassword = await encryptPassword(password, pkData.publicKey);
 
       const res = await fetch("/api/auth/signup", {
         method: "POST",
@@ -199,8 +208,9 @@ function SignupForm() {
       }
 
       router.replace("/");
-    } catch {
-      setServerError("네트워크 오류가 발생했습니다");
+    } catch (err) {
+      console.error("[회원가입] 클라이언트 오류:", err);
+      setServerError("네트워크 오류가 발생했습니다. 인터넷 연결을 확인해주세요.");
     } finally {
       setIsLoading(false);
     }

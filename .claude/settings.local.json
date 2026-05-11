@@ -34,7 +34,10 @@
       "Bash(npm install *)",
       "mcp__vercel__web_fetch_vercel_url",
       "mcp__supabase__get_project",
-      "mcp__supabase__get_advisors"
+      "mcp__supabase__get_advisors",
+      "Bash(grep -v \"^$\")",
+      "Bash(awk -F'=' '{print NR\": \"$1\"=SET\"}')",
+      "Bash(npm run *)"
     ]
   }
 }
