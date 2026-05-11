@@ -37,7 +37,10 @@
       "mcp__supabase__get_advisors",
       "Bash(grep -v \"^$\")",
       "Bash(awk -F'=' '{print NR\": \"$1\"=SET\"}')",
-      "Bash(npm run *)"
+      "Bash(npm run *)",
+      "Bash(node *)",
+      "Bash(npx *)",
+      "Bash(python3 *)"
     ]
   }
 }
