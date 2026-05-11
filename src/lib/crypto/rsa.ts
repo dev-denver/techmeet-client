@@ -9,7 +9,7 @@ export function decryptPassword(encryptedBase64: string): string {
   const buffer = Buffer.from(encryptedBase64, "base64");
   const decrypted = privateDecrypt(
     {
-      key: serverEnv.authRsaPrivateKey.replace(/\\n/g, "\n"),
+      key: serverEnv.authRsaPrivateKey.replace(/^["']|["']$/g, "").trim().replace(/\\n/g, "\n"),
       padding: constants.RSA_PKCS1_OAEP_PADDING,
       oaepHash: "sha256",
     },

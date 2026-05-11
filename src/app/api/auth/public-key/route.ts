@@ -3,7 +3,8 @@ import { serverEnv } from "@/lib/config/env";
 
 export async function GET() {
   try {
-    const rawKey = serverEnv.authRsaPublicKey;
+    // Vercel 등 일부 환경에서 env 값에 따옴표가 포함될 수 있어 제거
+    const rawKey = serverEnv.authRsaPublicKey.replace(/^["']|["']$/g, "").trim();
     // 모든 줄바꿈 표현 방식 정규화 (literal \n, \r\n, 실제 개행 등)
     const normalized = rawKey
       .replace(/\\r\\n/g, "\n")
