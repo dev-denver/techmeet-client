@@ -9,7 +9,7 @@ export async function encryptPassword(password: string, publicKeyPem: string): P
   const pemBody = publicKeyPem
     .replace(pemHeader, "")
     .replace(pemFooter, "")
-    .replace(/\s/g, "");
+    .replace(/[^A-Za-z0-9+/=]/g, "");
 
   const der = Uint8Array.from(atob(pemBody), (c) => c.charCodeAt(0));
 
