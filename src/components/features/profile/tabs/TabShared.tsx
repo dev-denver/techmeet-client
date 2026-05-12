@@ -153,7 +153,7 @@ export function BottomSheetForm({
   return (
     <div className="fixed inset-0 z-50 flex items-end justify-center">
       <div className="absolute inset-0 bg-black/40" onClick={onClose} />
-      <div className="relative w-full max-w-[600px] bg-card rounded-t-2xl max-h-[85vh] flex flex-col">
+      <div className="relative w-full max-w-[430px] bg-card rounded-t-2xl max-h-[85vh] flex flex-col">
         <div className="flex items-center justify-between px-5 py-4 border-b border-border shrink-0">
           <h3 className="text-sm font-bold text-foreground">{title}</h3>
           <button onClick={onClose} className="text-muted-foreground hover:text-foreground text-xs font-medium">닫기</button>

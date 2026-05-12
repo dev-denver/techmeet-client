@@ -4,6 +4,7 @@ import { useState } from "react";
 import { useRouter } from "next/navigation";
 import type { SkillInventory } from "@/types";
 import { formatMonthYear } from "@/lib/utils/format";
+import { MonthYearPicker } from "@/components/ui/month-year-picker";
 import {
   CardWrap, SectionHeader, EditDeleteActions, DashedAddButton,
   BottomSheetForm, FormInput, TagInput, Tag, ChevronDown, ChevronUp,
@@ -60,8 +61,14 @@ function SkillForm({ open, onClose, initial }: { open: boolean; onClose: () => v
     <BottomSheetForm title={initial ? "프로젝트 수정" : "프로젝트 추가"} open={open} onClose={onClose} onSubmit={handleSubmit} isLoading={isLoading} error={formError}>
       <FormInput label="프로젝트명" name="projectName" required defaultValue={initial?.projectName ?? ""} placeholder="ex. 공공기관 민원 통합 시스템 구축" />
       <div className="grid grid-cols-2 gap-3">
-        <FormInput label="참여 시작" name="startDate" type="month" defaultValue={initial?.startDate?.slice(0, 7) ?? ""} />
-        <FormInput label="참여 종료" name="endDate" type="month" defaultValue={initial?.endDate?.slice(0, 7) ?? ""} />
+        <div>
+          <label className="block text-xs font-medium text-muted-foreground mb-1.5">참여 시작</label>
+          <MonthYearPicker name="startDate" defaultValue={initial?.startDate?.slice(0, 7) ?? ""} />
+        </div>
+        <div>
+          <label className="block text-xs font-medium text-muted-foreground mb-1.5">참여 종료</label>
+          <MonthYearPicker name="endDate" defaultValue={initial?.endDate?.slice(0, 7) ?? ""} />
+        </div>
       </div>
       <div className="grid grid-cols-2 gap-3">
         <FormInput label="고객사" name="client" defaultValue={initial?.client ?? ""} placeholder="ex. 행정안전부" />

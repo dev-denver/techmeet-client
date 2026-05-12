@@ -4,6 +4,8 @@ import { useState } from "react";
 import { useRouter } from "next/navigation";
 import type { Education, Certification } from "@/types";
 import { formatMonthYear } from "@/lib/utils/format";
+import { validatePastOrCurrentMonth } from "@/lib/utils/validation";
+import { MonthYearPicker } from "@/components/ui/month-year-picker";
 import {
   CardWrap, SectionHeader, EditDeleteActions, DashedAddButton,
   BottomSheetForm, FormInput, FormSelect, validateDateRange,
@@ -63,8 +65,14 @@ function EducationForm({ open, onClose, initial }: { open: boolean; onClose: () 
         <FormInput label="전공" name="major" defaultValue={initial?.major ?? ""} placeholder="ex. 컴퓨터공학" />
       </div>
       <div className="grid grid-cols-2 gap-3">
-        <FormInput label="입학년월" name="startDate" type="month" defaultValue={initial?.startDate?.slice(0, 7) ?? ""} />
-        <FormInput label="졸업년월" name="endDate" type="month" defaultValue={initial?.endDate?.slice(0, 7) ?? ""} />
+        <div>
+          <label className="block text-xs font-medium text-muted-foreground mb-1.5">입학년월</label>
+          <MonthYearPicker name="startDate" defaultValue={initial?.startDate?.slice(0, 7) ?? ""} />
+        </div>
+        <div>
+          <label className="block text-xs font-medium text-muted-foreground mb-1.5">졸업년월</label>
+          <MonthYearPicker name="endDate" defaultValue={initial?.endDate?.slice(0, 7) ?? ""} />
+        </div>
       </div>
       <FormSelect label="졸업 여부" name="isGraduated" defaultValue={String(initial?.isGraduated ?? true)}>
         <option value="true">졸업</option>
@@ -113,16 +121,25 @@ function EducationCard({ edu, onEdit }: { edu: Education; onEdit: (e: Education)
 function CertForm({ open, onClose }: { open: boolean; onClose: () => void }) {
   const router = useRouter();
   const [isLoading, setIsLoading] = useState(false);
+  const [formError, setFormError] = useState("");
 
   async function handleSubmit(e: React.FormEvent<HTMLFormElement>) {
     e.preventDefault();
     const fd = new FormData(e.currentTarget);
+    const acquiredDate = (fd.get("acquiredDate") as string) || null;
+
+    if (acquiredDate) {
+      const err = validatePastOrCurrentMonth(acquiredDate);
+      if (err) { setFormError(err); return; }
+    }
+    setFormError("");
+
     setIsLoading(true);
     try {
       const res = await fetch("/api/profile/certifications", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ name: fd.get("name"), acquiredDate: (fd.get("acquiredDate") as string) || null }),
+        body: JSON.stringify({ name: fd.get("name"), acquiredDate }),
       });
       if (res.ok) { router.refresh(); onClose(); }
     } finally {
@@ -131,9 +148,12 @@ function CertForm({ open, onClose }: { open: boolean; onClose: () => void }) {
   }
 
   return (
-    <BottomSheetForm title="자격증 추가" open={open} onClose={onClose} onSubmit={handleSubmit} isLoading={isLoading}>
+    <BottomSheetForm title="자격증 추가" open={open} onClose={onClose} onSubmit={handleSubmit} isLoading={isLoading} error={formError}>
       <FormInput label="자격증명" name="name" required placeholder="ex. 정보처리기사" />
-      <FormInput label="취득년월" name="acquiredDate" type="month" />
+      <div>
+        <label className="block text-xs font-medium text-muted-foreground mb-1.5">취득년월</label>
+        <MonthYearPicker name="acquiredDate" />
+      </div>
     </BottomSheetForm>
   );
 }

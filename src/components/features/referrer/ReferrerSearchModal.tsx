@@ -9,9 +9,10 @@ interface Props {
   onSelect: (referrer: ReferrerSearchResult) => void;
   onClose: () => void;
   hasBottomNav?: boolean;
+  maxWidth?: "sm" | "lg";
 }
 
-export function ReferrerSearchModal({ onSelect, onClose, hasBottomNav = false }: Props) {
+export function ReferrerSearchModal({ onSelect, onClose, hasBottomNav = false, maxWidth = "sm" }: Props) {
   const [query, setQuery] = useState("");
   const [results, setResults] = useState<ReferrerSearchResult[]>([]);
   const [selected, setSelected] = useState<ReferrerSearchResult | null>(null);
@@ -52,7 +53,7 @@ export function ReferrerSearchModal({ onSelect, onClose, hasBottomNav = false }:
   }
 
   return (
-    <BottomSheet open onClose={onClose} hasBottomNav={hasBottomNav}>
+    <BottomSheet open onClose={onClose} hasBottomNav={hasBottomNav} maxWidth={maxWidth}>
       <div className="px-4 pb-6 pt-2 flex flex-col gap-4">
         {/* 헤더 */}
         <div className="flex items-center justify-between">

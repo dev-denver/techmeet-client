@@ -42,3 +42,48 @@ export function validateBirthDate(birthDate: string): boolean {
   today.setHours(0, 0, 0, 0);
   return date < today;
 }
+
+export function validateBirthDateWithMessage(birthDate: string): string | null {
+  if (!birthDate) return null;
+  const date = new Date(birthDate);
+  if (isNaN(date.getTime())) return "유효한 날짜를 입력해주세요";
+  const today = new Date();
+  today.setHours(0, 0, 0, 0);
+  if (date >= today) return "생년월일은 오늘 이전이어야 합니다";
+  if (date.getFullYear() < 1900) return "1900년 이후 날짜를 입력해주세요";
+  return null;
+}
+
+export function validatePastOrPresentDate(date: string): string | null {
+  if (!date) return null;
+  const d = new Date(date);
+  if (isNaN(d.getTime())) return "유효한 날짜를 입력해주세요";
+  const today = new Date();
+  today.setHours(0, 0, 0, 0);
+  if (d > today) return "오늘 이전 날짜를 입력해주세요";
+  if (d.getFullYear() < 1960) return "1960년 이후 날짜를 입력해주세요";
+  return null;
+}
+
+export function validateFutureDate(date: string): string | null {
+  if (!date) return null;
+  const d = new Date(date);
+  if (isNaN(d.getTime())) return "유효한 날짜를 입력해주세요";
+  const today = new Date();
+  today.setHours(0, 0, 0, 0);
+  if (d < today) return "오늘 이후 날짜를 선택해주세요";
+  return null;
+}
+
+export function validatePastOrCurrentMonth(monthYear: string): string | null {
+  if (!monthYear) return null;
+  const [y, m] = monthYear.split("-").map(Number);
+  if (!y || !m) return "유효한 년월을 입력해주세요";
+  const now = new Date();
+  const currentYear = now.getFullYear();
+  const currentMonth = now.getMonth() + 1;
+  if (y > currentYear || (y === currentYear && m > currentMonth)) {
+    return "미래 날짜는 선택할 수 없습니다";
+  }
+  return null;
+}

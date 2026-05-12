@@ -1,13 +1,14 @@
 "use client";
 
-import Link from "next/link";
 import { useSearchParams, useRouter } from "next/navigation";
 import { useEffect, useState, Suspense } from "react";
 import { Eye, EyeOff, X } from "lucide-react";
-import { validatePassword, validatePhone, validateBirthDate, formatPhone } from "@/lib/utils/validation";
+import { validatePassword, validatePhone, validateBirthDate, validateBirthDateWithMessage, formatPhone } from "@/lib/utils/validation";
 import { ReferrerSearchModal } from "@/components/features/referrer/ReferrerSearchModal";
+import { PolicyModal } from "@/components/features/signup/PolicyModal";
 import { FormField } from "@/components/ui/form-field";
 import { Input } from "@/components/ui/input";
+import { DateSelectPicker } from "@/components/ui/date-select-picker";
 import { cn } from "@/lib/utils/cn";
 import type { ReferrerSearchResult } from "@/types/api";
 import { encryptPassword } from "@/lib/crypto/client";
@@ -77,6 +78,7 @@ function SignupForm() {
   const [agreeMarketing, setAgreeMarketing] = useState(false);
   const [referrer, setReferrer] = useState<ReferrerSearchResult | null>(null);
   const [showReferrerModal, setShowReferrerModal] = useState(false);
+  const [policyModal, setPolicyModal] = useState<"terms" | "privacy" | null>(null);
 
   const [nameError, setNameError] = useState("");
   const [passwordError, setPasswordError] = useState("");
@@ -141,11 +143,13 @@ function SignupForm() {
       setPasswordConfirmError("");
     }
 
-    if (!birthDate || !validateBirthDate(birthDate)) {
-      setBirthDateError("올바른 생년월일을 입력해주세요");
+    if (!birthDate) {
+      setBirthDateError("생년월일을 입력해주세요");
       valid = false;
     } else {
-      setBirthDateError("");
+      const bdErr = validateBirthDateWithMessage(birthDate);
+      if (bdErr) { setBirthDateError(bdErr); valid = false; }
+      else setBirthDateError("");
     }
 
     if (!validatePhone(phone)) {
@@ -304,15 +308,11 @@ function SignupForm() {
 
       {/* 생년월일 */}
       <FormField label="생년월일" required error={birthDateError}>
-        <Input
-          type="date"
+        <DateSelectPicker
           value={birthDate}
-          onChange={(e) => {
-            setBirthDate(e.target.value);
-            if (birthDateError) setBirthDateError("");
-          }}
-          max={new Date().toISOString().split("T")[0]}
-          className={birthDateError ? "border-red-300" : ""}
+          onChange={(v) => { setBirthDate(v); if (birthDateError) setBirthDateError(""); }}
+          maxDate={new Date().toISOString().split("T")[0]}
+          error={!!birthDateError}
         />
       </FormField>
 
@@ -400,9 +400,13 @@ function SignupForm() {
             />
             <span className="text-sm text-zinc-700">
               <span className="text-red-500 mr-0.5">[필수]</span>
-              <Link href="/terms" target="_blank" className="underline underline-offset-2 hover:text-zinc-900">
+              <button
+                type="button"
+                onClick={() => setPolicyModal("terms")}
+                className="underline underline-offset-2 hover:text-zinc-900"
+              >
                 이용약관
-              </Link>
+              </button>
               에 동의합니다
             </span>
           </label>
@@ -416,9 +420,13 @@ function SignupForm() {
             />
             <span className="text-sm text-zinc-700">
               <span className="text-red-500 mr-0.5">[필수]</span>
-              <Link href="/privacy" target="_blank" className="underline underline-offset-2 hover:text-zinc-900">
+              <button
+                type="button"
+                onClick={() => setPolicyModal("privacy")}
+                className="underline underline-offset-2 hover:text-zinc-900"
+              >
                 개인정보 처리방침
-              </Link>
+              </button>
               에 동의합니다
             </span>
           </label>
@@ -458,8 +466,11 @@ function SignupForm() {
             setShowReferrerModal(false);
           }}
           onClose={() => setShowReferrerModal(false)}
+          maxWidth="lg"
         />
       )}
+
+      <PolicyModal type={policyModal} onClose={() => setPolicyModal(null)} />
     </form>
   );
 }

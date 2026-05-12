@@ -4,13 +4,14 @@ import { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
 import { Minus, Plus } from "lucide-react";
 import { SaveButton } from "@/components/ui/save-button";
-import { validatePhone, formatPhone } from "@/lib/utils/validation";
+import { validatePhone, formatPhone, validateBirthDateWithMessage, validatePastOrPresentDate } from "@/lib/utils/validation";
 import { TechStackInput } from "@/components/features/profile/TechStackInput";
 import { KakaoAddressInput } from "@/components/features/profile/KakaoAddressInput";
 import { Skeleton } from "@/components/ui/skeleton";
 import { FormField } from "@/components/ui/form-field";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
+import { DateSelectPicker } from "@/components/ui/date-select-picker";
 import type { FreelancerProfile } from "@/types";
 
 function SectionDivider({ label }: { label: string }) {
@@ -50,6 +51,8 @@ export default function EditProfilePage() {
   const [bio, setBio] = useState("");
 
   const [nameError, setNameError] = useState("");
+  const [birthDateError, setBirthDateError] = useState("");
+  const [joiningDateError, setJoiningDateError] = useState("");
   const [phoneError, setPhoneError] = useState("");
   const [serverError, setServerError] = useState("");
 
@@ -81,6 +84,16 @@ export default function EditProfilePage() {
     if (!name.trim()) { setNameError("이름을 입력해주세요"); valid = false; }
     else if (name.trim().length > 50) { setNameError("이름은 50자 이하로 입력해주세요"); valid = false; }
     else setNameError("");
+    if (birthDate) {
+      const bdErr = validateBirthDateWithMessage(birthDate);
+      if (bdErr) { setBirthDateError(bdErr); valid = false; }
+      else setBirthDateError("");
+    } else setBirthDateError("");
+    if (joiningDate) {
+      const jdErr = validatePastOrPresentDate(joiningDate);
+      if (jdErr) { setJoiningDateError(jdErr); valid = false; }
+      else setJoiningDateError("");
+    } else setJoiningDateError("");
     if (phone && !validatePhone(phone)) { setPhoneError("올바른 휴대폰 번호 형식이 아닙니다 (010-XXXX-XXXX)"); valid = false; }
     else setPhoneError("");
     return valid;
@@ -160,8 +173,13 @@ export default function EditProfilePage() {
         </FormField>
 
         <div className="grid grid-cols-2 gap-3">
-          <FormField label="생년월일" optional>
-            <Input type="date" value={birthDate} onChange={(e) => setBirthDate(e.target.value)} />
+          <FormField label="생년월일" optional error={birthDateError}>
+            <DateSelectPicker
+              value={birthDate}
+              onChange={(v) => { setBirthDate(v); if (birthDateError) setBirthDateError(""); }}
+              maxDate={new Date().toISOString().split("T")[0]}
+              error={!!birthDateError}
+            />
           </FormField>
           <FormField label="성별" optional>
             <select
@@ -187,8 +205,13 @@ export default function EditProfilePage() {
           <FormField label="소속" optional>
             <Input type="text" value={affiliation} onChange={(e) => setAffiliation(e.target.value)} placeholder="ex. 테크밋" />
           </FormField>
-          <FormField label="입사일" optional>
-            <Input type="date" value={joiningDate} onChange={(e) => setJoiningDate(e.target.value)} />
+          <FormField label="입사일" optional error={joiningDateError}>
+            <DateSelectPicker
+              value={joiningDate}
+              onChange={(v) => { setJoiningDate(v); if (joiningDateError) setJoiningDateError(""); }}
+              maxDate={new Date().toISOString().split("T")[0]}
+              error={!!joiningDateError}
+            />
           </FormField>
         </div>
 

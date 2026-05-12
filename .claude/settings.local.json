@@ -44,7 +44,10 @@
       "Bash(rm -f .next/trace .next/*.lock)",
       "Read(//tmp/**)",
       "Read(//usr/local/bin/**)",
-      "Read(//home/denver/.nvm/versions/node/**)"
+      "Read(//home/denver/.nvm/versions/node/**)",
+      "Bash(fuser -k 3000/tcp)",
+      "Bash(fuser -k 3001/tcp)",
+      "Bash(pkill -f \"next dev\")"
     ]
   }
 }

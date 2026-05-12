@@ -8,6 +8,7 @@ import { Button } from "@/components/ui/button";
 import { FormField } from "@/components/ui/form-field";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
+import { MonthYearPicker } from "@/components/ui/month-year-picker";
 import { CareerTimelineDot } from "@/components/features/profile/CareerTimelineDot";
 import { cn } from "@/lib/utils/cn";
 import { formatMonthYear } from "@/lib/utils/format";
@@ -387,20 +388,18 @@ function CareerForm({
 
       <div className="grid grid-cols-2 gap-3">
         <FormField label="시작일" required error={fieldErrors.startDate}>
-          <input
-            type="month"
+          <MonthYearPicker
             value={form.startDate ? form.startDate.slice(0, 7) : ""}
-            onChange={(e) => onUpdate("startDate", `${e.target.value}-01`)}
-            className={inputClass(fieldErrors.startDate)}
+            onChange={(v) => onUpdate("startDate", v ? `${v}-01` : "")}
+            error={!!fieldErrors.startDate}
           />
         </FormField>
         <FormField label="종료일" error={fieldErrors.endDate}>
-          <input
-            type="month"
+          <MonthYearPicker
             value={form.endDate ? form.endDate.slice(0, 7) : ""}
+            onChange={(v) => onUpdate("endDate", v ? `${v}-01` : "")}
             disabled={form.isCurrent}
-            onChange={(e) => onUpdate("endDate", `${e.target.value}-01`)}
-            className={cn(inputClass(fieldErrors.endDate), form.isCurrent && "opacity-40")}
+            error={!!fieldErrors.endDate}
           />
         </FormField>
       </div>

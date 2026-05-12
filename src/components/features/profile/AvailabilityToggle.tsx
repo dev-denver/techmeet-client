@@ -4,6 +4,8 @@ import { useState } from "react";
 import { cn } from "@/lib/utils/cn";
 import { AVAILABILITY_TOGGLE_CONFIG } from "@/lib/constants";
 import { AvailabilityStatus } from "@/types";
+import { DateSelectPicker } from "@/components/ui/date-select-picker";
+import { validateFutureDate } from "@/lib/utils/validation";
 
 interface AvailabilityToggleProps {
   status: AvailabilityStatus;
@@ -40,6 +42,8 @@ export function AvailabilityToggle({ status, availableFromDate, isDirty, onStatu
       setDateError("투입 가능 예정일을 선택해주세요");
       return;
     }
+    const err = validateFutureDate(dateInput);
+    if (err) { setDateError(err); return; }
     setDateError("");
     setShowDatePicker(false);
     onStatusChange(AvailabilityStatus.Partial, dateInput);
@@ -84,12 +88,11 @@ export function AvailabilityToggle({ status, availableFromDate, isDirty, onStatu
             <label className="block text-xs font-semibold text-status-info">
               투입 가능 예정일을 선택해주세요
             </label>
-            <input
-              type="date"
+            <DateSelectPicker
               value={dateInput}
-              onChange={(e) => { setDateInput(e.target.value); setDateError(""); }}
-              min={new Date().toISOString().slice(0, 10)}
-              className="w-full px-3 py-2.5 rounded-lg border border-input text-sm text-foreground bg-background focus:outline-none focus:ring-2 focus:ring-status-info focus:border-transparent"
+              onChange={(v) => { setDateInput(v); setDateError(""); }}
+              minDate={new Date().toISOString().slice(0, 10)}
+              error={!!dateError}
             />
             {dateError && <p className="text-xs text-destructive">{dateError}</p>}
             <div className="flex gap-2">

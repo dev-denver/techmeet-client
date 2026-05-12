@@ -6,11 +6,12 @@ interface BottomSheetProps {
   open: boolean;
   onClose: () => void;
   hasBottomNav?: boolean;
+  maxWidth?: "sm" | "lg";
   footer?: React.ReactNode;
   children: React.ReactNode;
 }
 
-export function BottomSheet({ open, onClose, hasBottomNav = false, footer, children }: BottomSheetProps) {
+export function BottomSheet({ open, onClose, hasBottomNav = false, maxWidth = "sm", footer, children }: BottomSheetProps) {
   if (!open) return null;
 
   return (
@@ -22,7 +23,8 @@ export function BottomSheet({ open, onClose, hasBottomNav = false, footer, child
     >
       <div
         className={cn(
-          "w-full max-w-[600px] rounded-t-2xl bg-card flex flex-col max-h-[85vh] overflow-hidden animate-in slide-in-from-bottom duration-300",
+          "w-full rounded-t-2xl bg-card flex flex-col max-h-[85vh] overflow-hidden animate-in slide-in-from-bottom duration-300",
+          maxWidth === "lg" ? "max-w-[600px]" : "max-w-[430px]",
           hasBottomNav && "mb-16"
         )}
         onClick={(e) => e.stopPropagation()}
