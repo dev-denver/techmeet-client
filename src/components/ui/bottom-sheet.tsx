@@ -32,7 +32,7 @@ export function BottomSheet({ open, onClose, hasBottomNav = false, maxWidth = "s
         <div className="flex justify-center pt-3 pb-1 shrink-0">
           <div className="w-10 h-1 rounded-full bg-muted" />
         </div>
-        <div className="overflow-y-auto overscroll-contain flex-1">
+        <div className="overflow-y-auto overscroll-contain flex-1 min-h-0">
           {children}
         </div>
         {footer && (
