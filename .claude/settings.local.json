@@ -47,7 +47,8 @@
       "Read(//home/denver/.nvm/versions/node/**)",
       "Bash(fuser -k 3000/tcp)",
       "Bash(fuser -k 3001/tcp)",
-      "Bash(pkill -f \"next dev\")"
+      "Bash(pkill -f \"next dev\")",
+      "Bash(xargs kill -9)"
     ]
   }
 }

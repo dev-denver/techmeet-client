@@ -258,7 +258,26 @@ export default function EditProfilePage() {
               >
                 <Minus className="h-4 w-4" />
               </button>
-              <span className="w-14 text-center text-sm font-medium tabular-nums select-none">{experienceYears}년</span>
+              <div className="flex items-center justify-center gap-0.5 px-2">
+                <input
+                  type="text"
+                  inputMode="numeric"
+                  value={experienceYears}
+                  onChange={(e) => {
+                    const raw = e.target.value.replace(/\D/g, "");
+                    setExperienceYears(raw === "" ? 0 : Math.min(50, Number(raw)));
+                  }}
+                  onBlur={(e) => {
+                    const v = Number(e.target.value) || 0;
+                    setExperienceYears(Math.min(50, Math.max(0, v)));
+                  }}
+                  onFocus={(e) => e.target.select()}
+                  className="w-9 text-center text-sm font-medium tabular-nums bg-transparent focus:outline-none"
+                  aria-label="경력 연수"
+                  maxLength={2}
+                />
+                <span className="text-sm font-medium text-foreground">년</span>
+              </div>
               <button
                 type="button"
                 onClick={() => setExperienceYears((y) => Math.min(50, y + 1))}
@@ -279,7 +298,26 @@ export default function EditProfilePage() {
               >
                 <Minus className="h-4 w-4" />
               </button>
-              <span className="w-16 text-center text-sm font-medium tabular-nums select-none">{experienceMonths}개월</span>
+              <div className="flex items-center justify-center gap-0.5 px-2">
+                <input
+                  type="text"
+                  inputMode="numeric"
+                  value={experienceMonths}
+                  onChange={(e) => {
+                    const raw = e.target.value.replace(/\D/g, "");
+                    setExperienceMonths(raw === "" ? 0 : Math.min(11, Number(raw)));
+                  }}
+                  onBlur={(e) => {
+                    const v = Number(e.target.value) || 0;
+                    setExperienceMonths(Math.min(11, Math.max(0, v)));
+                  }}
+                  onFocus={(e) => e.target.select()}
+                  className="w-9 text-center text-sm font-medium tabular-nums bg-transparent focus:outline-none"
+                  aria-label="경력 개월수"
+                  maxLength={2}
+                />
+                <span className="text-sm font-medium text-foreground">개월</span>
+              </div>
               <button
                 type="button"
                 onClick={() => setExperienceMonths((m) => Math.min(11, m + 1))}
