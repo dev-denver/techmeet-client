@@ -30,10 +30,11 @@ interface BasicInfoTabProps {
   isDirty: boolean;
   isSaving: boolean;
   onStatusChange: (status: AvailabilityStatus, date?: string | null) => void;
-  onSaveAndEdit: () => void;
+  onSave: () => void;
+  onEdit: () => void;
 }
 
-function BasicInfoTab({ profile, availStatus, availFromDate, isDirty, isSaving, onStatusChange, onSaveAndEdit }: BasicInfoTabProps) {
+function BasicInfoTab({ profile, availStatus, availFromDate, isDirty, isSaving, onStatusChange, onSave, onEdit }: BasicInfoTabProps) {
   const genderLabel = profile.gender === "male" ? "남" : profile.gender === "female" ? "여" : null;
 
   return (
@@ -117,36 +118,44 @@ function BasicInfoTab({ profile, availStatus, availFromDate, isDirty, isSaving, 
         />
       </div>
 
+      {/* 투입 상태 저장 버튼 (변경 있을 때만) */}
+      {isDirty && (
+        <button
+          type="button"
+          onClick={onSave}
+          disabled={isSaving}
+          className={cn(
+            "w-full flex items-center justify-center gap-2.5 rounded-xl py-3.5 text-base font-semibold transition-all",
+            "focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2",
+            "disabled:opacity-50 bg-status-info text-white hover:opacity-90 active:opacity-80"
+          )}
+        >
+          {isSaving ? (
+            <>
+              <span className="w-4 h-4 border-2 border-white/30 border-t-white rounded-full animate-spin shrink-0" />
+              저장 중...
+            </>
+          ) : (
+            <>
+              <Save className="h-4 w-4 shrink-0" />
+              투입 상태 저장하기
+            </>
+          )}
+        </button>
+      )}
+
       {/* 기본정보 수정 버튼 */}
       <button
         type="button"
-        onClick={onSaveAndEdit}
-        disabled={isSaving}
+        onClick={onEdit}
         className={cn(
           "w-full flex items-center justify-center gap-2.5 rounded-xl py-3.5 text-base font-semibold transition-all",
           "focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2",
-          "disabled:opacity-50",
-          isDirty
-            ? "bg-status-info text-white hover:opacity-90 active:opacity-80"
-            : "bg-primary text-primary-foreground hover:opacity-90 active:opacity-80"
+          "bg-primary text-primary-foreground hover:opacity-90 active:opacity-80"
         )}
       >
-        {isSaving ? (
-          <>
-            <span className="w-4 h-4 border-2 border-white/30 border-t-white rounded-full animate-spin shrink-0" />
-            저장 중...
-          </>
-        ) : isDirty ? (
-          <>
-            <Save className="h-4 w-4 shrink-0" />
-            변경사항 저장 후 수정
-          </>
-        ) : (
-          <>
-            <Pencil className="h-4 w-4 shrink-0" />
-            기본정보 수정
-          </>
-        )}
+        <Pencil className="h-4 w-4 shrink-0" />
+        기본정보 수정
       </button>
     </div>
   );
@@ -168,33 +177,40 @@ export function ProfileTabsClient({ profile }: ProfileTabsClientProps) {
   );
   const [availFromDate, setAvailFromDate] = useState<string | null>(profile.availableFromDate);
   const [isSaving, setIsSaving] = useState(false);
+  // 마지막으로 서버에 저장된 값 — isDirty 비교의 기준점
+  const [savedStatus, setSavedStatus] = useState<AvailabilityStatus>(
+    profile.availabilityStatus ?? AvailabilityStatus.Unavailable
+  );
+  const [savedFromDate, setSavedFromDate] = useState<string | null>(profile.availableFromDate);
 
-  // 서버에서 받은 초기값과 현재 로컬 상태를 비교해 미저장 변경이 있는지 감지.
-  // 투입 가능 상태는 별도 저장 버튼을 통해 명시적으로 저장하는 방식이라 isDirty 관리가 필요하다.
-  const isDirty =
-    availStatus !== (profile.availabilityStatus ?? AvailabilityStatus.Unavailable) ||
-    availFromDate !== profile.availableFromDate;
+  const isDirty = availStatus !== savedStatus || availFromDate !== savedFromDate;
 
   function handleStatusChange(status: AvailabilityStatus, date?: string | null) {
     setAvailStatus(status);
     setAvailFromDate(date ?? null);
   }
 
-  // 투입 상태 변경이 있으면 먼저 저장한 뒤 기본정보 수정 페이지로 이동.
-  // 저장 실패해도 페이지 이동은 진행 (에러 표시 없이 최선 노력).
-  async function handleSaveAndEdit() {
-    if (isDirty) {
-      setIsSaving(true);
-      try {
-        await fetch("/api/profile/availability", {
-          method: "PUT",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({ status: availStatus, availableFromDate: availFromDate }),
-        });
-      } finally {
-        setIsSaving(false);
+  // 투입 상태만 저장 (페이지 이동 없음)
+  async function handleSave() {
+    setIsSaving(true);
+    try {
+      const res = await fetch("/api/profile/availability", {
+        method: "PUT",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ status: availStatus, availableFromDate: availFromDate }),
+      });
+      if (res.ok) {
+        setSavedStatus(availStatus);
+        setSavedFromDate(availFromDate);
+        router.refresh();
       }
+    } finally {
+      setIsSaving(false);
     }
+  }
+
+  // 기본정보 수정 페이지로 이동
+  function handleEdit() {
     router.push("/settings/profile");
   }
 
@@ -260,7 +276,8 @@ export function ProfileTabsClient({ profile }: ProfileTabsClientProps) {
             isDirty={isDirty}
             isSaving={isSaving}
             onStatusChange={handleStatusChange}
-            onSaveAndEdit={handleSaveAndEdit}
+            onSave={handleSave}
+            onEdit={handleEdit}
           />
         )}
         {tab === "education" && (

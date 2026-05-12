@@ -40,7 +40,11 @@
       "Bash(npm run *)",
       "Bash(node *)",
       "Bash(npx *)",
-      "Bash(python3 *)"
+      "Bash(python3 *)",
+      "Bash(rm -f .next/trace .next/*.lock)",
+      "Read(//tmp/**)",
+      "Read(//usr/local/bin/**)",
+      "Read(//home/denver/.nvm/versions/node/**)"
     ]
   }
 }
