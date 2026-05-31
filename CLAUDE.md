@@ -45,7 +45,8 @@
 /projects                  → 프로젝트 목록
 /projects/[id]             → 프로젝트 상세 + 지원하기
 /projects/applications     → 내 신청 내역 및 상태
-/profile                   → 내 정보 (경력, 기술 스택, 상태 관리)
+/profile                   → 내 정보 (기본정보, 학력/자격증, 경력사항, 스킬 인벤토리)
+/notifications             → 알림 이력 (카카오 알림톡 발송 내역)
 /settings                  → 설정 (알림, 로그아웃)
 /login                     → 카카오 로그인
 ```
@@ -58,13 +59,15 @@
     /api                   → API 라우트 (Supabase 연동, 카카오 알림톡)
     /login                 → 로그인 페이지
     /projects              → 프로젝트 관련 페이지
-    /profile               → 내 정보 페이지
+    /profile               → 내 정보 페이지 (탭: 기본정보/학력자격증/경력사항/스킬인벤토리)
+    /notifications         → 알림 이력 페이지
     /settings              → 설정 페이지
   /components
     /ui                    → shadcn/ui 기반 재사용 UI 컴포넌트
     /layout                → TopBar, BottomNavigation 등 레이아웃 컴포넌트
     /features              → 기능별 컴포넌트 (projects/, profile/ 등)
   /lib
+    /api                   → 클라이언트 API 호출 함수 (projects, applications, profile, notices, notifications, settings, auth)
     /constants             → 상태 config 등 상수 정의 (status.ts)
     /supabase              → Supabase 클라이언트 및 쿼리 함수
     /kakao                 → 카카오 OAuth, 알림톡 API 유틸

@@ -318,6 +318,7 @@ create table if not exists public.notices (
   created_by   uuid        references public.profiles(id) on delete set null,               -- 작성 관리자 프로필 ID
   seq_id       bigint      generated always as identity unique,                             -- Supabase Realtime 순서 관리 (자동)
   deleted_at   timestamptz,                                                                 -- soft delete 일시
+  attachments  jsonb       not null default '[]'::jsonb,                                   -- 첨부파일 (JSON 배열)
   created_at   timestamptz not null default now(),                                          -- 생성 일시
   updated_at   timestamptz not null default now()                                           -- 수정 일시
 );
