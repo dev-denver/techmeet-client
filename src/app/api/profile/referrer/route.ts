@@ -1,14 +1,14 @@
 import { NextRequest, NextResponse } from "next/server";
 import { createServerClient } from "@/lib/supabase/server";
+import { requireAuth } from "@/lib/api/server";
 import { AccountStatus } from "@/types";
 
 export async function POST(request: NextRequest) {
-  const supabase = await createServerClient();
+  const { user, errorResponse } = await requireAuth();
+  if (errorResponse) return errorResponse;
 
-  const { data: { user } } = await supabase.auth.getUser();
-  if (!user) {
-    return NextResponse.json({ error: "인증이 필요합니다" }, { status: 401 });
-  }
+  // requireAuth()는 인증 확인만 담당하므로, 이후 profiles 조회·수정에 별도 클라이언트 생성
+  const supabase = await createServerClient();
 
   const body = await request.json() as { referrerId?: unknown };
   const { referrerId } = body;

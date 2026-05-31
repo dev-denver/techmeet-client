@@ -4,6 +4,7 @@ import { useState } from "react";
 import { useRouter } from "next/navigation";
 import { Button } from "@/components/ui/button";
 import { BottomSheet } from "@/components/ui/bottom-sheet";
+import { ErrorMessage } from "@/components/ui/error-message";
 import { FormField } from "@/components/ui/form-field";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
@@ -107,11 +108,7 @@ export function ApplyButton({ projectId }: ApplyButtonProps) {
         onClose={handleClose}
         footer={
           <div className="px-5 pt-3 pb-6 space-y-2.5">
-            {serverError && (
-              <p className="text-sm text-destructive bg-destructive/10 rounded-lg px-3 py-2.5">
-                {serverError}
-              </p>
-            )}
+            <ErrorMessage size="sm">{serverError}</ErrorMessage>
             <Button
               type="submit"
               form={FORM_ID}

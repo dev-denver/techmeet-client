@@ -89,3 +89,7 @@ export function formatProjectPeriod(
   if (startDate) return `${fmt(startDate)} 시작`;
   return `~ ${fmt(endDate!)}`;
 }
+
+export function maskPhone(phone: string): string {
+  return phone.replace(/(\d{3})-(\d{3,4})-(\d{4})/, (_, p1, _p2, p3) => `${p1}-****-${p3}`);
+}

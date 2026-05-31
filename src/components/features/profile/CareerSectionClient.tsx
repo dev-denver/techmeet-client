@@ -9,6 +9,7 @@ import { FormField } from "@/components/ui/form-field";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { MonthYearPicker } from "@/components/ui/month-year-picker";
+import { ErrorMessage } from "@/components/ui/error-message";
 import { CareerTimelineDot } from "@/components/features/profile/CareerTimelineDot";
 import { cn } from "@/lib/utils/cn";
 import { formatMonthYear } from "@/lib/utils/format";
@@ -433,9 +434,7 @@ function CareerForm({
         />
       </FormField>
 
-      {serverError && (
-        <p className="text-xs text-destructive bg-destructive/10 rounded-lg px-3 py-2">{serverError}</p>
-      )}
+      <ErrorMessage>{serverError}</ErrorMessage>
 
       <div className="flex gap-2">
         <Button type="submit" size="sm" disabled={isSubmitting} className="flex-1">

@@ -99,8 +99,8 @@
 
 ## 유틸리티 함수
 
-- `format.ts`: `formatDate`, `formatShortDate`, `formatDeadlineDays`, `getDeadlineDays`, `formatMonthYear`
-- `validation.ts`: `validatePassword`, `validatePhone`, `validateEmail`, `validateAge`, `formatPhone`
+- `format.ts`: `formatDate`, `formatShortDate`, `formatDeadlineDays`, `getDeadlineDays`, `formatMonthYear`, `maskPhone`
+- `validation.ts`: `validatePassword`, `validatePhone`, `validateEmail`, `validateAge`, `formatPhone`, `UUID_REGEX`
 - `cn.ts`: Tailwind 클래스 병합 (`clsx` + `tailwind-merge`)
 
 ## 컴포넌트 네이밍 규칙
@@ -117,9 +117,15 @@
 
 ## API Route 보안 패턴
 
-- 모든 인증 필요 API route는 핸들러 최상단에서 `createServerClient()` → `getUser()` → 미인증 시 401 반환
+- 모든 인증 필요 API route는 `requireAuth()` (`lib/api/server.ts`) 사용
+  ```ts
+  const { user, errorResponse } = await requireAuth();
+  if (errorResponse) return errorResponse;
+  ```
+- `requireAuth()`는 내부적으로 Supabase 클라이언트를 생성하므로, 이후 DB 작업에 별도 `createServerClient()`가 필요한 경우 추가 생성 허용 (소수)
 - query 함수 내부의 auth 체크는 방어적 레이어 (API route 레벨 체크가 우선)
 - enum 값 입력은 API route에서 유효성 검증 후 query 함수에 전달
+- 페이지네이션 파라미터는 `parsePaginationParams(searchParams, { maxPageSize })` 사용
 
 ## 에러 처리 패턴
 
@@ -165,6 +171,8 @@
 - 커스텀 인터랙티브 요소에 `focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2` 필수
 - 토글 버튼에 `role="switch"` + `aria-checked` 적용
 - `aria-label` 필요 시 한국어로 작성
+- 네비게이션 활성 항목에 `aria-current="page"` 적용 (BottomNavigation)
+- 로딩 중인 제출 버튼에 `aria-busy={isLoading || undefined}` 적용 (SaveButton)
 
 ## 다크 모드
 
@@ -182,6 +190,11 @@
 - `TechStackInput` (`components/features/profile/`): 기술 스택 입력 (Enter/추가 버튼, 태그 삭제)
 - `CareerTimelineDot` (`components/features/profile/`): 경력 타임라인 dot + line
 - `BottomSheet` (`components/ui/`): 하단 모달 오버레이
+- `EmptyState` (`components/ui/`): 데이터 없을 때 빈 상태 표시 (icon, title, description, action, iconShape, iconSize)
+- `ErrorMessage` (`components/ui/`): 폼 서버 오류 메시지 (size="xs"|"sm", children이 falsy면 렌더링 안 함)
+- `PageHero` (`components/ui/`): 상단 다크 헤더 배경 래퍼 (`bg-primary px-5 pt-6 pb-5`, className으로 pb 오버라이드)
+- `StatsGrid` (`components/ui/`): 통계 그리드 (stats 배열, valueSize, labelSize)
+- `SkeletonCard` / `SkeletonBadgeRow` / `SkeletonSectionHeader` (`components/ui/skeleton-patterns.tsx`): 로딩 스켈레톤 조각
 
 ## Supabase 클라이언트 사용
 
@@ -189,7 +202,9 @@
 | --------------------------------------------- | ----------------------------------------------------- |
 | Client Component                              | `createClient()` from `@/lib/supabase/client`         |
 | Server Component / API Route (인증 세션 필요) | `createServerClient()` from `@/lib/supabase/server`   |
-| API Route (RLS bypass — 추천인 검색 등)       | `@/lib/supabase/server` + `SUPABASE_SERVICE_ROLE_KEY` |
+| API Route (RLS bypass — 추천인 검색 등)       | `createAdminClient()` from `@/lib/supabase/server`    |
+
+> `createAdminClient()`는 service_role 키를 사용해 RLS를 우회합니다. 반드시 서버 사이드에서만 호출해야 합니다.
 
 ## 중요 사항
 

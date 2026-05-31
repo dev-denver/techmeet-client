@@ -1,15 +1,15 @@
 import { NextResponse } from "next/server";
 import { createServerClient } from "@/lib/supabase/server";
+import { requireAuth } from "@/lib/api/server";
 import { AccountStatus } from "@/types";
 
 export async function POST() {
   try {
-    const supabase = await createServerClient();
+    const { user, errorResponse } = await requireAuth();
+    if (errorResponse) return errorResponse;
 
-    const { data: { user } } = await supabase.auth.getUser();
-    if (!user) {
-      return NextResponse.json({ error: "인증이 필요합니다" }, { status: 401 });
-    }
+    // requireAuth()는 인증 확인만 담당하므로, 이후 DB 작업을 위해 별도 클라이언트 생성
+    const supabase = await createServerClient();
 
     // 소프트 탈퇴: profiles 테이블의 account_status를 'withdrawn'으로 변경
     const { error: profileError } = await supabase

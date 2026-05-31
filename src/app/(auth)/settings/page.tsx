@@ -2,6 +2,7 @@ import Link from "next/link";
 import { ChevronRight, Shield, Info, UserCog, UserX } from "lucide-react";
 import { NotificationSettings } from "@/components/features/settings/NotificationSettings";
 import { LogoutButton } from "@/components/features/settings/LogoutButton";
+import { PageHero } from "@/components/ui/page-hero";
 import { getProfile } from "@/lib/supabase/queries/profile";
 import { ReferrerSection } from "@/components/features/referrer/ReferrerSection";
 
@@ -52,11 +53,11 @@ export default async function SettingsPage() {
   return (
     <div className="pb-8">
       {/* 프로필 요약 */}
-      <div className="bg-primary px-5 pt-6 pb-6">
+      <PageHero className="pb-6">
         <p className="text-primary-foreground/50 text-xs font-medium tracking-wide">설정</p>
         <p className="text-primary-foreground font-bold text-lg leading-tight mt-0.5">{profile?.name ?? "-"}</p>
         <p className="text-primary-foreground/60 text-sm mt-1">{profile?.email ?? "-"}</p>
-      </div>
+      </PageHero>
 
       <div className="px-4 pt-4 space-y-4">
         {/* 계정 */}

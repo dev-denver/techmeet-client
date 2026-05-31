@@ -1,7 +1,7 @@
 # 테크밋 프리랜서 앱 - 개발 문서
 
 > 이 문서는 개발 환경이 바뀌어도 어디까지 개발됐는지 파악하고 이어서 개발할 수 있도록 작성된 문서입니다.
-> 마지막 업데이트: 2026-05-31
+> 마지막 업데이트: 2026-05-31 (코드 최적화 리팩토링)
 
 ---
 
@@ -83,7 +83,9 @@ src/
 │   ├── terms/page.tsx              # 이용약관 (공개)
 │   └── privacy/page.tsx           # 개인정보 처리방침 (공개)
 ├── components/
-│   ├── ui/                         # shadcn/ui 기반 (badge, bottom-sheet, button, card, separator, skeleton)
+│   ├── ui/                         # shadcn/ui 기반 + 공통 컴포넌트
+│   │                               # 기본: badge, bottom-sheet, button, card, input, textarea, separator, skeleton
+│   │                               # 공통: empty-state, error-message, page-hero, stats-grid, skeleton-patterns
 │   ├── layout/                     # TopBar, BottomNavigation
 │   └── features/
 │       ├── projects/               # ProjectCard, ProjectStatusBadge, ApplicationCard,
@@ -97,8 +99,9 @@ src/
 │       ├── referrer/               # ReferrerSection, ReferrerSearchModal (BottomSheet)
 │       └── settings/               # NotificationSettings, LogoutButton
 ├── lib/
-│   ├── api/                        # 클라이언트 사이드 API 호출 함수
-│   │   ├── client.ts               # apiFetch 기반 fetch 래퍼, ApiError 클래스
+│   ├── api/                        # API 관련 헬퍼
+│   │   ├── client.ts               # 클라이언트용: apiFetch 래퍼, ApiError 클래스 (브라우저에서 import)
+│   │   ├── server.ts               # 서버 전용: requireAuth(), parsePaginationParams() (API Route에서만 import)
 │   │   ├── projects.ts             # projectsApi (getList, getById)
 │   │   ├── applications.ts         # applicationsApi (getList, create, withdraw)
 │   │   ├── profile.ts              # profileApi (get, update, updateAvailability, career CRUD)
@@ -106,10 +109,10 @@ src/
 │   │   ├── auth.ts                 # authApi (signup, login)
 │   │   ├── settings.ts             # settingsApi (getNotifications, updateNotifications)
 │   │   ├── notifications.ts        # notificationsApi (알림톡 발송 이력 조회)
-│   │   └── index.ts                # re-export
+│   │   └── index.ts                # re-export (client.ts 기반 함수만 포함, server.ts 제외)
 │   ├── supabase/                   # Supabase 클라이언트 + 서버사이드 쿼리
-│   │   ├── client.ts               # 브라우저용 클라이언트
-│   │   ├── server.ts               # 서버용 클라이언트 (쿠키 기반 세션)
+│   │   ├── client.ts               # 브라우저용 클라이언트 (createClient)
+│   │   ├── server.ts               # 서버용 클라이언트: createServerClient (세션), createAdminClient (RLS 우회)
 │   │   └── queries/                # projects, applications, profile, notices
 │   ├── kakao/                      # OAuth (구현됨), 알림톡 (미구현 스텁)
 │   ├── config/env.ts               # 환경변수 타입 안전 접근
@@ -287,9 +290,17 @@ src/
 - [x] API 유효성 검사 강화: education·skill-inventories (길이·날짜 역전)
 - [x] GET /api/projects page/pageSize 범위 방어 (Math.min/max)
 - [x] 클라이언트 글자 수 카운터: 이름 (50자), 자기소개 (500자)
-- [x] 미사용 파일 제거: empty-state.tsx, settings/page.tsx 미사용 import
 - [x] 주요 복잡 로직에 개발자 주석 추가 (KakaoAddressInput, RSA, proxy, profile queries 등)
 - [x] 홈·신청내역·알림 페이지 — 개별 데이터 로드 실패 시 graceful fallback 처리
+
+### 코드 최적화 리팩토링 (2026-05-31)
+
+- [x] `requireAuth()` 헬퍼 추출 — 13개 보호된 API route의 인증 3-liner 공통화 (`lib/api/server.ts`)
+- [x] `parsePaginationParams()` 추출 — projects·notifications route 파라미터 파싱 일관화
+- [x] `createAdminClient()` 추출 — referrer lookup/search의 인라인 admin 클라이언트 생성 공통화
+- [x] `maskPhone()`, `UUID_REGEX` 중복 제거 — format.ts / validation.ts로 이동
+- [x] 공통 UI 컴포넌트 추가: `EmptyState`, `ErrorMessage`, `PageHero`, `StatsGrid`, `SkeletonCard/SkeletonBadgeRow/SkeletonSectionHeader`
+- [x] 접근성 개선: BottomNavigation `aria-current`, DateSelectPicker/MonthYearPicker `focus-visible`, SaveButton `aria-busy`
 
 ---
 
@@ -331,7 +342,7 @@ src/
 3. **타입 안전**: `any` 타입 금지, `unknown` 후 타입 가드 사용
 4. **스크롤 감지**: `window`가 아닌 `<main>` 엘리먼트 기준 (`useScrolled` 훅)
 5. **공개 경로**: `/terms`, `/privacy`는 미들웨어에서 인증 없이 접근 가능
-6. **API Route 인증**: 모든 인증 필요 API route 핸들러 최상단에서 `getUser()` → 미인증 시 401 반환
+6. **API Route 인증**: 모든 인증 필요 API route에서 `requireAuth()` (`lib/api/server.ts`) 사용 — 직접 `createServerClient().auth.getUser()` 패턴 사용 금지
 7. **BottomSheet 사용**: 하단 모달 패턴은 `components/ui/bottom-sheet.tsx` 공통 컴포넌트 사용
 8. **focus-visible**: 커스텀 input/button에 `focus-visible:` 접두사 사용 (`focus:` 금지)
 9. **클라이언트 API 호출**: `lib/api/` 모듈의 `*Api` 객체 사용 (apiFetch 직접 호출 금지)

@@ -1,4 +1,5 @@
 import { Skeleton } from "@/components/ui/skeleton";
+import { SkeletonCard, SkeletonBadgeRow } from "@/components/ui/skeleton-patterns";
 
 export default function ProjectsLoading() {
   return (
@@ -12,23 +13,19 @@ export default function ProjectsLoading() {
       </div>
       {/* 카드 목록 */}
       {[1, 2, 3, 4, 5].map((i) => (
-        <div key={i} className="p-4 border rounded-xl space-y-3">
+        <SkeletonCard key={i}>
           <div className="flex justify-between">
             <Skeleton className="h-5 w-16 rounded-full" />
             <Skeleton className="h-4 w-20" />
           </div>
           <Skeleton className="h-5 w-4/5" />
           <Skeleton className="h-4 w-1/3" />
-          <div className="flex gap-1.5">
-            {[1, 2, 3].map((j) => (
-              <Skeleton key={j} className="h-5 w-12 rounded-full" />
-            ))}
-          </div>
+          <SkeletonBadgeRow />
           <div className="flex gap-4">
             <Skeleton className="h-3 w-24" />
             <Skeleton className="h-3 w-12" />
           </div>
-        </div>
+        </SkeletonCard>
       ))}
     </div>
   );

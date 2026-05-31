@@ -75,6 +75,8 @@ export function validateFutureDate(date: string): string | null {
   return null;
 }
 
+export const UUID_REGEX = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
+
 export function validatePastOrCurrentMonth(monthYear: string): string | null {
   if (!monthYear) return null;
   const [y, m] = monthYear.split("-").map(Number);

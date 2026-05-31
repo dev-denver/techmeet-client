@@ -1,13 +1,8 @@
 import { NextRequest, NextResponse } from "next/server";
-import { createClient } from "@supabase/supabase-js";
-import { publicEnv, serverEnv } from "@/lib/config/env";
+import { createAdminClient } from "@/lib/supabase/server";
+import { UUID_REGEX } from "@/lib/utils/validation";
+import { maskPhone } from "@/lib/utils/format";
 import { AccountStatus } from "@/types";
-
-const UUID_REGEX = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
-
-function maskPhone(phone: string): string {
-  return phone.replace(/(\d{3})-(\d{3,4})-(\d{4})/, (_, p1, _p2, p3) => `${p1}-****-${p3}`);
-}
 
 export async function GET(request: NextRequest) {
   const { searchParams } = new URL(request.url);
@@ -17,11 +12,7 @@ export async function GET(request: NextRequest) {
     return NextResponse.json({ error: "유효하지 않은 ID입니다" }, { status: 400 });
   }
 
-  const supabaseAdmin = createClient(
-    publicEnv.supabaseUrl,
-    serverEnv.supabaseServiceRoleKey,
-    { auth: { autoRefreshToken: false, persistSession: false } }
-  );
+  const supabaseAdmin = createAdminClient();
 
   const { data, error } = await supabaseAdmin
     .from("profiles")

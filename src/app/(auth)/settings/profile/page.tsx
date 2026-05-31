@@ -4,6 +4,7 @@ import { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
 import { Minus, Plus } from "lucide-react";
 import { SaveButton } from "@/components/ui/save-button";
+import { ErrorMessage } from "@/components/ui/error-message";
 import { validatePhone, formatPhone, validateBirthDateWithMessage, validatePastOrPresentDate } from "@/lib/utils/validation";
 import { TechStackInput } from "@/components/features/profile/TechStackInput";
 import { KakaoAddressInput } from "@/components/features/profile/KakaoAddressInput";
@@ -344,9 +345,7 @@ export default function EditProfilePage() {
           />
         </FormField>
 
-        {serverError && (
-          <p className="text-sm text-destructive bg-destructive/10 rounded-lg px-3 py-2.5">{serverError}</p>
-        )}
+        <ErrorMessage size="sm">{serverError}</ErrorMessage>
 
         <SaveButton isLoading={isSaving} isSuccess={saveSuccess} />
       </div>

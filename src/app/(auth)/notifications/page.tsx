@@ -1,5 +1,6 @@
 import { CheckCircle, XCircle, Clock, Megaphone, User, FolderOpen, Bell } from "lucide-react";
 import { getAlimtalkLogs } from "@/lib/supabase/queries/notifications";
+import { EmptyState } from "@/components/ui/empty-state";
 import { AlimtalkServiceType } from "@/types";
 import { formatDate } from "@/lib/utils/format";
 
@@ -46,12 +47,13 @@ export default async function NotificationsPage() {
       </div>
 
       {logs.length === 0 ? (
-        <div className="flex flex-col items-center justify-center py-20 gap-3">
-          <div className="w-12 h-12 rounded-2xl bg-muted flex items-center justify-center">
-            <Bell className="h-5 w-5 text-muted-foreground" />
-          </div>
-          <p className="text-sm text-muted-foreground">받은 알림이 없습니다</p>
-        </div>
+        <EmptyState
+          icon={Bell}
+          title="받은 알림이 없습니다"
+          iconShape="rounded"
+          iconSize="sm"
+          className="py-20"
+        />
       ) : (
         <div className="px-4 pt-4 space-y-2">
           {logs.map((log) => {

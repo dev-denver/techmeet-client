@@ -27,6 +27,7 @@ export function SaveButton({
     <button
       type={type}
       disabled={disabled ?? isLoading ?? isSuccess}
+      aria-busy={isLoading || undefined}
       className={cn(
         "w-full rounded-xl py-3.5 text-base font-semibold transition-all flex items-center justify-center gap-2",
         "focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2",

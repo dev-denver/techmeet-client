@@ -4,8 +4,7 @@ import { NextRequest, NextResponse } from "next/server";
 import { serverEnv, publicEnv } from "@/lib/config/env";
 import { exchangeCodeForToken, getKakaoUserInfo } from "@/lib/kakao/oauth";
 import { AccountStatus } from "@/types";
-
-const UUID_REGEX = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
+import { UUID_REGEX } from "@/lib/utils/validation";
 
 export async function GET(request: NextRequest) {
   const { searchParams } = new URL(request.url);
