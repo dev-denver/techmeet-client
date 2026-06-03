@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from "next/server";
-import { createServerClient } from "@/lib/supabase/server";
+import { requireAuth } from "@/lib/api/server";
 import { updateAvailability } from "@/lib/supabase/queries/profile";
 import { AvailabilityStatus } from "@/types";
 
@@ -7,12 +7,8 @@ const validStatuses = new Set<string>(Object.values(AvailabilityStatus));
 
 export async function PUT(request: NextRequest) {
   try {
-    const supabase = await createServerClient();
-    const { data: { user } } = await supabase.auth.getUser();
-
-    if (!user) {
-      return NextResponse.json({ error: "인증이 필요합니다" }, { status: 401 });
-    }
+    const { errorResponse } = await requireAuth();
+    if (errorResponse) return errorResponse;
 
     const body = await request.json() as { status?: string; availableFromDate?: string | null };
 

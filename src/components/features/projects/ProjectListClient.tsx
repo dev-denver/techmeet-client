@@ -4,6 +4,7 @@ import { useState, useRef } from "react";
 import { FolderOpen, Loader2, Search, X } from "lucide-react";
 import { ProjectFilters } from "./ProjectFilters";
 import { ProjectCard } from "./ProjectCard";
+import { EmptyState } from "@/components/ui/empty-state";
 import type { Project, ProjectFilterValue } from "@/types";
 import type { GetProjectsResponse } from "@/types/api";
 
@@ -115,19 +116,12 @@ export function ProjectListClient({ initialProjects, initialTotal }: ProjectList
             <Loader2 className="h-6 w-6 animate-spin text-muted-foreground" />
           </div>
         ) : projects.length === 0 ? (
-          <div className="flex flex-col items-center justify-center py-16 gap-3">
-            <div className="w-14 h-14 rounded-2xl bg-muted flex items-center justify-center">
-              <FolderOpen className="h-6 w-6 text-muted-foreground" />
-            </div>
-            <div className="text-center">
-              <p className="text-sm font-medium text-muted-foreground">
-                {search ? `"${search}"에 해당하는 프로젝트가 없습니다` : "해당하는 프로젝트가 없습니다"}
-              </p>
-              <p className="text-xs text-muted-foreground mt-1">
-                {search ? "다른 검색어를 입력해보세요" : "다른 필터를 선택해보세요"}
-              </p>
-            </div>
-          </div>
+          <EmptyState
+            icon={FolderOpen}
+            iconShape="rounded"
+            title={search ? `"${search}"에 해당하는 프로젝트가 없습니다` : "해당하는 프로젝트가 없습니다"}
+            description={search ? "다른 검색어를 입력해보세요" : "다른 필터를 선택해보세요"}
+          />
         ) : (
           <>
             <div className="space-y-3">

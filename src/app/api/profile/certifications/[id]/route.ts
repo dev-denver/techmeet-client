@@ -1,11 +1,10 @@
 import { NextResponse } from "next/server";
-import { createServerClient } from "@/lib/supabase/server";
+import { requireAuth } from "@/lib/api/server";
 import { deleteCertification } from "@/lib/supabase/queries/resume";
 
 export async function DELETE(_: Request, { params }: { params: Promise<{ id: string }> }) {
-  const supabase = await createServerClient();
-  const { data: { user } } = await supabase.auth.getUser();
-  if (!user) return NextResponse.json({ error: "인증이 필요합니다" }, { status: 401 });
+  const { errorResponse } = await requireAuth();
+  if (errorResponse) return errorResponse;
 
   const { id } = await params;
 

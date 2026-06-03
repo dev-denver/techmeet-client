@@ -1,6 +1,7 @@
 import Link from "next/link";
 import { ChevronRight, Bell, Megaphone, CalendarClock } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
+import { StatsGrid } from "@/components/ui/stats-grid";
 import { ProjectCard } from "@/components/features/projects/ProjectCard";
 import { ApplicationCard } from "@/components/features/projects/ApplicationCard";
 import { getProfile } from "@/lib/supabase/queries/profile";
@@ -67,19 +68,16 @@ export default async function HomePage() {
         )}
 
         {/* 지원 현황 요약 */}
-        <div className="mt-5 grid grid-cols-4 divide-x divide-primary-foreground/20 bg-primary-foreground/10 border border-primary-foreground/15 rounded-2xl overflow-hidden">
-          {[
+        <StatsGrid
+          className="mt-5"
+          labelSize="10px"
+          stats={[
             { label: "전체", value: allApplications.length },
             { label: "검토 중", value: reviewingCount },
             { label: "면접", value: interviewCount },
             { label: "합격", value: acceptedCount },
-          ].map((stat) => (
-            <div key={stat.label} className="text-center py-4">
-              <p className="text-primary-foreground font-bold text-xl leading-none tabular-nums">{stat.value}</p>
-              <p className="text-primary-foreground/50 text-[10px] mt-2 font-medium">{stat.label}</p>
-            </div>
-          ))}
-        </div>
+          ]}
+        />
       </section>
 
       {/* 내 신청 현황 */}

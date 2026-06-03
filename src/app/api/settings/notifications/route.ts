@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
 import { createServerClient } from "@/lib/supabase/server";
+import { requireAuth } from "@/lib/api/server";
 import type { NotificationSettings, UpdateNotificationSettingsRequest } from "@/types";
 
 const defaultSettings: NotificationSettings = {
@@ -48,12 +49,11 @@ export async function GET() {
 export async function PUT(request: NextRequest) {
   try {
     const body = (await request.json()) as UpdateNotificationSettingsRequest;
-    const supabase = await createServerClient();
-    const { data: { user } } = await supabase.auth.getUser();
+    const { user, errorResponse } = await requireAuth();
+    if (errorResponse) return errorResponse;
 
-    if (!user) {
-      return NextResponse.json({ error: "인증이 필요합니다" }, { status: 401 });
-    }
+    // requireAuth()는 인증 확인만 담당하므로, profiles 업데이트에 별도 클라이언트 생성
+    const supabase = await createServerClient();
 
     const updateData: Record<string, boolean> = {};
     if (body.new_project !== undefined) updateData.notification_new_project = body.new_project;

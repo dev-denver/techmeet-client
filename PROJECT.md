@@ -1,7 +1,7 @@
 # 테크밋 프리랜서 앱 - 개발 문서
 
 > 이 문서는 개발 환경이 바뀌어도 어디까지 개발됐는지 파악하고 이어서 개발할 수 있도록 작성된 문서입니다.
-> 마지막 업데이트: 2026-05-05
+> 마지막 업데이트: 2026-05-31 (코드 최적화 리팩토링)
 
 ---
 
@@ -47,18 +47,28 @@ src/
 │   │   ├── profile/                # 프로필 조회/수정 (GET, PUT)
 │   │   │   ├── availability/       # 투입 가능 상태 변경 (PUT)
 │   │   │   ├── referrer/           # 추천인 등록 (POST)
-│   │   │   │   └── search/         # 추천인 검색 (GET, admin client)
-│   │   │   └── careers/            # 경력 목록/추가 (GET, POST)
-│   │   │       └── [id]/           # 경력 수정/삭제 (PUT, DELETE)
+│   │   │   │   ├── search/         # 추천인 검색 (GET, admin client)
+│   │   │   │   └── lookup/         # 추천인 단건 조회 (GET)
+│   │   │   ├── careers/            # 경력 목록/추가 (GET, POST)
+│   │   │   │   └── [id]/           # 경력 수정/삭제 (PUT, DELETE)
+│   │   │   ├── education/          # 학력 목록/추가 (GET, POST)
+│   │   │   │   └── [id]/           # 학력 수정/삭제 (PUT, DELETE)
+│   │   │   ├── certifications/     # 자격증 목록/추가 (GET, POST)
+│   │   │   │   └── [id]/           # 자격증 수정/삭제 (PUT, DELETE)
+│   │   │   └── skill-inventories/  # 스킬 인벤토리 목록/추가 (GET, POST)
+│   │   │       └── [id]/           # 스킬 인벤토리 수정/삭제 (PUT, DELETE)
 │   │   ├── projects/               # 프로젝트 목록 조회 (GET, page/pageSize/status 지원)
 │   │   │   └── [id]/               # 프로젝트 상세 조회 (GET)
 │   │   ├── notices/                # 공지사항 목록 조회 (GET)
+│   │   ├── notifications/          # 알림톡 발송 이력 조회 (GET)
 │   │   └── settings/notifications/ # 알림 설정 (GET, PUT)
 │   ├── (auth)/                     # 인증된 사용자용 (TopBar + BottomNav)
 │   │   ├── layout.tsx              # 고정 레이아웃
 │   │   ├── page.tsx                # 홈 (/)
 │   │   ├── notices/
 │   │   │   └── [id]/page.tsx       # 공지사항 상세
+│   │   ├── notifications/
+│   │   │   └── page.tsx            # 알림 이력 (카카오 알림톡 발송 내역)
 │   │   ├── projects/
 │   │   │   ├── page.tsx            # 프로젝트 목록 (더보기 페이지네이션)
 │   │   │   ├── [id]/page.tsx       # 프로젝트 상세 + 지원하기
@@ -73,30 +83,36 @@ src/
 │   ├── terms/page.tsx              # 이용약관 (공개)
 │   └── privacy/page.tsx           # 개인정보 처리방침 (공개)
 ├── components/
-│   ├── ui/                         # shadcn/ui 기반 (badge, bottom-sheet, button, card, separator, skeleton)
+│   ├── ui/                         # shadcn/ui 기반 + 공통 컴포넌트
+│   │                               # 기본: badge, bottom-sheet, button, card, input, textarea, separator, skeleton
+│   │                               # 공통: empty-state, error-message, page-hero, stats-grid, skeleton-patterns
 │   ├── layout/                     # TopBar, BottomNavigation
 │   └── features/
 │       ├── projects/               # ProjectCard, ProjectStatusBadge, ApplicationCard,
 │       │                           # ProjectListClient (더보기 페이지네이션), ProjectFilters,
-│       │                           # ApplyButton (지원 폼 + BottomSheet)
+│       │                           # ApplyButton (지원 폼 + BottomSheet), ShareButton (공유 링크 복사)
 │       ├── profile/                # ProfileHeader, AvailabilityToggle,
 │       │                           # TechStackSection, TechStackInput, CareerSection,
-│       │                           # CareerSectionClient (CRUD), CareerTimelineDot
+│       │                           # CareerSectionClient (CRUD), CareerTimelineDot,
+│       │                           # ProfileTabsClient (탭: 기본정보/학력자격증/경력사항/스킬인벤토리)
+│       │   └── tabs/               # EducationTab (학력+자격증 CRUD), SkillTab (스킬 인벤토리 CRUD), TabShared
 │       ├── referrer/               # ReferrerSection, ReferrerSearchModal (BottomSheet)
 │       └── settings/               # NotificationSettings, LogoutButton
 ├── lib/
-│   ├── api/                        # 클라이언트 사이드 API 호출 함수
-│   │   ├── client.ts               # apiFetch 기반 fetch 래퍼, ApiError 클래스
+│   ├── api/                        # API 관련 헬퍼
+│   │   ├── client.ts               # 클라이언트용: apiFetch 래퍼, ApiError 클래스 (브라우저에서 import)
+│   │   ├── server.ts               # 서버 전용: requireAuth(), parsePaginationParams() (API Route에서만 import)
 │   │   ├── projects.ts             # projectsApi (getList, getById)
 │   │   ├── applications.ts         # applicationsApi (getList, create, withdraw)
 │   │   ├── profile.ts              # profileApi (get, update, updateAvailability, career CRUD)
 │   │   ├── notices.ts              # noticesApi (getList)
 │   │   ├── auth.ts                 # authApi (signup, login)
 │   │   ├── settings.ts             # settingsApi (getNotifications, updateNotifications)
-│   │   └── index.ts                # re-export
+│   │   ├── notifications.ts        # notificationsApi (알림톡 발송 이력 조회)
+│   │   └── index.ts                # re-export (client.ts 기반 함수만 포함, server.ts 제외)
 │   ├── supabase/                   # Supabase 클라이언트 + 서버사이드 쿼리
-│   │   ├── client.ts               # 브라우저용 클라이언트
-│   │   ├── server.ts               # 서버용 클라이언트 (쿠키 기반 세션)
+│   │   ├── client.ts               # 브라우저용 클라이언트 (createClient)
+│   │   ├── server.ts               # 서버용 클라이언트: createServerClient (세션), createAdminClient (RLS 우회)
 │   │   └── queries/                # projects, applications, profile, notices
 │   ├── kakao/                      # OAuth (구현됨), 알림톡 (미구현 스텁)
 │   ├── config/env.ts               # 환경변수 타입 안전 접근
@@ -222,6 +238,10 @@ src/
 - [x] 경력 추가/수정/삭제 (CareerSectionClient, /api/profile/careers CRUD)
 - [x] 자기 소개 표시
 - [x] 내 정보 수정 (/settings/profile)
+- [x] 프로필 탭 구조 (기본정보 / 학력·자격증 / 경력사항 / 스킬 인벤토리) — ProfileTabsClient
+- [x] 학력 CRUD (EducationTab, /api/profile/education/ CRUD)
+- [x] 자격증 CRUD (EducationTab 내 통합, /api/profile/certifications/ CRUD)
+- [x] 스킬 인벤토리 CRUD (SkillTab, /api/profile/skill-inventories/ CRUD)
 
 ### 설정
 
@@ -239,6 +259,11 @@ src/
 - [x] 추천인 1명 제한, 등록 후 클라이언트 변경 불가 (관리자만 변경)
 - [x] 전화번호 마스킹 (010-\*\*\*\*-5678)
 - [x] API: GET /api/profile/referrer/search, POST /api/profile/referrer
+
+### 알림
+
+- [x] 알림 이력 페이지 (/notifications) — 카카오 알림톡 발송 내역, 상태 배지(발송 완료/실패/처리중), 서비스 유형 아이콘(프로젝트/공지/개별)
+- [x] GET /api/notifications — alimtalk_logs 조회 (graceful fallback 적용)
 
 ### 홈
 
@@ -265,9 +290,17 @@ src/
 - [x] API 유효성 검사 강화: education·skill-inventories (길이·날짜 역전)
 - [x] GET /api/projects page/pageSize 범위 방어 (Math.min/max)
 - [x] 클라이언트 글자 수 카운터: 이름 (50자), 자기소개 (500자)
-- [x] 미사용 파일 제거: empty-state.tsx, settings/page.tsx 미사용 import
 - [x] 주요 복잡 로직에 개발자 주석 추가 (KakaoAddressInput, RSA, proxy, profile queries 등)
 - [x] 홈·신청내역·알림 페이지 — 개별 데이터 로드 실패 시 graceful fallback 처리
+
+### 코드 최적화 리팩토링 (2026-05-31)
+
+- [x] `requireAuth()` 헬퍼 추출 — 13개 보호된 API route의 인증 3-liner 공통화 (`lib/api/server.ts`)
+- [x] `parsePaginationParams()` 추출 — projects·notifications route 파라미터 파싱 일관화
+- [x] `createAdminClient()` 추출 — referrer lookup/search의 인라인 admin 클라이언트 생성 공통화
+- [x] `maskPhone()`, `UUID_REGEX` 중복 제거 — format.ts / validation.ts로 이동
+- [x] 공통 UI 컴포넌트 추가: `EmptyState`, `ErrorMessage`, `PageHero`, `StatsGrid`, `SkeletonCard/SkeletonBadgeRow/SkeletonSectionHeader`
+- [x] 접근성 개선: BottomNavigation `aria-current`, DateSelectPicker/MonthYearPicker `focus-visible`, SaveButton `aria-busy`
 
 ---
 
@@ -292,7 +325,7 @@ src/
 - `profiles` — 프리랜서 프로필 (account_status, withdrawn_at, referrer_id 포함)
 - `careers` — 경력 (is_current, tech_stack 포함)
 - `projects` — 프로젝트 (admin 관리, client 읽기 전용)
-- `notices` — 공지사항 (notice_type: immediate/scheduled, start_at/end_at 포함)
+- `notices` — 공지사항 (notice_type: immediate/scheduled, start_at/end_at, attachments jsonb 포함)
 - `applications` — 지원 내역 (available_start_date·admin_memo는 admin 전용 컬럼)
 - `admin_users` — 관리자 계정 (service_role 전용)
 - `alimtalk_templates` + `alimtalk_logs` — 알림톡 서식·발송 이력 (service_role 전용)
@@ -309,7 +342,7 @@ src/
 3. **타입 안전**: `any` 타입 금지, `unknown` 후 타입 가드 사용
 4. **스크롤 감지**: `window`가 아닌 `<main>` 엘리먼트 기준 (`useScrolled` 훅)
 5. **공개 경로**: `/terms`, `/privacy`는 미들웨어에서 인증 없이 접근 가능
-6. **API Route 인증**: 모든 인증 필요 API route 핸들러 최상단에서 `getUser()` → 미인증 시 401 반환
+6. **API Route 인증**: 모든 인증 필요 API route에서 `requireAuth()` (`lib/api/server.ts`) 사용 — 직접 `createServerClient().auth.getUser()` 패턴 사용 금지
 7. **BottomSheet 사용**: 하단 모달 패턴은 `components/ui/bottom-sheet.tsx` 공통 컴포넌트 사용
 8. **focus-visible**: 커스텀 input/button에 `focus-visible:` 접두사 사용 (`focus:` 금지)
 9. **클라이언트 API 호출**: `lib/api/` 모듈의 `*Api` 객체 사용 (apiFetch 직접 호출 금지)

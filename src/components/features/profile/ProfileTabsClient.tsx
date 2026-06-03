@@ -10,6 +10,7 @@ import { EducationTab } from "./tabs/EducationTab";
 import { SkillTab } from "./tabs/SkillTab";
 import { CareerSectionClient } from "./CareerSectionClient";
 import { CardWrap, FieldRow, SectionHeader } from "./tabs/TabShared";
+import { PageHero } from "@/components/ui/page-hero";
 import { Pencil, Save } from "lucide-react";
 import { cn } from "@/lib/utils/cn";
 import { formatExperience } from "@/lib/utils/format";
@@ -226,7 +227,7 @@ export function ProfileTabsClient({ profile }: ProfileTabsClientProps) {
   return (
     <div>
       {/* 다크 헤더 */}
-      <div className="bg-primary px-5 pt-6 pb-6">
+      <PageHero className="pb-6">
         <p className="text-primary-foreground/60 text-xs font-medium tracking-wide">내 정보</p>
         <div className="flex items-center gap-2 mt-0.5">
           <p className="text-primary-foreground font-bold text-lg leading-tight">{profile.name}님</p>
@@ -245,7 +246,7 @@ export function ProfileTabsClient({ profile }: ProfileTabsClientProps) {
             {profile.positionTitle}{profile.affiliation ? ` · ${profile.affiliation}` : ""}
           </p>
         )}
-      </div>
+      </PageHero>
 
       {/* 탭 네비게이션 */}
       <div className="sticky top-0 z-40 bg-background border-b border-border">

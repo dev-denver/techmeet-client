@@ -1,13 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
-import { createClient } from "@supabase/supabase-js";
-import { createServerClient } from "@/lib/supabase/server";
-import { publicEnv, serverEnv } from "@/lib/config/env";
+import { createAdminClient, createServerClient } from "@/lib/supabase/server";
+import { maskPhone } from "@/lib/utils/format";
 import { AccountStatus } from "@/types";
-
-function maskPhone(phone: string): string {
-  // 010-1234-5678 → 010-****-5678
-  return phone.replace(/(\d{3})-(\d{3,4})-(\d{4})/, (_, p1, _p2, p3) => `${p1}-****-${p3}`);
-}
 
 export async function GET(request: NextRequest) {
   const { searchParams } = new URL(request.url);
@@ -30,11 +24,7 @@ export async function GET(request: NextRequest) {
     // 미로그인 상태 (회원가입 중) - 무시
   }
 
-  const supabaseAdmin = createClient(
-    publicEnv.supabaseUrl,
-    serverEnv.supabaseServiceRoleKey,
-    { auth: { autoRefreshToken: false, persistSession: false } }
-  );
+  const supabaseAdmin = createAdminClient();
 
   let query = supabaseAdmin
     .from("profiles")

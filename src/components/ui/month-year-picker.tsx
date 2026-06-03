@@ -97,7 +97,7 @@ export function MonthYearPicker({
 
   const fieldClass = (hasErr: boolean) =>
     cn(
-      "h-10 px-2 rounded-lg border text-sm text-foreground bg-background focus:outline-none focus:ring-2 focus:ring-ring focus:border-transparent transition-all",
+      "h-10 px-2 rounded-lg border text-sm text-foreground bg-background focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 focus-visible:border-transparent transition-all",
       hasErr ? "border-destructive/50" : "border-input",
       disabled && "opacity-40 cursor-not-allowed"
     );

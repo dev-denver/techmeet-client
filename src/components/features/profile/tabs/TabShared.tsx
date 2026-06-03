@@ -3,6 +3,7 @@
 import { Plus, Pencil, Trash2, ChevronDown, ChevronUp } from "lucide-react";
 export { Plus, Pencil, Trash2, ChevronDown, ChevronUp };
 import { SaveButton } from "@/components/ui/save-button";
+import { ErrorMessage } from "@/components/ui/error-message";
 
 export function Tag({ children }: { children: React.ReactNode }) {
   return (
@@ -163,9 +164,7 @@ export function BottomSheetForm({
             {children}
           </div>
           <div className="px-5 py-4 border-t border-border shrink-0 space-y-2.5">
-            {error && (
-              <p className="text-xs text-destructive bg-destructive/10 rounded-lg px-3 py-2">{error}</p>
-            )}
+            <ErrorMessage>{error}</ErrorMessage>
             <SaveButton isLoading={isLoading} />
           </div>
         </form>
