@@ -1,5 +1,5 @@
 import { createServerClient } from "@/lib/supabase/server";
-import type { Notice } from "@/types";
+import type { Notice, NoticeAttachment } from "@/types";
 import type { GetNoticesResponse } from "@/types";
 
 interface NoticeRow {
@@ -8,6 +8,7 @@ interface NoticeRow {
   content: string;
   is_important: boolean;
   created_at: string;
+  attachments: NoticeAttachment[];
 }
 
 function mapRowToNotice(row: NoticeRow): Notice {
@@ -17,6 +18,7 @@ function mapRowToNotice(row: NoticeRow): Notice {
     content: row.content,
     isImportant: row.is_important,
     createdAt: row.created_at,
+    attachments: Array.isArray(row.attachments) ? row.attachments : [],
   };
 }
 

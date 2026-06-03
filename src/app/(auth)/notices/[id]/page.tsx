@@ -1,8 +1,14 @@
 import { notFound } from "next/navigation";
 import Link from "next/link";
-import { Bell, CalendarDays, ChevronUp, ChevronDown, LayoutList } from "lucide-react";
+import { Bell, CalendarDays, ChevronUp, ChevronDown, LayoutList, Paperclip, Download } from "lucide-react";
 import { getNoticeById, getNotices } from "@/lib/supabase/queries/notices";
 import { formatDate } from "@/lib/utils/format";
+
+function formatFileSize(bytes: number): string {
+  if (bytes < 1024) return `${bytes} B`;
+  if (bytes < 1024 * 1024) return `${(bytes / 1024).toFixed(1)} KB`;
+  return `${(bytes / (1024 * 1024)).toFixed(1)} MB`;
+}
 
 interface NoticeDetailPageProps {
   params: Promise<{ id: string }>;
@@ -46,6 +52,40 @@ export default async function NoticeDetailPage({ params }: NoticeDetailPageProps
           {notice.content}
         </p>
       </div>
+
+      {/* 첨부파일 */}
+      {notice.attachments.length > 0 && (
+        <div className="px-4 pb-5 border-t pt-4">
+          <div className="flex items-center gap-1.5 mb-3">
+            <Paperclip className="h-3.5 w-3.5 text-muted-foreground" />
+            <span className="text-xs font-medium text-muted-foreground">
+              첨부파일 {notice.attachments.length}개
+            </span>
+          </div>
+          <ul className="space-y-2">
+            {notice.attachments.map((file, index) => (
+              <li key={index}>
+                <a
+                  href={file.url}
+                  download={file.name}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="flex items-center gap-3 rounded-lg border bg-muted/30 px-3 py-2.5 hover:bg-muted/60 active:bg-muted transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2"
+                >
+                  <Paperclip className="h-4 w-4 shrink-0 text-muted-foreground" />
+                  <span className="flex-1 text-sm text-foreground truncate">{file.name}</span>
+                  {file.size !== undefined && (
+                    <span className="text-xs text-muted-foreground shrink-0">
+                      {formatFileSize(file.size)}
+                    </span>
+                  )}
+                  <Download className="h-4 w-4 shrink-0 text-muted-foreground" />
+                </a>
+              </li>
+            ))}
+          </ul>
+        </div>
+      )}
 
       {/* 이전 / 다음 / 목록 */}
       <div className="border-t border-b divide-y divide-border">
