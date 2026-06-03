@@ -1,5 +1,5 @@
 import { createServerClient } from "@/lib/supabase/server";
-import type { FreelancerProfile, Career, AvailabilityStatus, Gender } from "@/types";
+import type { FreelancerProfile, Career, AvailabilityStatus, Gender, ProfileResume } from "@/types";
 import type {
   GetProfileResponse,
   UpdateProfileRequest,
@@ -12,6 +12,88 @@ import {
   getCertifications,
   getSkillInventories,
 } from "./resume";
+
+interface ProfileResumeRow {
+  id: string;
+  profile_id: string;
+  file_name: string;
+  file_path: string;
+  file_size: number;
+  mime_type: string;
+  created_at: string;
+}
+
+function mapRowToResume(row: ProfileResumeRow): ProfileResume {
+  return {
+    id: row.id,
+    fileName: row.file_name,
+    filePath: row.file_path,
+    fileSize: row.file_size,
+    mimeType: row.mime_type,
+    createdAt: row.created_at,
+  };
+}
+
+export async function getProfileResumes(userId: string): Promise<ProfileResume[]> {
+  const supabase = await createServerClient();
+  const { data, error } = await supabase
+    .from("profile_resumes")
+    .select("*")
+    .eq("profile_id", userId)
+    .order("created_at", { ascending: false });
+
+  if (error) {
+    console.warn("[getProfileResumes]", error);
+    return [];
+  }
+  return (data as ProfileResumeRow[]).map(mapRowToResume);
+}
+
+export async function addProfileResume(payload: {
+  profileId: string;
+  fileName: string;
+  filePath: string;
+  fileSize: number;
+  mimeType: string;
+}): Promise<ProfileResume> {
+  const supabase = await createServerClient();
+  const { data, error } = await supabase
+    .from("profile_resumes")
+    .insert({
+      profile_id: payload.profileId,
+      file_name: payload.fileName,
+      file_path: payload.filePath,
+      file_size: payload.fileSize,
+      mime_type: payload.mimeType,
+    })
+    .select()
+    .single();
+
+  if (error) throw error;
+  return mapRowToResume(data as ProfileResumeRow);
+}
+
+export async function deleteProfileResume(id: string, userId: string): Promise<string> {
+  const supabase = await createServerClient();
+
+  const { data: row, error: fetchError } = await supabase
+    .from("profile_resumes")
+    .select("file_path")
+    .eq("id", id)
+    .eq("profile_id", userId)
+    .single();
+
+  if (fetchError || !row) throw new Error("이력서를 찾을 수 없습니다");
+
+  const { error } = await supabase
+    .from("profile_resumes")
+    .delete()
+    .eq("id", id)
+    .eq("profile_id", userId);
+
+  if (error) throw error;
+  return (row as { file_path: string }).file_path;
+}
 
 interface CareerRow {
   id: string;
@@ -78,6 +160,7 @@ function mapRowToProfile(row: ProfileRow, profile: Partial<FreelancerProfile> = 
     educations: profile.educations ?? [],
     certifications: profile.certifications ?? [],
     skillInventories: profile.skillInventories ?? [],
+    resumes: profile.resumes ?? [],
     availabilityStatus: row.availability_status,
     availableFromDate: row.available_from_date,
     experienceYears: row.experience_years,
@@ -104,7 +187,7 @@ export async function getProfile(): Promise<GetProfileResponse | null> {
   const { data: { user } } = await supabase.auth.getUser();
   if (!user) return null;
 
-  const [profileResult, educations, certifications, skillInventories] = await Promise.all([
+  const [profileResult, educations, certifications, skillInventories, resumes] = await Promise.all([
     supabase
       .from("profiles")
       .select("*, careers(*)")
@@ -113,6 +196,7 @@ export async function getProfile(): Promise<GetProfileResponse | null> {
     getEducations(),
     getCertifications(),
     getSkillInventories(),
+    getProfileResumes(user.id),
   ]);
 
   if (profileResult.error) {
@@ -135,7 +219,7 @@ export async function getProfile(): Promise<GetProfileResponse | null> {
   return {
     data: mapRowToProfile(
       { ...row, referrer: referrerName ? { name: referrerName } : null },
-      { educations, certifications, skillInventories }
+      { educations, certifications, skillInventories, resumes }
     ),
   };
 }

@@ -8,6 +8,7 @@ import { AVAILABILITY_TOGGLE_CONFIG } from "@/lib/constants";
 import { AvailabilityToggle } from "./AvailabilityToggle";
 import { EducationTab } from "./tabs/EducationTab";
 import { SkillTab } from "./tabs/SkillTab";
+import { ResumeTab } from "./tabs/ResumeTab";
 import { CareerSectionClient } from "./CareerSectionClient";
 import { CardWrap, FieldRow, SectionHeader } from "./tabs/TabShared";
 import { PageHero } from "@/components/ui/page-hero";
@@ -15,13 +16,14 @@ import { Pencil, Save } from "lucide-react";
 import { cn } from "@/lib/utils/cn";
 import { formatExperience } from "@/lib/utils/format";
 
-type Tab = "basic" | "education" | "career" | "skill";
+type Tab = "basic" | "education" | "career" | "skill" | "resume";
 
 const TABS: { key: Tab; label: string }[] = [
   { key: "basic", label: "기본정보" },
   { key: "education", label: "학력/자격증" },
   { key: "career", label: "경력사항" },
   { key: "skill", label: "스킬 인벤토리" },
+  { key: "resume", label: "이력서" },
 ];
 
 interface BasicInfoTabProps {
@@ -32,10 +34,9 @@ interface BasicInfoTabProps {
   isSaving: boolean;
   onStatusChange: (status: AvailabilityStatus, date?: string | null) => void;
   onSave: () => void;
-  onEdit: () => void;
 }
 
-function BasicInfoTab({ profile, availStatus, availFromDate, isDirty, isSaving, onStatusChange, onSave, onEdit }: BasicInfoTabProps) {
+function BasicInfoTab({ profile, availStatus, availFromDate, isDirty, isSaving, onStatusChange, onSave }: BasicInfoTabProps) {
   const genderLabel = profile.gender === "male" ? "남" : profile.gender === "female" ? "여" : null;
 
   return (
@@ -145,19 +146,6 @@ function BasicInfoTab({ profile, availStatus, availFromDate, isDirty, isSaving, 
         </button>
       )}
 
-      {/* 기본정보 수정 버튼 */}
-      <button
-        type="button"
-        onClick={onEdit}
-        className={cn(
-          "w-full flex items-center justify-center gap-2.5 rounded-xl py-3.5 text-base font-semibold transition-all",
-          "focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2",
-          "bg-primary text-primary-foreground hover:opacity-90 active:opacity-80"
-        )}
-      >
-        <Pencil className="h-4 w-4 shrink-0" />
-        기본정보 수정
-      </button>
     </div>
   );
 }
@@ -228,24 +216,39 @@ export function ProfileTabsClient({ profile }: ProfileTabsClientProps) {
     <div>
       {/* 다크 헤더 */}
       <PageHero className="pb-6">
-        <p className="text-primary-foreground/60 text-xs font-medium tracking-wide">내 정보</p>
-        <div className="flex items-center gap-2 mt-0.5">
-          <p className="text-primary-foreground font-bold text-lg leading-tight">{profile.name}님</p>
-          <span className={`text-[10px] font-semibold px-2 py-0.5 rounded-full ${availConfig?.className ?? ""}`}>
-            {availConfig?.label}
-            {fromDateLabel && ` · ${fromDateLabel}`}
-          </span>
-          {isDirty && (
-            <span className="text-[10px] font-semibold px-1.5 py-0.5 rounded-full bg-status-warning/20 text-status-warning border border-status-warning/30">
-              미저장
-            </span>
+        <div className="flex items-start justify-between gap-3">
+          <div className="min-w-0">
+            <p className="text-primary-foreground/60 text-xs font-medium tracking-wide">내 정보</p>
+            <div className="flex items-center gap-2 mt-0.5 flex-wrap">
+              <p className="text-primary-foreground font-bold text-lg leading-tight">{profile.name}님</p>
+              <span className={`text-[10px] font-semibold px-2 py-0.5 rounded-full ${availConfig?.className ?? ""}`}>
+                {availConfig?.label}
+                {fromDateLabel && ` · ${fromDateLabel}`}
+              </span>
+              {isDirty && (
+                <span className="text-[10px] font-semibold px-1.5 py-0.5 rounded-full bg-status-warning/20 text-status-warning border border-status-warning/30">
+                  미저장
+                </span>
+              )}
+            </div>
+            {profile.positionTitle && (
+              <p className="text-primary-foreground/60 text-sm mt-1">
+                {profile.positionTitle}{profile.affiliation ? ` · ${profile.affiliation}` : ""}
+              </p>
+            )}
+          </div>
+          {tab === "basic" && (
+            <button
+              type="button"
+              onClick={handleEdit}
+              className="shrink-0 flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-medium text-primary-foreground/70 hover:text-primary-foreground hover:bg-primary-foreground/10 active:bg-primary-foreground/15 transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary-foreground/50"
+              aria-label="기본정보 수정"
+            >
+              <Pencil className="h-3.5 w-3.5" />
+              수정
+            </button>
           )}
         </div>
-        {profile.positionTitle && (
-          <p className="text-primary-foreground/60 text-sm mt-1">
-            {profile.positionTitle}{profile.affiliation ? ` · ${profile.affiliation}` : ""}
-          </p>
-        )}
       </PageHero>
 
       {/* 탭 네비게이션 */}
@@ -278,7 +281,6 @@ export function ProfileTabsClient({ profile }: ProfileTabsClientProps) {
             isSaving={isSaving}
             onStatusChange={handleStatusChange}
             onSave={handleSave}
-            onEdit={handleEdit}
           />
         )}
         {tab === "education" && (
@@ -286,6 +288,7 @@ export function ProfileTabsClient({ profile }: ProfileTabsClientProps) {
         )}
         {tab === "career" && <CareerTab profile={profile} />}
         {tab === "skill" && <SkillTab skills={profile.skillInventories} />}
+        {tab === "resume" && <ResumeTab resumes={profile.resumes} />}
       </div>
     </div>
   );
