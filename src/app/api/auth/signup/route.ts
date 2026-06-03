@@ -199,17 +199,30 @@ export async function POST(request: NextRequest) {
       return supabaseResponse;
     }
 
-    const { data, error } = await supabase.auth.signUp({
+    // 이메일 중복 확인 (admin API로 rate limit 없이 조회)
+    const { data: existingUser } = await supabaseAdmin
+      .from("profiles")
+      .select("id")
+      .eq("email", email)
+      .maybeSingle();
+
+    if (existingUser) {
+      const linked = await checkAdminAccount(email, supabaseAdmin);
+      if (linked) return linked;
+      return NextResponse.json({ error: "이미 사용 중인 이메일입니다" }, { status: 409 });
+    }
+
+    // admin API로 생성 — rate limit 우회, 이메일 확인 즉시 처리
+    const { data: newUser, error: createError } = await supabaseAdmin.auth.admin.createUser({
       email,
       password,
-      options: {
-        data: { name, phone, birth_date },
-      },
+      email_confirm: true,
+      user_metadata: { name, phone, birth_date },
     });
 
-    if (error) {
-      console.error("[회원가입] signUp 오류:", error.status, error.message);
-      if (error.status === 422 || error.message.includes("already registered")) {
+    if (createError || !newUser.user) {
+      console.error("[회원가입] createUser 오류:", createError?.status, createError?.message);
+      if (createError?.message?.includes("already registered") || createError?.message?.includes("already been registered")) {
         const linked = await checkAdminAccount(email, supabaseAdmin);
         if (linked) return linked;
         return NextResponse.json({ error: "이미 사용 중인 이메일입니다" }, { status: 409 });
@@ -217,35 +230,31 @@ export async function POST(request: NextRequest) {
       return NextResponse.json({ error: "회원가입에 실패했습니다" }, { status: 500 });
     }
 
-    // 이메일 확인이 활성화된 경우 Supabase는 기존 이메일에 대해 유령 user를 반환함
-    // identities가 빈 배열이면 이미 가입된 이메일
-    if (!data.user || data.user.identities?.length === 0) {
-      const linked = await checkAdminAccount(email, supabaseAdmin);
-      if (linked) return linked;
-      return NextResponse.json({ error: "이미 사용 중인 이메일입니다" }, { status: 409 });
+    const profileUpsert: Record<string, unknown> = {
+      id: newUser.user.id,
+      name,
+      email,
+      phone,
+      birth_date,
+      kakao_id: typeof kakaoId === "string" && kakaoId ? kakaoId : null,
+      notification_marketing: agreeMarketing,
+      account_status: AccountStatus.Active,
+    };
+    if (referrerId) profileUpsert.referrer_id = referrerId;
+
+    const { error: upsertError } = await supabaseAdmin
+      .from("profiles")
+      .upsert(profileUpsert, { onConflict: "id" });
+
+    if (upsertError) {
+      console.error("[회원가입] profiles upsert 실패:", upsertError.message, upsertError.code, upsertError.details);
+      return NextResponse.json({ error: "프로필 정보 저장에 실패했습니다" }, { status: 500 });
     }
 
-    if (data.user) {
-      const profileUpsert: Record<string, unknown> = {
-        id: data.user.id,
-        name,
-        email,
-        phone,
-        birth_date,
-        kakao_id: typeof kakaoId === "string" && kakaoId ? kakaoId : null,
-        notification_marketing: agreeMarketing,
-        account_status: AccountStatus.Active,
-      };
-      if (referrerId) profileUpsert.referrer_id = referrerId;
-
-      const { error: upsertError } = await supabaseAdmin
-        .from("profiles")
-        .upsert(profileUpsert, { onConflict: "id" });
-
-      if (upsertError) {
-        console.error("[회원가입] profiles upsert 실패:", upsertError.message, upsertError.code, upsertError.details);
-        return NextResponse.json({ error: "프로필 정보 저장에 실패했습니다" }, { status: 500 });
-      }
+    const { error: signInError } = await supabase.auth.signInWithPassword({ email, password });
+    if (signInError) {
+      console.error("[회원가입] 로그인 실패:", signInError);
+      return NextResponse.json({ error: "로그인에 실패했습니다" }, { status: 500 });
     }
 
     return supabaseResponse;
