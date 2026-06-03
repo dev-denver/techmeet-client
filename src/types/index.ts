@@ -7,7 +7,7 @@ export type { FreelancerProfile, Career, Education, Certification, SkillInventor
 export { ApplicationStatus } from "./application";
 export type { Application } from "./application";
 
-export type { Notice } from "./notice";
+export type { Notice, NoticeAttachment } from "./notice";
 export { AlimtalkServiceType } from "./notification";
 export type { AlimtalkLog } from "./notification";
 export type {

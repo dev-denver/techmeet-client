@@ -183,6 +183,9 @@ export async function POST(request: NextRequest) {
 
       if (profileError) {
         console.error("[재가입] 프로필 생성 실패:", profileError);
+        await supabaseAdmin.auth.admin.deleteUser(newUser.user.id).catch((e) =>
+          console.error("[재가입] 롤백 실패 — auth.users 고아 행 남음:", e)
+        );
         return NextResponse.json({ error: "프로필 정보 저장에 실패했습니다." }, { status: 500 });
       }
 
@@ -193,6 +196,9 @@ export async function POST(request: NextRequest) {
 
       if (signInError) {
         console.error("[재가입] 로그인 실패:", signInError);
+        await supabaseAdmin.auth.admin.deleteUser(newUser.user.id).catch((e) =>
+          console.error("[재가입] 롤백 실패 — auth.users 고아 행 남음:", e)
+        );
         return NextResponse.json({ error: "로그인에 실패했습니다." }, { status: 500 });
       }
 
@@ -248,12 +254,18 @@ export async function POST(request: NextRequest) {
 
     if (upsertError) {
       console.error("[회원가입] profiles upsert 실패:", upsertError.message, upsertError.code, upsertError.details);
+      await supabaseAdmin.auth.admin.deleteUser(newUser.user.id).catch((e) =>
+        console.error("[회원가입] 롤백 실패 — auth.users 고아 행 남음:", e)
+      );
       return NextResponse.json({ error: "프로필 정보 저장에 실패했습니다" }, { status: 500 });
     }
 
     const { error: signInError } = await supabase.auth.signInWithPassword({ email, password });
     if (signInError) {
       console.error("[회원가입] 로그인 실패:", signInError);
+      await supabaseAdmin.auth.admin.deleteUser(newUser.user.id).catch((e) =>
+        console.error("[회원가입] 롤백 실패 — auth.users 고아 행 남음:", e)
+      );
       return NextResponse.json({ error: "로그인에 실패했습니다" }, { status: 500 });
     }
 
