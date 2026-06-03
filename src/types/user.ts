@@ -63,6 +63,15 @@ export interface SkillInventory {
   sortOrder: number;
 }
 
+export interface ProfileResume {
+  id: string;
+  fileName: string;
+  filePath: string;
+  fileSize: number;
+  mimeType: string;
+  createdAt: string;
+}
+
 export interface FreelancerProfile {
   id: string;
   name: string;
@@ -74,6 +83,7 @@ export interface FreelancerProfile {
   educations: Education[];
   certifications: Certification[];
   skillInventories: SkillInventory[];
+  resumes: ProfileResume[];
   availabilityStatus: AvailabilityStatus | null;
   experienceYears: number | null;
   experienceMonths: number;
