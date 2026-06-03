@@ -32,8 +32,16 @@ async function checkAdminAccount(
 }
 
 export async function POST(request: NextRequest) {
+  // 이메일은 httpOnly 쿠키에서만 읽음 (클라이언트에 노출 안 됨)
+  const email = request.cookies.get("signup_email")?.value;
+  if (!email) {
+    return NextResponse.json(
+      { error: "회원가입 세션이 만료되었습니다. 카카오 로그인을 다시 시도해주세요." },
+      { status: 400 }
+    );
+  }
+
   let body: {
-    email?: unknown;
     encryptedPassword?: unknown;
     name?: unknown;
     birth_date?: unknown;
@@ -51,13 +59,12 @@ export async function POST(request: NextRequest) {
   }
 
   try {
-    const { email, encryptedPassword, name, birth_date, phone, kakaoId } = body;
+    const { encryptedPassword, name, birth_date, phone, kakaoId } = body;
     const referrerId = typeof body.referrer_id === "string" && body.referrer_id ? body.referrer_id : null;
     const agreeMarketing = typeof body.agree_marketing === "boolean" ? body.agree_marketing : false;
     const reactivate = body.reactivate === true;
 
     if (
-      typeof email !== "string" ||
       typeof encryptedPassword !== "string" ||
       typeof name !== "string" ||
       typeof birth_date !== "string" ||
@@ -96,6 +103,7 @@ export async function POST(request: NextRequest) {
     }
 
     const supabaseResponse = NextResponse.json({ success: true }, { status: 201 });
+    supabaseResponse.cookies.set("signup_email", "", { maxAge: 0, path: "/" });
 
     let supabaseAdmin: SupabaseClient;
     try {

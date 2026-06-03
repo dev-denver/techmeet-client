@@ -102,13 +102,19 @@ export async function GET(request: NextRequest) {
       // 탈퇴 회원 → 재가입 페이지로
       if (profile.account_status === AccountStatus.Withdrawn) {
         const reactivateUrl = new URL("/signup", request.url);
-        reactivateUrl.searchParams.set("email", profile.email);
         reactivateUrl.searchParams.set("name", name ?? "");
         reactivateUrl.searchParams.set("kakao_id", kakaoId);
         reactivateUrl.searchParams.set("reactivate", "true");
         if (isValidRef) reactivateUrl.searchParams.set("ref", pendingReferral!);
         const reactivateResponse = NextResponse.redirect(reactivateUrl);
         reactivateResponse.cookies.set("pending_referral", "", { maxAge: 0, path: "/" });
+        reactivateResponse.cookies.set("signup_email", profile.email, {
+          httpOnly: true,
+          sameSite: "lax",
+          secure: process.env.NODE_ENV === "production",
+          maxAge: 600,
+          path: "/",
+        });
         return reactivateResponse;
       }
 
@@ -178,12 +184,18 @@ export async function GET(request: NextRequest) {
     // 신규 유저: 회원가입 페이지로
     console.log("[카카오 콜백] 신규 유저 → /signup 리다이렉트");
     const signupUrl = new URL("/signup", request.url);
-    signupUrl.searchParams.set("email", email);
     signupUrl.searchParams.set("name", name ?? "");
     signupUrl.searchParams.set("kakao_id", kakaoId);
     if (isValidRef) signupUrl.searchParams.set("ref", pendingReferral!);
     const signupResponse = NextResponse.redirect(signupUrl);
     signupResponse.cookies.set("pending_referral", "", { maxAge: 0, path: "/" });
+    signupResponse.cookies.set("signup_email", email, {
+      httpOnly: true,
+      sameSite: "lax",
+      secure: process.env.NODE_ENV === "production",
+      maxAge: 600,
+      path: "/",
+    });
     return signupResponse;
   } catch (error) {
     console.error("[카카오 콜백 오류]", error);
