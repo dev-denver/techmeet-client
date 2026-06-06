@@ -106,6 +106,7 @@ export function ApplyButton({ projectId }: ApplyButtonProps) {
       <BottomSheet
         open={open}
         onClose={handleClose}
+        hasBottomNav
         footer={
           <div className="px-5 pt-3 pb-6 space-y-2.5">
             <ErrorMessage size="sm">{serverError}</ErrorMessage>
