@@ -3,8 +3,8 @@
 import { useState } from "react";
 import { useRouter } from "next/navigation";
 import type { SkillInventory } from "@/types";
-import { formatMonthYear } from "@/lib/utils/format";
-import { MonthYearPicker } from "@/components/ui/month-year-picker";
+import { formatDate } from "@/lib/utils/format";
+import { DateSelectPicker } from "@/components/ui/date-select-picker";
 import {
   CardWrap, SectionHeader, EditDeleteActions, DashedAddButton,
   BottomSheetForm, FormInput, TagInput, Tag, ChevronDown, ChevronUp,
@@ -71,11 +71,11 @@ function SkillForm({ open, onClose, initial }: { open: boolean; onClose: () => v
       <div className="grid grid-cols-2 gap-3">
         <div>
           <label className="block text-xs font-medium text-muted-foreground mb-1.5">참여 시작</label>
-          <MonthYearPicker name="startDate" defaultValue={initial?.startDate?.slice(0, 7) ?? ""} />
+          <DateSelectPicker name="startDate" defaultValue={initial?.startDate?.slice(0, 10) ?? ""} />
         </div>
         <div>
           <label className="block text-xs font-medium text-muted-foreground mb-1.5">참여 종료</label>
-          <MonthYearPicker name="endDate" defaultValue={initial?.endDate?.slice(0, 7) ?? ""} />
+          <DateSelectPicker name="endDate" defaultValue={initial?.endDate?.slice(0, 10) ?? ""} />
         </div>
       </div>
       <div className="grid grid-cols-2 gap-3">
@@ -116,8 +116,8 @@ function SkillCard({ skill, onEdit }: { skill: SkillInventory; onEdit: () => voi
     setDeleting(false);
   }
 
-  const startLabel = skill.startDate ? formatMonthYear(skill.startDate.slice(0, 7)) : null;
-  const endLabel = skill.endDate ? formatMonthYear(skill.endDate.slice(0, 7)) : null;
+  const startLabel = skill.startDate ? formatDate(skill.startDate) : null;
+  const endLabel = skill.endDate ? formatDate(skill.endDate) : null;
   const period = [startLabel, endLabel].filter(Boolean).join(" ~ ");
 
   return (
