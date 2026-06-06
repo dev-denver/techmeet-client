@@ -122,20 +122,27 @@ function SkillCard({ skill, onEdit }: { skill: SkillInventory; onEdit: () => voi
 
   return (
     <CardWrap>
-      <button
-        type="button"
-        className="w-full flex items-center justify-between px-4 py-3.5 text-left"
-        onClick={() => setOpen(!open)}
-      >
-        <div className="flex-1 min-w-0 mr-3">
+      <div className="flex items-center justify-between px-4 py-3.5">
+        <button
+          type="button"
+          className="flex-1 min-w-0 mr-3 text-left"
+          onClick={() => setOpen(!open)}
+        >
           <p className="text-sm font-semibold text-foreground leading-snug line-clamp-1">{skill.projectName}</p>
           {period && <p className="text-xs text-muted-foreground mt-0.5">{period}</p>}
-        </div>
+        </button>
         <div className="flex items-center gap-1 shrink-0">
           <EditDeleteActions onEdit={onEdit} onDelete={handleDelete} />
-          {open ? <ChevronUp className="h-4 w-4 text-muted-foreground ml-1" /> : <ChevronDown className="h-4 w-4 text-muted-foreground ml-1" />}
+          <button
+            type="button"
+            onClick={() => setOpen(!open)}
+            className="p-1.5 text-muted-foreground hover:text-foreground transition-colors"
+            aria-label={open ? "접기" : "펼치기"}
+          >
+            {open ? <ChevronUp className="h-4 w-4" /> : <ChevronDown className="h-4 w-4" />}
+          </button>
         </div>
-      </button>
+      </div>
 
       {open && (
         <div className="border-t border-border">
