@@ -1,4 +1,5 @@
-import { CheckCircle, XCircle, Clock, Megaphone, User, FolderOpen, Bell } from "lucide-react";
+import Link from "next/link";
+import { CheckCircle, XCircle, Clock, Megaphone, User, FolderOpen, Bell, ChevronRight } from "lucide-react";
 import { getAlimtalkLogs } from "@/lib/supabase/queries/notifications";
 import { EmptyState } from "@/components/ui/empty-state";
 import { AlimtalkServiceType } from "@/types";
@@ -60,21 +61,36 @@ export default async function NotificationsPage() {
             const typeConfig = SERVICE_TYPE_CONFIG[log.serviceType] ?? SERVICE_TYPE_CONFIG[AlimtalkServiceType.Individual];
             const TypeIcon = typeConfig.icon;
             const displayTime = log.sentAt ?? log.createdAt;
+            // 프로젝트 알림은 프로젝트 목록으로 이동 (엔티티 레벨 딥링크는 DB 컬럼 필요 → 추후)
+            const href = log.serviceType === AlimtalkServiceType.Project ? "/projects" : null;
 
-            return (
-              <div key={log.id} className="rounded-xl border border-border bg-card overflow-hidden">
-                <div className="flex items-start gap-3 px-4 py-3.5">
-                  <div className="mt-0.5 flex h-8 w-8 shrink-0 items-center justify-center rounded-xl bg-muted">
-                    <TypeIcon className="h-4 w-4 text-muted-foreground" />
-                  </div>
-                  <div className="flex-1 min-w-0">
-                    <p className="text-sm font-medium text-foreground leading-snug">{log.templateName}</p>
-                    <div className="flex items-center justify-between mt-2 gap-2">
-                      <span className="text-xs text-muted-foreground">{formatDate(displayTime)}</span>
-                      <StatusBadge isSuccess={log.isSuccess} />
-                    </div>
+            const cardInner = (
+              <div className="flex items-start gap-3 px-4 py-3.5">
+                <div className="mt-0.5 flex h-8 w-8 shrink-0 items-center justify-center rounded-xl bg-muted">
+                  <TypeIcon className="h-4 w-4 text-muted-foreground" />
+                </div>
+                <div className="flex-1 min-w-0">
+                  <p className="text-sm font-medium text-foreground leading-snug">{log.templateName}</p>
+                  <div className="flex items-center justify-between mt-2 gap-2">
+                    <span className="text-xs text-muted-foreground">{formatDate(displayTime)}</span>
+                    <StatusBadge isSuccess={log.isSuccess} />
                   </div>
                 </div>
+                {href && <ChevronRight className="h-4 w-4 text-muted-foreground self-center shrink-0" />}
+              </div>
+            );
+
+            return href ? (
+              <Link
+                key={log.id}
+                href={href}
+                className="block rounded-xl border border-border bg-card overflow-hidden hover:bg-muted/40 active:bg-muted transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2"
+              >
+                {cardInner}
+              </Link>
+            ) : (
+              <div key={log.id} className="rounded-xl border border-border bg-card overflow-hidden">
+                {cardInner}
               </div>
             );
           })}

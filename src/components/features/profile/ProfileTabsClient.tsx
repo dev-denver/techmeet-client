@@ -10,11 +10,13 @@ import { EducationTab } from "./tabs/EducationTab";
 import { SkillTab } from "./tabs/SkillTab";
 import { ResumeTab } from "./tabs/ResumeTab";
 import { CareerSectionClient } from "./CareerSectionClient";
+import { ProfileCompletionBar } from "./ProfileCompletionBar";
 import { CardWrap, FieldRow, SectionHeader } from "./tabs/TabShared";
 import { PageHero } from "@/components/ui/page-hero";
 import { Pencil, Save } from "lucide-react";
 import { cn } from "@/lib/utils/cn";
 import { formatExperience } from "@/lib/utils/format";
+import { getProfileCompletion } from "@/lib/utils/profile-completion";
 
 type Tab = "basic" | "education" | "career" | "skill" | "resume";
 
@@ -204,6 +206,7 @@ export function ProfileTabsClient({ profile }: ProfileTabsClientProps) {
   }
 
   const availConfig = AVAILABILITY_TOGGLE_CONFIG[availStatus];
+  const completion = getProfileCompletion(profile);
 
   const fromDateLabel = (() => {
     if (availStatus !== AvailabilityStatus.Partial || !availFromDate) return null;
@@ -250,6 +253,15 @@ export function ProfileTabsClient({ profile }: ProfileTabsClientProps) {
           )}
         </div>
       </PageHero>
+
+      {/* 프로필 완성도 */}
+      <div className="px-4 pt-4">
+        <ProfileCompletionBar
+          percent={completion.percent}
+          missing={completion.missing}
+          onSelect={setTab}
+        />
+      </div>
 
       {/* 탭 네비게이션 */}
       <div className="sticky top-0 z-40 bg-background border-b border-border">

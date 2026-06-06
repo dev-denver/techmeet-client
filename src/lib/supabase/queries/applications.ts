@@ -19,6 +19,14 @@ interface ApplicationRow {
   projects: { title: string } | null;
 }
 
+/** 중복 지원(unique 제약 위반) 시 throw — API route에서 409로 매핑 */
+export class DuplicateApplicationError extends Error {
+  constructor() {
+    super("이미 지원한 프로젝트입니다");
+    this.name = "DuplicateApplicationError";
+  }
+}
+
 function mapRowToApplication(row: ApplicationRow): Application {
   return {
     id: row.id,
@@ -72,6 +80,26 @@ export async function getApplications(): Promise<GetApplicationsResponse> {
   };
 }
 
+/** 현재 사용자의 특정 프로젝트 지원 내역 단건 조회 (없으면 null) */
+export async function getApplicationForProject(
+  projectId: string
+): Promise<Application | null> {
+  const supabase = await createServerClient();
+
+  const { data: { user } } = await supabase.auth.getUser();
+  if (!user) return null;
+
+  const { data, error } = await supabase
+    .from("applications")
+    .select("*, projects(title)")
+    .eq("freelancer_id", user.id)
+    .eq("project_id", projectId)
+    .maybeSingle();
+
+  if (error || !data) return null;
+  return mapRowToApplication(data as ApplicationRow);
+}
+
 export async function createApplication(
   payload: CreateApplicationRequest
 ): Promise<CreateApplicationResponse> {
@@ -91,7 +119,11 @@ export async function createApplication(
     .select("*, projects(title)")
     .single();
 
-  if (error) throw error;
+  if (error) {
+    // unique (project_id, freelancer_id) 위반 → 이미 지원한 프로젝트
+    if (error.code === "23505") throw new DuplicateApplicationError();
+    throw error;
+  }
 
   return { data: mapRowToApplication(data as ApplicationRow) };
 }

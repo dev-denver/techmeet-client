@@ -1,13 +1,20 @@
+import Link from "next/link";
 import { notFound } from "next/navigation";
-import { MapPin, Clock, Users, Calendar } from "lucide-react";
+import { MapPin, Clock, Users, Calendar, Check, ChevronRight, Sparkles } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { ProjectStatusBadge } from "@/components/features/projects/ProjectStatusBadge";
 import { ApplyButton } from "@/components/features/projects/ApplyButton";
 import { ShareButton } from "@/components/features/projects/ShareButton";
+import { RecordRecentProject } from "@/components/features/projects/RecordRecentProject";
 import { getProjectById } from "@/lib/supabase/queries/projects";
+import { getApplicationForProject } from "@/lib/supabase/queries/applications";
+import { getProfile } from "@/lib/supabase/queries/profile";
 import { createServerClient } from "@/lib/supabase/server";
 import { formatDate, formatDeadlineDays, getDeadlineDays, formatWorkType } from "@/lib/utils/format";
-import { ProjectStatus } from "@/types";
+import { getMySkills, countSkillMatches, isSkillMatched } from "@/lib/utils/skills";
+import { APPLICATION_STATUS_CONFIG } from "@/lib/constants";
+import { cn } from "@/lib/utils/cn";
+import { ApplicationStatus, ProjectStatus } from "@/types";
 
 interface ProjectDetailPageProps {
   params: Promise<{ id: string }>;
@@ -15,9 +22,11 @@ interface ProjectDetailPageProps {
 
 export default async function ProjectDetailPage({ params }: ProjectDetailPageProps) {
   const { id } = await params;
-  const [result, supabase] = await Promise.all([
+  const [result, supabase, myApplication, profileResult] = await Promise.all([
     getProjectById(id),
     createServerClient(),
+    getApplicationForProject(id),
+    getProfile(),
   ]);
   const { data: { user } } = await supabase.auth.getUser();
   const currentUserId = user?.id ?? null;
@@ -25,14 +34,22 @@ export default async function ProjectDetailPage({ params }: ProjectDetailPagePro
   if (!result) notFound();
 
   const { data: project } = result;
+  const mySkills = profileResult?.data ? getMySkills(profileResult.data) : [];
+  const matchCount = countSkillMatches(project.techStack, mySkills);
   const isRecruiting = project.status === ProjectStatus.Recruiting;
   const deadlineText = formatDeadlineDays(project.deadline);
   const deadlineDays = getDeadlineDays(project.deadline);
   const isUrgent = isRecruiting && deadlineDays !== null && deadlineDays <= 7;
   const isExpired = deadlineText === "마감";
 
+  const appConfig = myApplication ? APPLICATION_STATUS_CONFIG[myApplication.status] : null;
+  const isWithdrawn = myApplication?.status === ApplicationStatus.Withdrawn;
+
   return (
     <div>
+      {/* 최근 본 프로젝트 기록 (렌더 없음) */}
+      <RecordRecentProject id={project.id} title={project.title} />
+
       {/* 히어로 */}
       <div className="bg-zinc-800 px-5 pt-6 pb-5">
         <div className="flex items-center justify-between gap-2 mb-3">
@@ -96,16 +113,33 @@ export default async function ProjectDetailPage({ params }: ProjectDetailPagePro
       {/* 기술 스택 */}
       {project.techStack.length > 0 && (
         <div className="px-4 py-5 border-b">
-          <h2 className="font-semibold mb-3">요구 기술 스택</h2>
-          <div className="flex flex-wrap gap-2">
-            {project.techStack.map((tech) => (
-              <span
-                key={tech}
-                className="text-sm bg-zinc-700 text-zinc-100 px-3 py-1 rounded-lg font-medium"
-              >
-                {tech}
+          <div className="flex items-center justify-between mb-3">
+            <h2 className="font-semibold">요구 기술 스택</h2>
+            {matchCount > 0 && (
+              <span className="flex items-center gap-1 text-xs font-semibold text-status-success">
+                <Sparkles className="h-3.5 w-3.5" />
+                내 기술 {matchCount}개 일치
               </span>
-            ))}
+            )}
+          </div>
+          <div className="flex flex-wrap gap-2">
+            {project.techStack.map((tech) => {
+              const matched = isSkillMatched(tech, mySkills);
+              return (
+                <span
+                  key={tech}
+                  className={cn(
+                    "flex items-center gap-1 text-sm px-3 py-1 rounded-lg font-medium",
+                    matched
+                      ? "bg-status-success/15 text-status-success border border-status-success/30"
+                      : "bg-zinc-700 text-zinc-100"
+                  )}
+                >
+                  {matched && <Check className="h-3.5 w-3.5" />}
+                  {tech}
+                </span>
+              );
+            })}
           </div>
         </div>
       )}
@@ -162,8 +196,28 @@ export default async function ProjectDetailPage({ params }: ProjectDetailPagePro
       <div className="h-20" />
 
       {/* CTA - BottomNav 바로 위에 고정 */}
-      <div className="fixed bottom-16 left-1/2 -translate-x-1/2 w-full max-w-[600px] z-30 bg-background border-t border-border px-4 py-3">
-        {isRecruiting ? (
+      <div className="fixed bottom-16 left-1/2 -translate-x-1/2 w-full max-w-[430px] z-30 bg-background border-t border-border px-4 py-3">
+        {myApplication ? (
+          <Link
+            href="/projects/applications"
+            className="flex w-full h-12 items-center justify-center gap-2 rounded-md border border-border bg-muted/60 text-sm font-semibold text-foreground transition-colors hover:bg-muted active:bg-muted focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2"
+          >
+            {isWithdrawn ? (
+              <span>지원을 취소한 프로젝트입니다</span>
+            ) : (
+              <>
+                <Check className="h-4 w-4 text-status-success" />
+                지원 완료
+              </>
+            )}
+            {appConfig && (
+              <span className={cn("text-xs font-semibold px-2 py-0.5 rounded-full", appConfig.className)}>
+                {appConfig.label}
+              </span>
+            )}
+            <ChevronRight className="h-4 w-4 text-muted-foreground shrink-0" />
+          </Link>
+        ) : isRecruiting ? (
           <ApplyButton projectId={project.id} />
         ) : (
           <Button className="w-full h-12 text-base font-semibold" disabled>
