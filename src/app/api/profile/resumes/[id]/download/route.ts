@@ -24,9 +24,14 @@ export async function GET(
       return NextResponse.json({ error: "이력서를 찾을 수 없습니다" }, { status: 404 });
     }
 
+    // Windows/브라우저에서 금지된 문자 제거: \ / : * ? " < > |
+    const safeFileName = (row.file_name as string)
+      .replace(/[\\/:*?"<>|]/g, "_")
+      .trim() || "resume";
+
     const { data: signedData, error: signError } = await supabase.storage
       .from("resumes")
-      .createSignedUrl(row.file_path, 60);
+      .createSignedUrl(row.file_path, 60, { download: safeFileName });
 
     if (signError || !signedData) {
       return NextResponse.json({ error: "다운로드 링크 생성에 실패했습니다" }, { status: 500 });

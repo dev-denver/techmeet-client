@@ -1,5 +1,12 @@
 import { createServerClient } from "@/lib/supabase/server";
 import type { FreelancerProfile, Career, AvailabilityStatus, Gender, ProfileResume } from "@/types";
+
+/** "YYYY-MM" → "YYYY-MM-01" 변환. PostgreSQL date 컬럼은 "YYYY-MM-DD" 형식만 허용. */
+function toDbDate(v: string | null | undefined): string | null {
+  if (!v) return null;
+  if (/^\d{4}-\d{2}$/.test(v)) return `${v}-01`;
+  return v;
+}
 import type {
   GetProfileResponse,
   UpdateProfileRequest,
@@ -283,8 +290,8 @@ export async function addCareer(payload: AddCareerRequest): Promise<void> {
     profile_id: user.id,
     company: payload.company,
     role: payload.role,
-    start_date: payload.startDate,
-    end_date: payload.endDate ?? null,
+    start_date: toDbDate(payload.startDate),
+    end_date: toDbDate(payload.endDate) ?? null,
     is_current: payload.isCurrent,
     description: payload.description,
     tech_stack: payload.techStack,
@@ -302,8 +309,8 @@ export async function updateCareer(id: string, payload: UpdateCareerRequest): Pr
   const updateData: Record<string, unknown> = {};
   if (payload.company !== undefined) updateData.company = payload.company;
   if (payload.role !== undefined) updateData.role = payload.role;
-  if (payload.startDate !== undefined) updateData.start_date = payload.startDate;
-  if (payload.endDate !== undefined) updateData.end_date = payload.endDate;
+  if (payload.startDate !== undefined) updateData.start_date = toDbDate(payload.startDate);
+  if (payload.endDate !== undefined) updateData.end_date = toDbDate(payload.endDate);
   if (payload.isCurrent !== undefined) updateData.is_current = payload.isCurrent;
   if (payload.description !== undefined) updateData.description = payload.description;
   if (payload.techStack !== undefined) updateData.tech_stack = payload.techStack;

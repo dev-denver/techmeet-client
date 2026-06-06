@@ -1,9 +1,11 @@
 "use client";
 
+import { useId } from "react";
 import { Plus, Pencil, Trash2, ChevronDown, ChevronUp } from "lucide-react";
 export { Plus, Pencil, Trash2, ChevronDown, ChevronUp };
 import { SaveButton } from "@/components/ui/save-button";
 import { ErrorMessage } from "@/components/ui/error-message";
+import { BottomSheet } from "@/components/ui/bottom-sheet";
 
 export function Tag({ children }: { children: React.ReactNode }) {
   return (
@@ -150,26 +152,31 @@ export function BottomSheetForm({
   error?: string;
   children: React.ReactNode;
 }) {
-  if (!open) return null;
+  // 공유 BottomSheet 사용: z-index/하단 네비 여백(hasBottomNav)을 일관 처리.
+  // 제출 버튼은 footer에 있고 form은 children에 있으므로 form 속성으로 연결한다.
+  const formId = useId();
   return (
-    <div className="fixed inset-0 z-50 flex items-end justify-center">
-      <div className="absolute inset-0 bg-black/40" onClick={onClose} />
-      <div className="relative w-full max-w-[430px] bg-card rounded-t-2xl max-h-[85vh] flex flex-col">
-        <div className="flex items-center justify-between px-5 py-4 border-b border-border shrink-0">
+    <BottomSheet
+      open={open}
+      onClose={onClose}
+      hasBottomNav
+      header={
+        <div className="flex items-center justify-between px-5 py-4 border-b border-border">
           <h3 className="text-sm font-bold text-foreground">{title}</h3>
-          <button onClick={onClose} className="text-muted-foreground hover:text-foreground text-xs font-medium">닫기</button>
+          <button type="button" onClick={onClose} className="text-muted-foreground hover:text-foreground text-xs font-medium">닫기</button>
         </div>
-        <form onSubmit={onSubmit} className="flex flex-col flex-1 overflow-hidden">
-          <div className="flex-1 overflow-y-auto px-5 py-4 space-y-4">
-            {children}
-          </div>
-          <div className="px-5 py-4 border-t border-border shrink-0 space-y-2.5">
-            <ErrorMessage>{error}</ErrorMessage>
-            <SaveButton isLoading={isLoading} />
-          </div>
-        </form>
-      </div>
-    </div>
+      }
+      footer={
+        <div className="px-5 py-4 space-y-2.5">
+          <ErrorMessage>{error}</ErrorMessage>
+          <SaveButton form={formId} isLoading={isLoading} />
+        </div>
+      }
+    >
+      <form id={formId} onSubmit={onSubmit} className="px-5 py-4 space-y-4">
+        {children}
+      </form>
+    </BottomSheet>
   );
 }
 

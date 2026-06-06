@@ -76,6 +76,7 @@ export function ReferrerSection({ currentReferrerName }: Props) {
           onSelect={(referrer) => void handleSelect(referrer)}
           onClose={() => setShowModal(false)}
           maxWidth="lg"
+          hasBottomNav
         />
       )}
     </>

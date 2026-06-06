@@ -3,8 +3,8 @@
 import { useState } from "react";
 import { useRouter } from "next/navigation";
 import type { SkillInventory } from "@/types";
-import { formatMonthYear } from "@/lib/utils/format";
-import { MonthYearPicker } from "@/components/ui/month-year-picker";
+import { formatDate } from "@/lib/utils/format";
+import { DateSelectPicker } from "@/components/ui/date-select-picker";
 import {
   CardWrap, SectionHeader, EditDeleteActions, DashedAddButton,
   BottomSheetForm, FormInput, TagInput, Tag, ChevronDown, ChevronUp,
@@ -51,7 +51,15 @@ function SkillForm({ open, onClose, initial }: { open: boolean; onClose: () => v
       const url = initial ? `/api/profile/skill-inventories/${initial.id}` : "/api/profile/skill-inventories";
       const method = initial ? "PUT" : "POST";
       const res = await fetch(url, { method, headers: { "Content-Type": "application/json" }, body: JSON.stringify(payload) });
-      if (res.ok) { router.refresh(); onClose(); }
+      if (!res.ok) {
+        const data = await res.json() as { error?: string };
+        setFormError(data.error ?? "저장에 실패했습니다");
+        return;
+      }
+      router.refresh();
+      onClose();
+    } catch {
+      setFormError("네트워크 오류가 발생했습니다");
     } finally {
       setIsLoading(false);
     }
@@ -63,11 +71,11 @@ function SkillForm({ open, onClose, initial }: { open: boolean; onClose: () => v
       <div className="grid grid-cols-2 gap-3">
         <div>
           <label className="block text-xs font-medium text-muted-foreground mb-1.5">참여 시작</label>
-          <MonthYearPicker name="startDate" defaultValue={initial?.startDate?.slice(0, 7) ?? ""} />
+          <DateSelectPicker name="startDate" defaultValue={initial?.startDate?.slice(0, 10) ?? ""} />
         </div>
         <div>
           <label className="block text-xs font-medium text-muted-foreground mb-1.5">참여 종료</label>
-          <MonthYearPicker name="endDate" defaultValue={initial?.endDate?.slice(0, 7) ?? ""} />
+          <DateSelectPicker name="endDate" defaultValue={initial?.endDate?.slice(0, 10) ?? ""} />
         </div>
       </div>
       <div className="grid grid-cols-2 gap-3">
@@ -108,26 +116,33 @@ function SkillCard({ skill, onEdit }: { skill: SkillInventory; onEdit: () => voi
     setDeleting(false);
   }
 
-  const startLabel = skill.startDate ? formatMonthYear(skill.startDate.slice(0, 7)) : null;
-  const endLabel = skill.endDate ? formatMonthYear(skill.endDate.slice(0, 7)) : null;
+  const startLabel = skill.startDate ? formatDate(skill.startDate) : null;
+  const endLabel = skill.endDate ? formatDate(skill.endDate) : null;
   const period = [startLabel, endLabel].filter(Boolean).join(" ~ ");
 
   return (
     <CardWrap>
-      <button
-        type="button"
-        className="w-full flex items-center justify-between px-4 py-3.5 text-left"
-        onClick={() => setOpen(!open)}
-      >
-        <div className="flex-1 min-w-0 mr-3">
+      <div className="flex items-center justify-between px-4 py-3.5">
+        <button
+          type="button"
+          className="flex-1 min-w-0 mr-3 text-left"
+          onClick={() => setOpen(!open)}
+        >
           <p className="text-sm font-semibold text-foreground leading-snug line-clamp-1">{skill.projectName}</p>
           {period && <p className="text-xs text-muted-foreground mt-0.5">{period}</p>}
-        </div>
+        </button>
         <div className="flex items-center gap-1 shrink-0">
           <EditDeleteActions onEdit={onEdit} onDelete={handleDelete} />
-          {open ? <ChevronUp className="h-4 w-4 text-muted-foreground ml-1" /> : <ChevronDown className="h-4 w-4 text-muted-foreground ml-1" />}
+          <button
+            type="button"
+            onClick={() => setOpen(!open)}
+            className="p-1.5 text-muted-foreground hover:text-foreground transition-colors"
+            aria-label={open ? "접기" : "펼치기"}
+          >
+            {open ? <ChevronUp className="h-4 w-4" /> : <ChevronDown className="h-4 w-4" />}
+          </button>
         </div>
-      </button>
+      </div>
 
       {open && (
         <div className="border-t border-border">
