@@ -1,15 +1,18 @@
 import Link from "next/link";
-import { MapPin, Clock, Users, CalendarRange, Layers } from "lucide-react";
+import { MapPin, Clock, Users, CalendarRange, Layers, Sparkles } from "lucide-react";
 import { ProjectStatusBadge } from "./ProjectStatusBadge";
 import { formatDeadlineDays, getDeadlineDays, formatWorkType, formatProjectType, formatProjectPeriod } from "@/lib/utils/format";
+import { countSkillMatches } from "@/lib/utils/skills";
 import { ProjectStatus } from "@/types";
 import type { Project } from "@/types";
 
 interface ProjectCardProps {
   project: Project;
+  /** 현재 사용자의 기술 목록(소문자 정규화). 전달 시 매칭 배지 표시 */
+  mySkills?: string[];
 }
 
-export function ProjectCard({ project }: ProjectCardProps) {
+export function ProjectCard({ project, mySkills }: ProjectCardProps) {
   const deadlineText = formatDeadlineDays(project.deadline);
   const deadlineDays = getDeadlineDays(project.deadline);
   const isUrgent =
@@ -17,6 +20,7 @@ export function ProjectCard({ project }: ProjectCardProps) {
     deadlineDays !== null &&
     deadlineDays <= 7;
   const period = formatProjectPeriod(project.duration.startDate, project.duration.endDate);
+  const matchCount = mySkills ? countSkillMatches(project.techStack, mySkills) : 0;
 
   return (
     <Link href={`/projects/${project.id}`}>
@@ -47,6 +51,14 @@ export function ProjectCard({ project }: ProjectCardProps) {
               <p className="text-xs text-muted-foreground mt-1">{project.clientName}</p>
             )}
           </div>
+
+          {/* 내 기술 매칭 */}
+          {matchCount > 0 && (
+            <div className="flex items-center gap-1 text-xs font-semibold text-status-success">
+              <Sparkles className="h-3.5 w-3.5" />
+              내 기술 {matchCount}개 일치
+            </div>
+          )}
 
           {/* 기술 스택 */}
           {project.techStack.length > 0 && (

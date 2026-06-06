@@ -4,11 +4,13 @@ import { Badge } from "@/components/ui/badge";
 import { StatsGrid } from "@/components/ui/stats-grid";
 import { ProjectCard } from "@/components/features/projects/ProjectCard";
 import { ApplicationCard } from "@/components/features/projects/ApplicationCard";
+import { RecentProjectsSection } from "@/components/features/projects/RecentProjectsSection";
 import { getProfile } from "@/lib/supabase/queries/profile";
 import { getApplications } from "@/lib/supabase/queries/applications";
 import { getProjects } from "@/lib/supabase/queries/projects";
 import { getNotices } from "@/lib/supabase/queries/notices";
 import { formatDate, formatShortDate } from "@/lib/utils/format";
+import { getMySkills } from "@/lib/utils/skills";
 import { AVAILABILITY_STATUS_CONFIG } from "@/lib/constants";
 import { ApplicationStatus, AvailabilityStatus, ProjectStatus } from "@/types";
 
@@ -30,6 +32,7 @@ export default async function HomePage() {
   const availConfig = profile?.availabilityStatus
     ? AVAILABILITY_STATUS_CONFIG[profile.availabilityStatus]
     : null;
+  const mySkills = profile ? getMySkills(profile) : [];
 
   const reviewingCount = allApplications.filter(
     (a) => a.status === ApplicationStatus.Pending || a.status === ApplicationStatus.Reviewing
@@ -111,6 +114,9 @@ export default async function HomePage() {
         )}
       </section>
 
+      {/* 최근 본 프로젝트 (localStorage 기반, 항목 없으면 미표시) */}
+      <RecentProjectsSection />
+
       {/* 모집 중인 프로젝트 */}
       <section className="pt-5 pb-4 border-b">
         <div className="flex items-center justify-between px-4 mb-3">
@@ -126,7 +132,7 @@ export default async function HomePage() {
         {recentProjects.length > 0 ? (
           <div className="space-y-3 px-4">
             {recentProjects.map((project) => (
-              <ProjectCard key={project.id} project={project} />
+              <ProjectCard key={project.id} project={project} mySkills={mySkills} />
             ))}
           </div>
         ) : (

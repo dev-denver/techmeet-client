@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useRef } from "react";
+import { useState, useRef, useEffect } from "react";
 import { FolderOpen, Loader2, Search, X } from "lucide-react";
 import { ProjectFilters } from "./ProjectFilters";
 import { ProjectCard } from "./ProjectCard";
@@ -9,13 +9,15 @@ import type { Project, ProjectFilterValue } from "@/types";
 import type { GetProjectsResponse } from "@/types/api";
 
 const PAGE_SIZE = 10;
+const SEARCH_DEBOUNCE_MS = 300;
 
 interface ProjectListClientProps {
   initialProjects: Project[];
   initialTotal: number;
+  mySkills?: string[];
 }
 
-export function ProjectListClient({ initialProjects, initialTotal }: ProjectListClientProps) {
+export function ProjectListClient({ initialProjects, initialTotal, mySkills }: ProjectListClientProps) {
   const [projects, setProjects] = useState<Project[]>(initialProjects);
   const [filter, setFilter]     = useState<ProjectFilterValue>("all");
   const [search, setSearch]     = useState("");
@@ -23,6 +25,12 @@ export function ProjectListClient({ initialProjects, initialTotal }: ProjectList
   const [total, setTotal]       = useState(initialTotal);
   const [isLoading, setIsLoading] = useState(false);
   const searchRef = useRef<HTMLInputElement>(null);
+  const debounceRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+
+  // 언마운트 시 대기 중인 디바운스 타이머 정리
+  useEffect(() => () => {
+    if (debounceRef.current) clearTimeout(debounceRef.current);
+  }, []);
 
   const hasMore = projects.length < total;
 
@@ -54,16 +62,21 @@ export function ProjectListClient({ initialProjects, initialTotal }: ProjectList
   }
 
   function handleFilterChange(newFilter: ProjectFilterValue) {
+    if (debounceRef.current) clearTimeout(debounceRef.current);
     setFilter(newFilter);
     void fetchProjects(newFilter, 1, false);
   }
 
   function handleSearch(value: string) {
     setSearch(value);
-    void fetchProjects(filter, 1, false, value);
+    if (debounceRef.current) clearTimeout(debounceRef.current);
+    debounceRef.current = setTimeout(() => {
+      void fetchProjects(filter, 1, false, value);
+    }, SEARCH_DEBOUNCE_MS);
   }
 
   function handleClearSearch() {
+    if (debounceRef.current) clearTimeout(debounceRef.current);
     setSearch("");
     searchRef.current?.focus();
     void fetchProjects(filter, 1, false, "");
@@ -126,7 +139,7 @@ export function ProjectListClient({ initialProjects, initialTotal }: ProjectList
           <>
             <div className="space-y-3">
               {projects.map((project) => (
-                <ProjectCard key={project.id} project={project} />
+                <ProjectCard key={project.id} project={project} mySkills={mySkills} />
               ))}
             </div>
             {hasMore && (

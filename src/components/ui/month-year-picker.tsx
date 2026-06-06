@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { useState } from "react";
 import { cn } from "@/lib/utils/cn";
 
 interface MonthYearPickerProps {
@@ -42,14 +42,17 @@ export function MonthYearPicker({
   const [year, setYear] = useState(initial.year);
   const [month, setMonth] = useState(initial.month);
   const [yearError, setYearError] = useState("");
+  const [prevValue, setPrevValue] = useState(value);
 
-  useEffect(() => {
+  // value prop이 외부에서 바뀌면 내부 상태 동기화 (렌더 중 보정 — effect 불필요)
+  if (value !== prevValue) {
+    setPrevValue(value);
     if (value !== undefined) {
       const parsed = parseMonthYear(value);
       setYear(parsed.year);
       setMonth(parsed.month);
     }
-  }, [value]);
+  }
 
   // 4자리 연도와 월이 모두 있을 때만 값 생성
   const computed = year.length === 4 && month ? `${year}-${month}` : "";

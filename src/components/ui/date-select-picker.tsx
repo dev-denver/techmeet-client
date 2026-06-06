@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { useState } from "react";
 import { cn } from "@/lib/utils/cn";
 
 interface DateSelectPickerProps {
@@ -57,15 +57,18 @@ export function DateSelectPicker({
   const [month, setMonth] = useState(initial.month);
   const [day, setDay] = useState(initial.day);
   const [yearError, setYearError] = useState("");
+  const [prevValue, setPrevValue] = useState(value);
 
-  useEffect(() => {
+  // value prop이 외부에서 바뀌면 내부 상태 동기화 (렌더 중 보정 — effect 불필요)
+  if (value !== prevValue) {
+    setPrevValue(value);
     if (value !== undefined) {
       const parsed = parseDate(value);
       setYear(parsed.year);
       setMonth(parsed.month);
       setDay(parsed.day);
     }
-  }, [value]);
+  }
 
   // 4자리 연도 + 월 + 일이 모두 있을 때만 날짜 문자열 생성
   function buildValue(y: string, m: string, d: string): string {
@@ -163,7 +166,6 @@ export function DateSelectPicker({
     return false;
   }
 
-  const hasYearError = !!yearError || (!!error && !year);
   const fieldClass = (hasErr: boolean) =>
     cn(
       "h-10 px-2 rounded-lg border text-sm text-foreground bg-background focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 focus-visible:border-transparent transition-all",

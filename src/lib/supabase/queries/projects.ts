@@ -60,7 +60,11 @@ export async function getProjects(params?: GetProjectsParams): Promise<GetProjec
     query = query.eq("status", params.status);
   }
   if (params?.search) {
-    query = query.ilike("title", `%${params.search}%`);
+    // 제목 + 소개 동시 검색. `.or()` DSL을 깨뜨릴 수 있는 문자는 공백으로 치환
+    const term = params.search.replace(/[,()]/g, " ").trim();
+    if (term) {
+      query = query.or(`title.ilike.%${term}%,description.ilike.%${term}%`);
+    }
   }
 
   const { data, count, error } = await query;

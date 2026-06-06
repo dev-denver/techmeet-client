@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from "next/server";
-import { getApplications, createApplication } from "@/lib/supabase/queries/applications";
+import { getApplications, createApplication, DuplicateApplicationError } from "@/lib/supabase/queries/applications";
 import type { CreateApplicationRequest } from "@/types";
 
 export async function GET() {
@@ -36,7 +36,10 @@ export async function POST(request: NextRequest) {
 
     const result = await createApplication({ projectId, coverLetter: coverLetter.trim(), expectedRate });
     return NextResponse.json(result, { status: 201 });
-  } catch {
+  } catch (err) {
+    if (err instanceof DuplicateApplicationError) {
+      return NextResponse.json({ error: err.message }, { status: 409 });
+    }
     return NextResponse.json({ error: "지원 신청에 실패했습니다" }, { status: 500 });
   }
 }

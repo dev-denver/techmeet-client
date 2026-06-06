@@ -1,0 +1,47 @@
+"use client";
+
+import { useSyncExternalStore } from "react";
+import Link from "next/link";
+import { History } from "lucide-react";
+import {
+  getRecentProjects,
+  getRecentProjectsServerSnapshot,
+  subscribeRecentProjects,
+} from "@/lib/utils/recent-projects";
+
+interface RecentProjectsSectionProps {
+  /** 현재 보고 있는 프로젝트는 목록에서 제외 (선택) */
+  excludeId?: string;
+}
+
+export function RecentProjectsSection({ excludeId }: RecentProjectsSectionProps) {
+  const all = useSyncExternalStore(
+    subscribeRecentProjects,
+    getRecentProjects,
+    getRecentProjectsServerSnapshot
+  );
+  const items = excludeId ? all.filter((p) => p.id !== excludeId) : all;
+
+  // 최근 본 항목이 없으면 섹션 자체를 렌더링하지 않음 (서버 스냅샷이 빈 배열이라 하이드레이션 안전)
+  if (items.length === 0) return null;
+
+  return (
+    <section className="pt-5 pb-4 border-b">
+      <div className="flex items-center gap-1.5 px-4 mb-3">
+        <History className="h-4 w-4 text-muted-foreground" />
+        <h3 className="font-semibold">최근 본 프로젝트</h3>
+      </div>
+      <div className="flex gap-2.5 overflow-x-auto pb-2 scrollbar-none px-4">
+        {items.map((p) => (
+          <Link
+            key={p.id}
+            href={`/projects/${p.id}`}
+            className="shrink-0 min-w-[160px] max-w-[200px] rounded-xl border border-border bg-card px-3.5 py-3 hover:border-muted-foreground/40 hover:shadow-sm transition-all focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2"
+          >
+            <p className="text-sm font-semibold leading-snug line-clamp-2">{p.title}</p>
+          </Link>
+        ))}
+      </div>
+    </section>
+  );
+}
