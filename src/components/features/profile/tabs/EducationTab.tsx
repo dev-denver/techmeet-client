@@ -41,7 +41,15 @@ function EducationForm({ open, onClose, initial }: { open: boolean; onClose: () 
       const url = initial ? `/api/profile/education/${initial.id}` : "/api/profile/education";
       const method = initial ? "PUT" : "POST";
       const res = await fetch(url, { method, headers: { "Content-Type": "application/json" }, body: JSON.stringify(payload) });
-      if (res.ok) { router.refresh(); onClose(); }
+      if (!res.ok) {
+        const data = await res.json() as { error?: string };
+        setFormError(data.error ?? "저장에 실패했습니다");
+        return;
+      }
+      router.refresh();
+      onClose();
+    } catch {
+      setFormError("네트워크 오류가 발생했습니다");
     } finally {
       setIsLoading(false);
     }
@@ -141,7 +149,15 @@ function CertForm({ open, onClose }: { open: boolean; onClose: () => void }) {
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ name: fd.get("name"), acquiredDate }),
       });
-      if (res.ok) { router.refresh(); onClose(); }
+      if (!res.ok) {
+        const data = await res.json() as { error?: string };
+        setFormError(data.error ?? "저장에 실패했습니다");
+        return;
+      }
+      router.refresh();
+      onClose();
+    } catch {
+      setFormError("네트워크 오류가 발생했습니다");
     } finally {
       setIsLoading(false);
     }

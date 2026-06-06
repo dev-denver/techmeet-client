@@ -51,7 +51,15 @@ function SkillForm({ open, onClose, initial }: { open: boolean; onClose: () => v
       const url = initial ? `/api/profile/skill-inventories/${initial.id}` : "/api/profile/skill-inventories";
       const method = initial ? "PUT" : "POST";
       const res = await fetch(url, { method, headers: { "Content-Type": "application/json" }, body: JSON.stringify(payload) });
-      if (res.ok) { router.refresh(); onClose(); }
+      if (!res.ok) {
+        const data = await res.json() as { error?: string };
+        setFormError(data.error ?? "저장에 실패했습니다");
+        return;
+      }
+      router.refresh();
+      onClose();
+    } catch {
+      setFormError("네트워크 오류가 발생했습니다");
     } finally {
       setIsLoading(false);
     }

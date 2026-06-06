@@ -1,6 +1,13 @@
 import { createServerClient } from "@/lib/supabase/server";
 import type { Education, Certification, SkillInventory } from "@/types";
 
+/** "YYYY-MM" → "YYYY-MM-01" 변환. PostgreSQL date 컬럼은 "YYYY-MM-DD" 형식만 허용. */
+function toDbDate(v: string | null | undefined): string | null {
+  if (!v) return null;
+  if (/^\d{4}-\d{2}$/.test(v)) return `${v}-01`;
+  return v;
+}
+
 // ── Education ────────────────────────────────────────────────
 
 interface EducationRow {
@@ -57,8 +64,8 @@ export async function addEducation(payload: {
     school_name: payload.schoolName,
     degree: payload.degree,
     major: payload.major,
-    start_date: payload.startDate,
-    end_date: payload.endDate,
+    start_date: toDbDate(payload.startDate),
+    end_date: toDbDate(payload.endDate),
     is_graduated: payload.isGraduated,
   });
   if (error) throw error;
@@ -80,8 +87,8 @@ export async function updateEducation(id: string, payload: {
   if (payload.schoolName !== undefined) update.school_name = payload.schoolName;
   if (payload.degree !== undefined) update.degree = payload.degree;
   if (payload.major !== undefined) update.major = payload.major;
-  if (payload.startDate !== undefined) update.start_date = payload.startDate;
-  if (payload.endDate !== undefined) update.end_date = payload.endDate;
+  if (payload.startDate !== undefined) update.start_date = toDbDate(payload.startDate);
+  if (payload.endDate !== undefined) update.end_date = toDbDate(payload.endDate);
   if (payload.isGraduated !== undefined) update.is_graduated = payload.isGraduated;
 
   const { error } = await supabase
@@ -147,7 +154,7 @@ export async function addCertification(payload: {
   const { error } = await supabase.from("certifications").insert({
     profile_id: user.id,
     name: payload.name,
-    acquired_date: payload.acquiredDate,
+    acquired_date: toDbDate(payload.acquiredDate),
   });
   if (error) throw error;
 }
@@ -231,8 +238,8 @@ export async function addSkillInventory(payload: Omit<SkillInventory, "id" | "so
   const { error } = await supabase.from("skill_inventories").insert({
     profile_id: user.id,
     project_name: payload.projectName,
-    start_date: payload.startDate,
-    end_date: payload.endDate,
+    start_date: toDbDate(payload.startDate),
+    end_date: toDbDate(payload.endDate),
     client: payload.client,
     company: payload.company,
     industry: payload.industry,
@@ -255,8 +262,8 @@ export async function updateSkillInventory(id: string, payload: Partial<Omit<Ski
 
   const update: Record<string, unknown> = {};
   if (payload.projectName !== undefined) update.project_name = payload.projectName;
-  if (payload.startDate !== undefined) update.start_date = payload.startDate;
-  if (payload.endDate !== undefined) update.end_date = payload.endDate;
+  if (payload.startDate !== undefined) update.start_date = toDbDate(payload.startDate);
+  if (payload.endDate !== undefined) update.end_date = toDbDate(payload.endDate);
   if (payload.client !== undefined) update.client = payload.client;
   if (payload.company !== undefined) update.company = payload.company;
   if (payload.industry !== undefined) update.industry = payload.industry;
