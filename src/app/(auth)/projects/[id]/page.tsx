@@ -51,7 +51,7 @@ export default async function ProjectDetailPage({ params }: ProjectDetailPagePro
       <RecordRecentProject id={project.id} title={project.title} />
 
       {/* 히어로 */}
-      <div className="bg-zinc-800 px-5 pt-6 pb-5">
+      <div className="bg-primary px-5 pt-6 pb-5">
         <div className="flex items-center justify-between gap-2 mb-3">
           <ProjectStatusBadge status={project.status} />
           <div className="flex items-center gap-2">
@@ -59,8 +59,8 @@ export default async function ProjectDetailPage({ params }: ProjectDetailPagePro
               <span
                 className={`text-xs font-semibold px-2.5 py-0.5 rounded-full ${
                   isUrgent
-                    ? "bg-red-500/20 text-red-400"
-                    : "bg-zinc-800 text-zinc-400"
+                    ? "bg-status-danger/25 text-status-danger"
+                    : "bg-primary-foreground/10 text-primary-foreground/60"
                 }`}
               >
                 {deadlineText}
@@ -70,39 +70,39 @@ export default async function ProjectDetailPage({ params }: ProjectDetailPagePro
               <ShareButton
                 projectId={project.id}
                 userId={currentUserId}
-                className="border-zinc-700 text-zinc-400 hover:bg-zinc-800 hover:text-zinc-200 bg-transparent"
+                className="border-primary-foreground/20 text-primary-foreground/60 hover:bg-primary-foreground/10 hover:text-primary-foreground bg-transparent"
               />
             )}
           </div>
         </div>
 
-        <h1 className="text-white text-xl font-bold leading-snug">{project.title}</h1>
+        <h1 className="text-primary-foreground text-xl font-bold leading-snug">{project.title}</h1>
         {project.clientName && (
-          <p className="text-zinc-500 text-sm mt-1.5">{project.clientName}</p>
+          <p className="text-primary-foreground/50 text-sm mt-1.5">{project.clientName}</p>
         )}
 
         {/* 핵심 정보 chips */}
         <div className="flex flex-wrap gap-2 mt-4">
           {project.workType && (
-            <span className="flex items-center gap-1.5 text-xs text-zinc-300 bg-zinc-800 border border-zinc-700/50 px-3 py-1.5 rounded-full">
+            <span className="flex items-center gap-1.5 text-xs text-primary-foreground/70 bg-primary-foreground/10 border border-primary-foreground/15 px-3 py-1.5 rounded-full">
               <Clock className="h-3 w-3" />
               {formatWorkType(project.workType)}
             </span>
           )}
           {project.location && (
-            <span className="flex items-center gap-1.5 text-xs text-zinc-300 bg-zinc-800 border border-zinc-700/50 px-3 py-1.5 rounded-full">
+            <span className="flex items-center gap-1.5 text-xs text-primary-foreground/70 bg-primary-foreground/10 border border-primary-foreground/15 px-3 py-1.5 rounded-full">
               <MapPin className="h-3 w-3" />
               {project.location}
             </span>
           )}
           {project.headcount !== null && (
-            <span className="flex items-center gap-1.5 text-xs text-zinc-300 bg-zinc-800 border border-zinc-700/50 px-3 py-1.5 rounded-full">
+            <span className="flex items-center gap-1.5 text-xs text-primary-foreground/70 bg-primary-foreground/10 border border-primary-foreground/15 px-3 py-1.5 rounded-full">
               <Users className="h-3 w-3" />
               {project.headcount}명 모집
             </span>
           )}
           {(project.duration.startDate || project.duration.endDate) && (
-            <span className="flex items-center gap-1.5 text-xs text-zinc-300 bg-zinc-800 border border-zinc-700/50 px-3 py-1.5 rounded-full">
+            <span className="flex items-center gap-1.5 text-xs text-primary-foreground/70 bg-primary-foreground/10 border border-primary-foreground/15 px-3 py-1.5 rounded-full">
               <Calendar className="h-3 w-3" />
               {formatDate(project.duration.startDate)} ~ {formatDate(project.duration.endDate)}
             </span>
@@ -132,7 +132,7 @@ export default async function ProjectDetailPage({ params }: ProjectDetailPagePro
                     "flex items-center gap-1 text-sm px-3 py-1 rounded-lg font-medium",
                     matched
                       ? "bg-status-success/15 text-status-success border border-status-success/30"
-                      : "bg-zinc-700 text-zinc-100"
+                      : "bg-primary text-primary-foreground"
                   )}
                 >
                   {matched && <Check className="h-3.5 w-3.5" />}
@@ -146,9 +146,9 @@ export default async function ProjectDetailPage({ params }: ProjectDetailPagePro
 
       {/* 프로젝트 소개 */}
       {project.description && (
-        <div className="px-4 py-5 border-b bg-zinc-50">
+        <div className="px-4 py-5 border-b bg-muted/30">
           <h2 className="font-semibold mb-3">프로젝트 소개</h2>
-          <p className="text-sm text-zinc-700 leading-relaxed whitespace-pre-wrap">
+          <p className="text-sm text-foreground/80 leading-relaxed whitespace-pre-wrap">
             {project.description}
           </p>
         </div>
@@ -161,8 +161,8 @@ export default async function ProjectDetailPage({ params }: ProjectDetailPagePro
           <ul className="space-y-2.5">
             {project.requirements.map((req, idx) => (
               <li key={idx} className="flex items-start gap-2.5 text-sm">
-                <span className="w-1.5 h-1.5 rounded-full bg-zinc-400 shrink-0 mt-1.5" />
-                <span className="text-zinc-700">{req}</span>
+                <span className="w-1.5 h-1.5 rounded-full bg-muted-foreground shrink-0 mt-1.5" />
+                <span className="text-foreground/80">{req}</span>
               </li>
             ))}
           </ul>
@@ -196,7 +196,7 @@ export default async function ProjectDetailPage({ params }: ProjectDetailPagePro
       <div className="h-20" />
 
       {/* CTA - BottomNav 바로 위에 고정 */}
-      <div className="fixed bottom-16 left-1/2 -translate-x-1/2 w-full max-w-[430px] z-30 bg-background border-t border-border px-4 py-3">
+      <div className="fixed bottom-16 left-1/2 -translate-x-1/2 w-full max-w-[600px] z-30 bg-background border-t border-border px-4 py-3">
         {myApplication ? (
           <Link
             href="/projects/applications"
