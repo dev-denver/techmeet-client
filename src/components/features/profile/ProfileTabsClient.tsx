@@ -10,6 +10,7 @@ import { EducationTab } from "./tabs/EducationTab";
 import { SkillTab } from "./tabs/SkillTab";
 import { ResumeTab } from "./tabs/ResumeTab";
 import { CareerSectionClient } from "./CareerSectionClient";
+import { ProfileBasicForm } from "./ProfileBasicForm";
 import { ProfileCompletionBar } from "./ProfileCompletionBar";
 import { CardWrap, FieldRow, SectionHeader } from "./tabs/TabShared";
 import { PageHero } from "@/components/ui/page-hero";
@@ -163,6 +164,7 @@ interface ProfileTabsClientProps {
 export function ProfileTabsClient({ profile }: ProfileTabsClientProps) {
   const router = useRouter();
   const [tab, setTab] = useState<Tab>("basic");
+  const [editingBasic, setEditingBasic] = useState(false);
   const [availStatus, setAvailStatus] = useState<AvailabilityStatus>(
     profile.availabilityStatus ?? AvailabilityStatus.Unavailable
   );
@@ -200,9 +202,10 @@ export function ProfileTabsClient({ profile }: ProfileTabsClientProps) {
     }
   }
 
-  // 기본정보 수정 페이지로 이동
-  function handleEdit() {
-    router.push("/settings/profile");
+  // 탭 전환 시 인라인 편집 모드 해제 (편집 중 다른 탭으로 이동하면 편집 취소)
+  function selectTab(next: Tab) {
+    setTab(next);
+    setEditingBasic(false);
   }
 
   const availConfig = AVAILABILITY_TOGGLE_CONFIG[availStatus];
@@ -240,10 +243,10 @@ export function ProfileTabsClient({ profile }: ProfileTabsClientProps) {
               </p>
             )}
           </div>
-          {tab === "basic" && (
+          {tab === "basic" && !editingBasic && (
             <button
               type="button"
-              onClick={handleEdit}
+              onClick={() => setEditingBasic(true)}
               className="shrink-0 flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-medium text-primary-foreground/70 hover:text-primary-foreground hover:bg-primary-foreground/10 active:bg-primary-foreground/15 transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary-foreground/50"
               aria-label="기본정보 수정"
             >
@@ -259,7 +262,7 @@ export function ProfileTabsClient({ profile }: ProfileTabsClientProps) {
         <ProfileCompletionBar
           percent={completion.percent}
           missing={completion.missing}
-          onSelect={setTab}
+          onSelect={selectTab}
         />
       </div>
 
@@ -269,7 +272,7 @@ export function ProfileTabsClient({ profile }: ProfileTabsClientProps) {
           {TABS.map(({ key, label }) => (
             <button
               key={key}
-              onClick={() => setTab(key)}
+              onClick={() => selectTab(key)}
               className={`flex-1 min-w-fit py-3 px-3 text-xs font-medium whitespace-nowrap transition-colors border-b-2 ${
                 tab === key
                   ? "text-foreground border-foreground"
@@ -285,15 +288,23 @@ export function ProfileTabsClient({ profile }: ProfileTabsClientProps) {
       {/* 탭 콘텐츠 */}
       <div className="px-4 pt-5 pb-8">
         {tab === "basic" && (
-          <BasicInfoTab
-            profile={profile}
-            availStatus={availStatus}
-            availFromDate={availFromDate}
-            isDirty={isDirty}
-            isSaving={isSaving}
-            onStatusChange={handleStatusChange}
-            onSave={handleSave}
-          />
+          editingBasic ? (
+            <ProfileBasicForm
+              initial={profile}
+              onSuccess={() => { setEditingBasic(false); router.refresh(); }}
+              onCancel={() => setEditingBasic(false)}
+            />
+          ) : (
+            <BasicInfoTab
+              profile={profile}
+              availStatus={availStatus}
+              availFromDate={availFromDate}
+              isDirty={isDirty}
+              isSaving={isSaving}
+              onStatusChange={handleStatusChange}
+              onSave={handleSave}
+            />
+          )
         )}
         {tab === "education" && (
           <EducationTab educations={profile.educations} certifications={profile.certifications} />
