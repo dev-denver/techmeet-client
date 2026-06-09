@@ -1,6 +1,6 @@
 import { createServerClient } from "@/lib/supabase/server";
 import type { Notice, NoticeAttachment } from "@/types";
-import type { GetNoticesResponse } from "@/types";
+import type { GetNoticesParams, GetNoticesResponse } from "@/types";
 
 interface NoticeRow {
   id: string;
@@ -35,24 +35,34 @@ export async function getNoticeById(id: string): Promise<Notice | null> {
   return mapRowToNotice(data as NoticeRow);
 }
 
-export async function getNotices(): Promise<GetNoticesResponse> {
+export async function getNotices(params?: GetNoticesParams): Promise<GetNoticesResponse> {
   const supabase = await createServerClient();
 
-  const { data, count, error } = await supabase
+  let query = supabase
     .from("notices")
     .select("*", { count: "exact" })
     .order("is_important", { ascending: false })
     .order("created_at", { ascending: false });
 
+  const page = params?.page ?? 1;
+  const pageSize = params?.pageSize;
+
+  if (pageSize) {
+    const from = (page - 1) * pageSize;
+    query = query.range(from, from + pageSize - 1);
+  }
+
+  const { data, count, error } = await query;
+
   if (error) {
     console.warn("[getNotices]", error);
-    return { data: [], total: 0, page: 1, pageSize: 20 };
+    return { data: [], total: 0, page, pageSize: pageSize ?? 20 };
   }
 
   return {
     data: (data as NoticeRow[]).map(mapRowToNotice),
     total: count ?? 0,
-    page: 1,
-    pageSize: 20,
+    page,
+    pageSize: pageSize ?? 20,
   };
 }

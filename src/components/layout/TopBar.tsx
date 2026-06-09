@@ -15,6 +15,7 @@ const pageTitles: Record<string, string> = {
   "/settings/profile": "내 정보 수정",
   "/settings/withdraw": "회원 탈퇴",
   "/notifications": "알림 내역",
+  "/notices": "공지사항",
 };
 
 function getTitle(pathname: string): string {

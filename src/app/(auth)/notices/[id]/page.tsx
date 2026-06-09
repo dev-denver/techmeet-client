@@ -113,7 +113,7 @@ export default async function NoticeDetailPage({ params }: NoticeDetailPageProps
         )}
       </div>
 
-      <Link href="/">
+      <Link href="/notices">
         <div className="flex items-center justify-center gap-1.5 px-4 py-4 hover:bg-muted/50 active:bg-muted transition-colors">
           <LayoutList className="h-4 w-4 text-muted-foreground" />
           <span className="text-sm text-muted-foreground">목록으로</span>
