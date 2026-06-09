@@ -98,6 +98,11 @@ export interface ReferrerSearchResult { id: string; name: string; maskedPhone: s
 export type SearchReferrerResponse = { data: ReferrerSearchResult[] };
 
 // ── Notices ───────────────────────────────────────────
+export interface GetNoticesParams {
+  page?: number;
+  pageSize?: number;
+}
+
 export type GetNoticesResponse = PaginatedResponse<Notice>;
 
 // ── Notifications ─────────────────────────────────────

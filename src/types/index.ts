@@ -27,6 +27,7 @@ export type {
   AddCareerRequest,
   UpdateCareerRequest,
   GetProfileResponse,
+  GetNoticesParams,
   GetNoticesResponse,
   GetAlimtalkLogsResponse,
   NotificationSettings,

@@ -151,6 +151,13 @@ export default async function HomePage() {
                 <Megaphone className="h-3.5 w-3.5" />
                 공지사항
               </span>
+              <Link
+                href="/notices"
+                className="text-xs text-muted-foreground flex items-center gap-0.5 hover:text-foreground transition-colors"
+              >
+                더보기
+                <ChevronRight className="h-3.5 w-3.5" />
+              </Link>
             </div>
             <div className="divide-y divide-border">
               {notices.slice(0, 2).map((notice) => (
