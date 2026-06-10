@@ -1,4 +1,4 @@
-import { createServerClient } from "@/lib/supabase/server";
+import { createAdminClient, createServerClient } from "@/lib/supabase/server";
 import { ApplicationStatus } from "@/types";
 import type { Application } from "@/types";
 import type {
@@ -107,6 +107,34 @@ export async function createApplication(
 
   const { data: { user } } = await supabase.auth.getUser();
   if (!user) throw new Error("인증이 필요합니다");
+
+  const { data: existing } = await supabase
+    .from("applications")
+    .select("id, status")
+    .eq("project_id", payload.projectId)
+    .eq("freelancer_id", user.id)
+    .maybeSingle();
+
+  // 취소(withdrawn)했던 지원 내역이 있으면 재지원으로 간주해 기존 행을 재활성화한다.
+  // RLS의 applications_update_own 정책은 pending → withdrawn 전환만 허용하므로,
+  // withdrawn → pending 재활성화는 admin client로 처리한다.
+  if (existing?.status === ApplicationStatus.Withdrawn) {
+    const admin = createAdminClient();
+    const { data, error } = await admin
+      .from("applications")
+      .update({
+        status: ApplicationStatus.Pending,
+        cover_letter: payload.coverLetter,
+        expected_rate: payload.expectedRate,
+        applied_at: new Date().toISOString(),
+      })
+      .eq("id", existing.id)
+      .select("*, projects(title)")
+      .single();
+
+    if (error) throw error;
+    return { data: mapRowToApplication(data as ApplicationRow) };
+  }
 
   const { data, error } = await supabase
     .from("applications")
