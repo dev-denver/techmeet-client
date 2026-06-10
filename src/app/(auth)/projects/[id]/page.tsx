@@ -41,6 +41,7 @@ export default async function ProjectDetailPage({ params }: ProjectDetailPagePro
   const deadlineDays = getDeadlineDays(project.deadline);
   const isUrgent = isRecruiting && deadlineDays !== null && deadlineDays <= 7;
   const isExpired = deadlineText === "마감";
+  const deadlinePassed = !!project.deadline && getDeadlineDays(project.deadline) === null;
 
   const appConfig = myApplication ? APPLICATION_STATUS_CONFIG[myApplication.status] : null;
   const isWithdrawn = myApplication?.status === ApplicationStatus.Withdrawn;
@@ -217,11 +218,15 @@ export default async function ProjectDetailPage({ params }: ProjectDetailPagePro
             )}
             <ChevronRight className="h-4 w-4 text-muted-foreground shrink-0" />
           </Link>
-        ) : isRecruiting ? (
+        ) : isRecruiting && !deadlinePassed ? (
           <ApplyButton projectId={project.id} />
         ) : (
           <Button className="w-full h-12 text-base font-semibold" disabled>
-            {project.status === ProjectStatus.InProgress ? "진행 중인 프로젝트" : "모집 종료"}
+            {!isRecruiting
+              ? project.status === ProjectStatus.InProgress
+                ? "진행 중인 프로젝트"
+                : "모집 종료"
+              : "지원 마감"}
           </Button>
         )}
       </div>

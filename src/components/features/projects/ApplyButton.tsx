@@ -10,7 +10,7 @@ import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { cn } from "@/lib/utils/cn";
 
-const MIN_COVER_LETTER = 20;
+const MAX_COVER_LETTER = 1000;
 // BottomSheet footer에 제출 버튼을 두고, form은 sheet body 안에 있어 별도 id로 연결
 const FORM_ID = "apply-form";
 
@@ -20,7 +20,6 @@ interface ApplyButtonProps {
 
 function validateCoverLetter(value: string): string {
   if (!value.trim()) return "지원 동기를 입력해주세요";
-  if (value.trim().length < MIN_COVER_LETTER) return `최소 ${MIN_COVER_LETTER}자 이상 입력해주세요`;
   return "";
 }
 
@@ -95,7 +94,6 @@ export function ApplyButton({ projectId }: ApplyButtonProps) {
   }
 
   const charCount = coverLetter.length;
-  const charOk = charCount >= MIN_COVER_LETTER;
 
   return (
     <>
@@ -139,20 +137,17 @@ export function ApplyButton({ projectId }: ApplyButtonProps) {
                 <Textarea
                   value={coverLetter}
                   onChange={(e) => {
-                    setCoverLetter(e.target.value);
-                    if (coverLetterError) setCoverLetterError(validateCoverLetter(e.target.value));
+                    const value = e.target.value.slice(0, MAX_COVER_LETTER);
+                    setCoverLetter(value);
+                    if (coverLetterError) setCoverLetterError(validateCoverLetter(value));
                   }}
                   placeholder="해당 프로젝트에 지원하는 이유와 관련 경험을 간략히 적어주세요"
                   rows={5}
+                  maxLength={MAX_COVER_LETTER}
                   className={cn("pb-7", coverLetterError ? "border-destructive/50" : "")}
                 />
-                <span
-                  className={cn(
-                    "absolute bottom-2.5 right-3 text-xs tabular-nums pointer-events-none",
-                    charOk ? "text-status-success" : "text-muted-foreground"
-                  )}
-                >
-                  {charCount}자
+                <span className="absolute bottom-2.5 right-3 text-xs tabular-nums text-muted-foreground pointer-events-none">
+                  {charCount}/{MAX_COVER_LETTER}자
                 </span>
               </div>
             </FormField>
