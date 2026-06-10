@@ -1,5 +1,10 @@
 import { NextRequest, NextResponse } from "next/server";
+import { requireAuth } from "@/lib/api/server";
 import { getApplications, createApplication, DuplicateApplicationError } from "@/lib/supabase/queries/applications";
+import { getProjectById } from "@/lib/supabase/queries/projects";
+import { getDeadlineDays } from "@/lib/utils/format";
+import { UUID_REGEX } from "@/lib/utils/validation";
+import { ProjectStatus } from "@/types";
 import type { CreateApplicationRequest } from "@/types";
 
 export async function GET() {
@@ -12,6 +17,9 @@ export async function GET() {
 }
 
 export async function POST(request: NextRequest) {
+  const { errorResponse } = await requireAuth();
+  if (errorResponse) return errorResponse;
+
   try {
     const body = (await request.json()) as Partial<CreateApplicationRequest>;
     const { projectId, coverLetter, expectedRate } = body;
@@ -24,9 +32,17 @@ export async function POST(request: NextRequest) {
       return NextResponse.json({ error: "필수 항목을 모두 입력해주세요" }, { status: 400 });
     }
 
-    // 지원 동기: 최소 20자
-    if (coverLetter.trim().length < 20) {
-      return NextResponse.json({ error: "지원 동기는 20자 이상 입력해주세요" }, { status: 400 });
+    if (!UUID_REGEX.test(projectId)) {
+      return NextResponse.json({ error: "올바르지 않은 프로젝트입니다" }, { status: 400 });
+    }
+
+    // 지원 동기: 필수 입력, 최대 1000자
+    const trimmedCoverLetter = coverLetter.trim();
+    if (!trimmedCoverLetter) {
+      return NextResponse.json({ error: "지원 동기를 입력해주세요" }, { status: 400 });
+    }
+    if (trimmedCoverLetter.length > 1000) {
+      return NextResponse.json({ error: "지원 동기는 1000자 이하로 입력해주세요" }, { status: 400 });
     }
 
     // 희망 단가: 1~9999만원 범위
@@ -34,7 +50,20 @@ export async function POST(request: NextRequest) {
       return NextResponse.json({ error: "희망 단가는 1~9999만원 사이로 입력해주세요" }, { status: 400 });
     }
 
-    const result = await createApplication({ projectId, coverLetter: coverLetter.trim(), expectedRate });
+    const project = await getProjectById(projectId);
+    if (!project) {
+      return NextResponse.json({ error: "존재하지 않는 프로젝트입니다" }, { status: 404 });
+    }
+
+    const { status, deadline } = project.data;
+    if (status !== ProjectStatus.Recruiting) {
+      return NextResponse.json({ error: "모집이 종료된 프로젝트입니다" }, { status: 400 });
+    }
+    if (deadline && getDeadlineDays(deadline) === null) {
+      return NextResponse.json({ error: "지원이 마감된 프로젝트입니다" }, { status: 400 });
+    }
+
+    const result = await createApplication({ projectId, coverLetter: trimmedCoverLetter, expectedRate });
     return NextResponse.json(result, { status: 201 });
   } catch (err) {
     if (err instanceof DuplicateApplicationError) {
