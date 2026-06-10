@@ -198,19 +198,13 @@ export default async function ProjectDetailPage({ params }: ProjectDetailPagePro
 
       {/* CTA - BottomNav 바로 위에 고정 */}
       <div className="fixed bottom-16 left-1/2 -translate-x-1/2 w-full max-w-[600px] z-30 bg-background border-t border-border px-4 py-3">
-        {myApplication ? (
+        {myApplication && !isWithdrawn ? (
           <Link
             href="/projects/applications"
             className="flex w-full h-12 items-center justify-center gap-2 rounded-md border border-border bg-muted/60 text-sm font-semibold text-foreground transition-colors hover:bg-muted active:bg-muted focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2"
           >
-            {isWithdrawn ? (
-              <span>지원을 취소한 프로젝트입니다</span>
-            ) : (
-              <>
-                <Check className="h-4 w-4 text-status-success" />
-                지원 완료
-              </>
-            )}
+            <Check className="h-4 w-4 text-status-success" />
+            지원 완료
             {appConfig && (
               <span className={cn("text-xs font-semibold px-2 py-0.5 rounded-full", appConfig.className)}>
                 {appConfig.label}
@@ -220,6 +214,19 @@ export default async function ProjectDetailPage({ params }: ProjectDetailPagePro
           </Link>
         ) : isRecruiting && !deadlinePassed ? (
           <ApplyButton projectId={project.id} />
+        ) : myApplication ? (
+          <Link
+            href="/projects/applications"
+            className="flex w-full h-12 items-center justify-center gap-2 rounded-md border border-border bg-muted/60 text-sm font-semibold text-foreground transition-colors hover:bg-muted active:bg-muted focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2"
+          >
+            <span>지원을 취소한 프로젝트입니다</span>
+            {appConfig && (
+              <span className={cn("text-xs font-semibold px-2 py-0.5 rounded-full", appConfig.className)}>
+                {appConfig.label}
+              </span>
+            )}
+            <ChevronRight className="h-4 w-4 text-muted-foreground shrink-0" />
+          </Link>
         ) : (
           <Button className="w-full h-12 text-base font-semibold" disabled>
             {!isRecruiting
