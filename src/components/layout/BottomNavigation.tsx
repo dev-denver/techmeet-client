@@ -1,7 +1,7 @@
 "use client";
 
-import Link from "next/link";
-import { usePathname } from "next/navigation";
+import { useEffect } from "react";
+import { useRouter, usePathname } from "next/navigation";
 import { Home, FolderOpen, User, Settings } from "lucide-react";
 import { cn } from "@/lib/utils/cn";
 
@@ -13,7 +13,13 @@ const navItems = [
 ];
 
 export function BottomNavigation() {
+  const router = useRouter();
   const pathname = usePathname();
+
+  // Link의 자동 prefetch 대체: 하단 탭은 항상 노출되므로 마운트 시 전체 프리페치
+  useEffect(() => {
+    navItems.forEach(({ href }) => router.prefetch(href));
+  }, [router]);
 
   return (
     <nav className="fixed bottom-0 left-1/2 -translate-x-1/2 w-full max-w-[600px] h-16 bg-background border-t border-border z-50">
@@ -25,9 +31,10 @@ export function BottomNavigation() {
               : pathname === href || pathname.startsWith(href + "/");
 
           return (
-            <Link
+            <button
               key={href}
-              href={href}
+              type="button"
+              onClick={() => router.push(href)}
               aria-current={isActive ? "page" : undefined}
               className={cn(
                 "flex flex-1 flex-col items-center justify-center gap-1 text-xs transition-colors",
@@ -43,7 +50,7 @@ export function BottomNavigation() {
               <span className={cn("font-medium", isActive ? "font-semibold" : "")}>
                 {label}
               </span>
-            </Link>
+            </button>
           );
         })}
       </div>
