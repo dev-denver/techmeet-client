@@ -197,7 +197,8 @@
 ## 다크 모드
 
 - CSS custom properties로 `.dark` 클래스 기반 정의됨
-- 현재 미사용 상태 (토글 UI 미구현)
+- `ThemeProvider`/`useTheme` (`components/ui/theme-provider.tsx`)로 토글 구현, `/settings` "화면 설정" 섹션에 `ThemeToggle` 노출
+- 루트 레이아웃(`app/layout.tsx`)의 인라인 스크립트가 `localStorage.theme` 값을 읽어 hydration 전에 `.dark` 클래스 적용 (FOUC 방지), `<html suppressHydrationWarning>` 적용
 
 ## 환경변수 관리
 
@@ -217,6 +218,8 @@
 - `PageHero` (`components/ui/`): 상단 다크 헤더 배경 래퍼 (`bg-primary px-5 pt-6 pb-5`, className으로 pb 오버라이드)
 - `StatsGrid` (`components/ui/`): 통계 그리드 (stats 배열, valueSize, labelSize)
 - `SkeletonCard` / `SkeletonBadgeRow` / `SkeletonSectionHeader` (`components/ui/skeleton-patterns.tsx`): 로딩 스켈레톤 조각
+- `Switch` (`components/ui/switch.tsx`): 토글 스위치 (`{ checked, onChange, disabled?, "aria-label"? }`, `role="switch"`)
+- `PasswordStrength` (`components/features/signup/`): 비밀번호 강도 표시 (회원가입/비밀번호 변경에서 공유)
 
 ## Supabase 클라이언트 사용
 

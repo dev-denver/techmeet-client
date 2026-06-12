@@ -251,6 +251,8 @@ src/
 - [x] 개인정보 처리방침 / 이용약관 링크
 - [x] 회원 탈퇴 UI 및 API
 - [x] 추천인 등록 (미등록 시 등록 버튼 → 모달, 등록 후 이름 read-only 표시)
+- [x] 비밀번호 변경 (/settings/password)
+- [x] 다크 모드 토글
 
 ### 추천인
 
@@ -347,6 +349,16 @@ src/
 - [x] ResumeTab — FormData 업로드/삭제를 `profileApi.uploadResume`/`deleteResume` + `ApiError`로 이관
 - [x] SignupForm/login/withdraw — public-key 조회, 추천인 lookup, 회원가입/로그인/탈퇴를 `authApi`/`profileApi`로 이관 (탈퇴 계정 로그인 시 `code` 기반 안내 메시지 처리)
 
+### 비밀번호 변경 · 다크 모드 토글 (2026-06-12)
+
+- [x] PUT /api/auth/password 신규 — `requireAuth()` + `createAdminClient()`로 현재 비밀번호 검증(`signInWithPassword`) 후 `auth.admin.updateUserById`로 변경 (세션 쿠키 영향 없음)
+- [x] `authApi.changePassword()` 추가, `ChangePasswordRequest` 타입 추가
+- [x] `/settings/password` 페이지 신규 — 현재/새/새 비밀번호 확인 입력, `PasswordStrength`(SignupForm에서 공유 컴포넌트로 분리) 표시, RSA 암호화 후 제출
+- [x] TopBar `pageTitles`/`isDetailPage`에 `/settings/password` 추가, 설정 페이지에 "비밀번호 변경" 링크 추가
+- [x] 다크 모드 토글 — `ThemeProvider`/`useTheme`(`components/ui/theme-provider.tsx`, 의존성 없음) + 루트 레이아웃 인라인 스크립트로 FOUC 방지(`localStorage.theme` 기반 `.dark` 클래스 선적용)
+- [x] `Switch` 컴포넌트 신규 (`components/ui/switch.tsx`) — NotificationSettings의 로컬 `Toggle`을 공통화, `ThemeToggle`에서도 사용
+- [x] 설정 페이지에 "화면 설정" 섹션 추가 (다크 모드 토글)
+
 ---
 
 ## 🔧 TODO
@@ -357,11 +369,6 @@ src/
   - 알림톡 API 제공사 계약 필요 (센트온)
   - 신규 프로젝트 등록 시 → 대상 프리랜서 전체 발송
   - 지원 상태 변경 시 → 해당 프리랜서에게 발송
-
-### 낮은 우선순위
-
-- [ ] **비밀번호 변경**: 이메일 로그인 계정용 비밀번호 변경 기능
-- [ ] **다크 모드 토글**: globals.css에 `.dark` CSS 변수 정의됨, 토글 UI 미구현
 
 ---
 

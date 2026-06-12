@@ -13,6 +13,7 @@ const pageTitles: Record<string, string> = {
   "/profile": "내 정보",
   "/settings": "설정",
   "/settings/profile": "내 정보 수정",
+  "/settings/password": "비밀번호 변경",
   "/settings/withdraw": "회원 탈퇴",
   "/notifications": "알림 내역",
   "/notices": "공지사항",
@@ -37,7 +38,7 @@ function isDetailPage(pathname: string): boolean {
   ) {
     return true;
   }
-  if (pathname === "/settings/profile" || pathname === "/settings/withdraw") {
+  if (pathname === "/settings/profile" || pathname === "/settings/password" || pathname === "/settings/withdraw") {
     return true;
   }
   if (pathname === "/notifications") {

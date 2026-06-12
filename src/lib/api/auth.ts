@@ -1,5 +1,11 @@
 import { apiFetch } from "./client";
-import type { SignupRequest, LoginRequest, ApiSuccessResponse, GetPublicKeyResponse } from "@/types";
+import type {
+  SignupRequest,
+  LoginRequest,
+  ApiSuccessResponse,
+  GetPublicKeyResponse,
+  ChangePasswordRequest,
+} from "@/types";
 
 export const authApi = {
   signup: (data: SignupRequest) =>
@@ -19,4 +25,10 @@ export const authApi = {
   withdraw: () => apiFetch<ApiSuccessResponse>("/api/auth/withdraw", { method: "POST" }),
 
   getPublicKey: () => apiFetch<GetPublicKeyResponse>("/api/auth/public-key"),
+
+  changePassword: (data: ChangePasswordRequest) =>
+    apiFetch<ApiSuccessResponse>("/api/auth/password", {
+      method: "PUT",
+      body: JSON.stringify(data),
+    }),
 };

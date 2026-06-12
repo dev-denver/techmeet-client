@@ -37,6 +37,11 @@ export interface LoginRequest {
 
 export type GetPublicKeyResponse = { publicKey: string };
 
+export interface ChangePasswordRequest {
+  encryptedCurrentPassword: string;
+  encryptedNewPassword: string;
+}
+
 // ── Projects ──────────────────────────────────────────
 export interface GetProjectsParams {
   status?: ProjectFilterValue;
