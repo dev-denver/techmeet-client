@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
 import { requireAuth } from "@/lib/api/server";
 import { createServerClient } from "@/lib/supabase/server";
+import { UUID_REGEX } from "@/lib/utils/validation";
 
 export async function GET(
   _request: NextRequest,
@@ -11,6 +12,9 @@ export async function GET(
     if (errorResponse) return errorResponse;
 
     const { id } = await params;
+    if (!UUID_REGEX.test(id)) {
+      return NextResponse.json({ error: "올바르지 않은 요청입니다" }, { status: 400 });
+    }
     const supabase = await createServerClient();
 
     const { data: row, error: fetchError } = await supabase

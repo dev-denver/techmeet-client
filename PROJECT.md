@@ -1,7 +1,7 @@
 # 테크밋 프리랜서 앱 - 개발 문서
 
 > 이 문서는 개발 환경이 바뀌어도 어디까지 개발됐는지 파악하고 이어서 개발할 수 있도록 작성된 문서입니다.
-> 마지막 업데이트: 2026-05-31 (코드 최적화 리팩토링)
+> 마지막 업데이트: 2026-06-12 (전체 품질 업그레이드: 유효성 검사·성능·UI/UX·유지보수성)
 
 ---
 
@@ -11,7 +11,7 @@
 
 - 관리자 기능은 별도 레포지토리에서 관리 (https://github.com/dev-denver/techmeet-admin)
 - 카카오 로그인 전용 (이메일 로그인 보조 지원)
-- 모바일 앱형 UI (max-w-[430px] 고정 폭, 반응형 없음)
+- 모바일 앱형 UI (max-w-[600px] 고정 폭, 반응형 없음)
 
 ---
 
@@ -159,7 +159,7 @@ src/
 
 ```
 전체 화면
-└── max-w-[430px] mx-auto (데스크탑에서 중앙 정렬)
+└── max-w-[600px] mx-auto (데스크탑에서 중앙 정렬)
     ├── TopBar (fixed top, h-14) - 페이지 타이틀, 뒤로가기, 스크롤시 햄버거
     ├── <main> (h-screen, overflow-y-auto, pt-14, pb-16) - 스크롤 컨텍스트
     └── BottomNavigation (fixed bottom, h-16) - 홈/프로젝트/내정보/설정
@@ -278,7 +278,7 @@ src/
 - [x] TopBar (뒤로가기, 스크롤 시 햄버거 메뉴)
 - [x] BottomNavigation (홈/프로젝트/내정보/설정)
 - [x] 모든 (auth) 페이지 로딩 스켈레톤 (loading.tsx)
-- [x] 모바일 고정 폭 (max-w-[430px])
+- [x] 모바일 고정 폭 (max-w-[600px])
 - [x] 수평 스크롤 (-mx-4 px-4 + scrollbar-none) 패턴
 - [x] 글로벌 에러 바운더리 (auth)/error.tsx — 페이지 렌더링 실패 시 재시도 UI
 
@@ -302,6 +302,45 @@ src/
 - [x] 공통 UI 컴포넌트 추가: `EmptyState`, `ErrorMessage`, `PageHero`, `StatsGrid`, `SkeletonCard/SkeletonBadgeRow/SkeletonSectionHeader`
 - [x] 접근성 개선: BottomNavigation `aria-current`, DateSelectPicker/MonthYearPicker `focus-visible`, SaveButton `aria-busy`
 
+### 전체 품질 업그레이드 (2026-06-12)
+
+**유효성 검사·로직 보완**
+
+- [x] `lib/constants/limits.ts` 신규 — 길이/범위 제한 상수 `LIMITS` 중앙 관리
+- [x] `validateLength`, `validateStringArray` 헬퍼 추가 (`lib/utils/validation.ts`)
+- [x] POST /api/auth/signup — 이름 길이(≤50) 검증, `referrer_id` UUID 검증
+- [x] PUT /api/profile — bio/affiliation/department/positionTitle/militaryService/address 길이 검증, experienceYears 0~50 정수 검증, gender enum 검증(Set 기반), joiningDate 날짜 검증, techStack 배열 검증
+- [x] careers POST/PUT — description/techStack 검증 + **POST 라우트에 누락되어 있던 `requireAuth()` 추가 (보안 결함 수정)**
+- [x] education/certifications/skill-inventories — 요청 바디 타입 지정(`Partial<...Request>`), 길이/배열 검증 추가
+- [x] 모든 `[id]` 라우트에 `UUID_REGEX` 검증 추가 (careers/education/certifications/skill-inventories/applications/resumes)
+- [x] 검색어 길이 상한: `/api/projects` search, `/api/profile/referrer/search` q (`LIMITS.SEARCH_MAX`)
+- [x] 로그인 페이지 이메일 입력 `maxLength` 적용
+
+**성능 최적화**
+
+- [x] `getProfile()` — referrer 순차 조회 제거, `referrer:referrer_id(name)` self-join embed로 통합
+- [x] 프로젝트 상세 페이지 — 중복 `auth.getUser()` 호출 제거 (profileResult 재사용)
+- [x] 스킬 매칭 2중 순회 제거 — `getMatchedSkillSet()` (`lib/utils/skills.ts`)로 단일 Set 계산
+- [x] `ProjectListClient` — fetch 실패 시 loadError 표시 + 요청 시퀀스 ref로 stale 응답 무시
+- [x] `getRecentProjects()` — localStorage 접근 try-catch (프라이빗 모드 SecurityError 대응)
+- [x] `getProjects`/`getNotices`/`getProfileResumes` — select 컬럼 명시화 (Row 인터페이스와 1:1)
+
+**UI/UX 개선**
+
+- [x] `ConfirmSheet` 신규 — EducationTab/SkillTab의 `confirm()` 대체
+- [x] `ToastProvider`/`useToast` 신규 — CRUD 성공 시 토스트 피드백 (EducationTab/SkillTab/CareerSectionClient/ProfileTabsClient)
+- [x] ProfileTabsClient 투입 상태 저장 — 침묵 실패 제거, 에러 토스트 + `profileApi` 이관
+- [x] 터치 타깃·focus-visible 보강: TopBar 뒤로가기/알림 버튼, TabShared 수정/삭제 버튼, CareerSectionClient 아이콘 버튼, BottomNavigation, DashedAddButton 등
+- [x] 시맨틱 색상 토큰 표준화: (auth)/error.tsx, login, withdraw, ProfileBasicForm — raw `red-*`/`zinc-*` → `destructive`/`foreground`/`muted-foreground` (카카오 브랜드색 `#FEE500`는 유지)
+
+**유지보수성**
+
+- [x] `useSubmit` 훅 신규 — 폼 제출 isLoading/error 처리 공통화
+- [x] raw fetch → `*Api` + `useSubmit` 이관: EducationTab, SkillTab, CareerSectionClient, ApplyButton, ApplicationCard, ProfileBasicForm, ProfileTabsClient
+- [x] 대형 파일 분리: CareerSectionClient → `CareerForm.tsx` 분리, ProfileTabsClient → `BasicInfoTab.tsx` 분리 (로직 변경 없음)
+- [x] `PullToRefresh` — non-null assertion(`main!`) 제거
+- [x] CLAUDE.md/PROJECT.md `max-w-[430px]` → `600px` 표기 정정, BottomSheet 기본폭(sm=430px) 안내 추가, 폼 제출 패턴(useSubmit) 문서화
+
 ---
 
 ## 🔧 TODO
@@ -317,6 +356,12 @@ src/
 
 - [ ] **비밀번호 변경**: 이메일 로그인 계정용 비밀번호 변경 기능
 - [ ] **다크 모드 토글**: globals.css에 `.dark` CSS 변수 정의됨, 토글 UI 미구현
+
+### 후속 작업 (2026-06-12 품질 업그레이드에서 발견)
+
+- [ ] NotificationSettings, ReferrerSection, LogoutButton — raw fetch를 `*Api` + `useSubmit`으로 이관 (가치 대비 변경량이 낮아 이번 작업에서는 제외)
+- [ ] ResumeTab — FormData 업로드 방식이라 `apiFetch`와 호환이 어려움, 별도 패턴 검토 필요
+- [ ] SignupForm/login/withdraw — raw fetch 이관 (탈퇴 회원 재가입 플로우 작업이 먼저 마무리되어야 충돌 없이 진행 가능)
 
 ---
 

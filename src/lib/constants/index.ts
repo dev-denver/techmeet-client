@@ -4,3 +4,4 @@ export {
   AVAILABILITY_STATUS_CONFIG,
   AVAILABILITY_TOGGLE_CONFIG,
 } from "./status";
+export { LIMITS } from "./limits";

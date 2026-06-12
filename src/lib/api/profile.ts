@@ -5,6 +5,9 @@ import type {
   UpdateAvailabilityRequest,
   AddCareerRequest,
   UpdateCareerRequest,
+  SaveEducationRequest,
+  SaveCertificationRequest,
+  SaveSkillInventoryRequest,
 } from "@/types";
 
 export const profileApi = {
@@ -36,4 +39,43 @@ export const profileApi = {
 
   deleteCareer: (id: string) =>
     apiFetch<{ success: true }>(`/api/profile/careers/${id}`, { method: "DELETE" }),
+
+  addEducation: (data: SaveEducationRequest) =>
+    apiFetch<{ success: true }>("/api/profile/education", {
+      method: "POST",
+      body: JSON.stringify(data),
+    }),
+
+  updateEducation: (id: string, data: SaveEducationRequest) =>
+    apiFetch<{ success: true }>(`/api/profile/education/${id}`, {
+      method: "PUT",
+      body: JSON.stringify(data),
+    }),
+
+  deleteEducation: (id: string) =>
+    apiFetch<{ success: true }>(`/api/profile/education/${id}`, { method: "DELETE" }),
+
+  addCertification: (data: SaveCertificationRequest) =>
+    apiFetch<{ success: true }>("/api/profile/certifications", {
+      method: "POST",
+      body: JSON.stringify(data),
+    }),
+
+  deleteCertification: (id: string) =>
+    apiFetch<{ success: true }>(`/api/profile/certifications/${id}`, { method: "DELETE" }),
+
+  addSkillInventory: (data: SaveSkillInventoryRequest) =>
+    apiFetch<{ success: true }>("/api/profile/skill-inventories", {
+      method: "POST",
+      body: JSON.stringify(data),
+    }),
+
+  updateSkillInventory: (id: string, data: SaveSkillInventoryRequest) =>
+    apiFetch<{ success: true }>(`/api/profile/skill-inventories/${id}`, {
+      method: "PUT",
+      body: JSON.stringify(data),
+    }),
+
+  deleteSkillInventory: (id: string) =>
+    apiFetch<{ success: true }>(`/api/profile/skill-inventories/${id}`, { method: "DELETE" }),
 };

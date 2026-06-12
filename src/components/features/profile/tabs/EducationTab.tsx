@@ -6,6 +6,10 @@ import type { Education, Certification } from "@/types";
 import { formatMonthYear } from "@/lib/utils/format";
 import { validatePastOrCurrentMonth } from "@/lib/utils/validation";
 import { MonthYearPicker } from "@/components/ui/month-year-picker";
+import { ConfirmSheet } from "@/components/ui/confirm-sheet";
+import { useToast } from "@/components/ui/toast";
+import { useSubmit } from "@/hooks/useSubmit";
+import { profileApi } from "@/lib/api/profile";
 import {
   CardWrap, SectionHeader, EditDeleteActions, DashedAddButton,
   BottomSheetForm, FormInput, FormSelect, validateDateRange,
@@ -15,8 +19,8 @@ import {
 
 function EducationForm({ open, onClose, initial }: { open: boolean; onClose: () => void; initial?: Education }) {
   const router = useRouter();
-  const [isLoading, setIsLoading] = useState(false);
-  const [formError, setFormError] = useState("");
+  const { showToast } = useToast();
+  const { isLoading, error, setError, submit } = useSubmit();
 
   async function handleSubmit(e: React.FormEvent<HTMLFormElement>) {
     e.preventDefault();
@@ -25,8 +29,7 @@ function EducationForm({ open, onClose, initial }: { open: boolean; onClose: () 
     const endDate = (fd.get("endDate") as string) || null;
 
     const rangeErr = startDate && endDate ? validateDateRange(startDate, endDate) : null;
-    if (rangeErr) { setFormError(rangeErr); return; }
-    setFormError("");
+    if (rangeErr) { setError(rangeErr); return; }
 
     const payload = {
       schoolName: fd.get("schoolName") as string,
@@ -36,31 +39,24 @@ function EducationForm({ open, onClose, initial }: { open: boolean; onClose: () 
       endDate,
       isGraduated: fd.get("isGraduated") === "true",
     };
-    setIsLoading(true);
-    try {
-      const url = initial ? `/api/profile/education/${initial.id}` : "/api/profile/education";
-      const method = initial ? "PUT" : "POST";
-      const res = await fetch(url, { method, headers: { "Content-Type": "application/json" }, body: JSON.stringify(payload) });
-      if (!res.ok) {
-        const data = await res.json() as { error?: string };
-        setFormError(data.error ?? "저장에 실패했습니다");
-        return;
+    await submit(
+      () => (initial ? profileApi.updateEducation(initial.id, payload) : profileApi.addEducation(payload)),
+      {
+        onSuccess: () => {
+          showToast("저장되었습니다");
+          router.refresh();
+          onClose();
+        },
       }
-      router.refresh();
-      onClose();
-    } catch {
-      setFormError("네트워크 오류가 발생했습니다");
-    } finally {
-      setIsLoading(false);
-    }
+    );
   }
 
   return (
     <BottomSheetForm
       title={initial ? "학력 수정" : "학력 추가"}
-      open={open} onClose={onClose} onSubmit={handleSubmit} isLoading={isLoading} error={formError}
+      open={open} onClose={onClose} onSubmit={handleSubmit} isLoading={isLoading} error={error}
     >
-      <FormInput label="학교명" name="schoolName" defaultValue={initial?.schoolName ?? ""} required placeholder="ex. 한국대학교" />
+      <FormInput label="학교명" name="schoolName" defaultValue={initial?.schoolName ?? ""} required maxLength={100} placeholder="ex. 한국대학교" />
       <div className="grid grid-cols-2 gap-3">
         <FormSelect label="학위" name="degree" defaultValue={initial?.degree ?? ""}>
           <option value="">선택</option>
@@ -70,7 +66,7 @@ function EducationForm({ open, onClose, initial }: { open: boolean; onClose: () 
           <option value="석사">석사</option>
           <option value="박사">박사</option>
         </FormSelect>
-        <FormInput label="전공" name="major" defaultValue={initial?.major ?? ""} placeholder="ex. 컴퓨터공학" />
+        <FormInput label="전공" name="major" defaultValue={initial?.major ?? ""} maxLength={100} placeholder="ex. 컴퓨터공학" />
       </div>
       <div className="grid grid-cols-2 gap-3">
         <div>
@@ -92,14 +88,18 @@ function EducationForm({ open, onClose, initial }: { open: boolean; onClose: () 
 
 function EducationCard({ edu, onEdit }: { edu: Education; onEdit: (e: Education) => void }) {
   const router = useRouter();
-  const [deleting, setDeleting] = useState(false);
+  const { showToast } = useToast();
+  const { isLoading, submit } = useSubmit();
+  const [confirmOpen, setConfirmOpen] = useState(false);
 
   async function handleDelete() {
-    if (!confirm("삭제할까요?")) return;
-    setDeleting(true);
-    await fetch(`/api/profile/education/${edu.id}`, { method: "DELETE" });
-    router.refresh();
-    setDeleting(false);
+    await submit(() => profileApi.deleteEducation(edu.id), {
+      onSuccess: () => {
+        showToast("삭제되었습니다");
+        setConfirmOpen(false);
+        router.refresh();
+      },
+    });
   }
 
   const startLabel = edu.startDate ? formatMonthYear(edu.startDate.slice(0, 7)) : null;
@@ -117,9 +117,16 @@ function EducationCard({ edu, onEdit }: { edu: Education; onEdit: (e: Education)
           </p>
           {period && <p className="text-xs text-muted-foreground mt-1.5">{period}</p>}
         </div>
-        <EditDeleteActions onEdit={() => onEdit(edu)} onDelete={handleDelete} />
+        <EditDeleteActions onEdit={() => onEdit(edu)} onDelete={() => setConfirmOpen(true)} />
       </div>
-      {deleting && <div className="px-4 py-1 text-xs text-muted-foreground">삭제 중...</div>}
+      <ConfirmSheet
+        open={confirmOpen}
+        title="학력을 삭제할까요?"
+        description={`${edu.schoolName} 항목이 삭제되며 되돌릴 수 없습니다.`}
+        isLoading={isLoading}
+        onConfirm={handleDelete}
+        onClose={() => setConfirmOpen(false)}
+      />
     </CardWrap>
   );
 }
@@ -128,8 +135,8 @@ function EducationCard({ edu, onEdit }: { edu: Education; onEdit: (e: Education)
 
 function CertForm({ open, onClose }: { open: boolean; onClose: () => void }) {
   const router = useRouter();
-  const [isLoading, setIsLoading] = useState(false);
-  const [formError, setFormError] = useState("");
+  const { showToast } = useToast();
+  const { isLoading, error, setError, submit } = useSubmit();
 
   async function handleSubmit(e: React.FormEvent<HTMLFormElement>) {
     e.preventDefault();
@@ -138,34 +145,24 @@ function CertForm({ open, onClose }: { open: boolean; onClose: () => void }) {
 
     if (acquiredDate) {
       const err = validatePastOrCurrentMonth(acquiredDate);
-      if (err) { setFormError(err); return; }
+      if (err) { setError(err); return; }
     }
-    setFormError("");
 
-    setIsLoading(true);
-    try {
-      const res = await fetch("/api/profile/certifications", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ name: fd.get("name"), acquiredDate }),
-      });
-      if (!res.ok) {
-        const data = await res.json() as { error?: string };
-        setFormError(data.error ?? "저장에 실패했습니다");
-        return;
+    await submit(
+      () => profileApi.addCertification({ name: fd.get("name") as string, acquiredDate }),
+      {
+        onSuccess: () => {
+          showToast("저장되었습니다");
+          router.refresh();
+          onClose();
+        },
       }
-      router.refresh();
-      onClose();
-    } catch {
-      setFormError("네트워크 오류가 발생했습니다");
-    } finally {
-      setIsLoading(false);
-    }
+    );
   }
 
   return (
-    <BottomSheetForm title="자격증 추가" open={open} onClose={onClose} onSubmit={handleSubmit} isLoading={isLoading} error={formError}>
-      <FormInput label="자격증명" name="name" required placeholder="ex. 정보처리기사" />
+    <BottomSheetForm title="자격증 추가" open={open} onClose={onClose} onSubmit={handleSubmit} isLoading={isLoading} error={error}>
+      <FormInput label="자격증명" name="name" required maxLength={100} placeholder="ex. 정보처리기사" />
       <div>
         <label className="block text-xs font-medium text-muted-foreground mb-1.5">취득년월</label>
         <MonthYearPicker name="acquiredDate" />
@@ -176,14 +173,18 @@ function CertForm({ open, onClose }: { open: boolean; onClose: () => void }) {
 
 function CertCard({ cert }: { cert: Certification }) {
   const router = useRouter();
-  const [deleting, setDeleting] = useState(false);
+  const { showToast } = useToast();
+  const { isLoading, submit } = useSubmit();
+  const [confirmOpen, setConfirmOpen] = useState(false);
 
   async function handleDelete() {
-    if (!confirm("삭제할까요?")) return;
-    setDeleting(true);
-    await fetch(`/api/profile/certifications/${cert.id}`, { method: "DELETE" });
-    router.refresh();
-    setDeleting(false);
+    await submit(() => profileApi.deleteCertification(cert.id), {
+      onSuccess: () => {
+        showToast("삭제되었습니다");
+        setConfirmOpen(false);
+        router.refresh();
+      },
+    });
   }
 
   return (
@@ -192,9 +193,9 @@ function CertCard({ cert }: { cert: Certification }) {
         <div className="flex items-start justify-between gap-1 mb-2">
           <p className="text-xs font-semibold text-foreground leading-snug">{cert.name}</p>
           <button
-            onClick={handleDelete}
-            disabled={deleting}
-            className="p-1 text-muted-foreground hover:text-destructive hover:bg-destructive/10 rounded-md transition-colors shrink-0 -mt-0.5 -mr-0.5"
+            onClick={() => setConfirmOpen(true)}
+            aria-label={`${cert.name} 삭제`}
+            className="flex h-8 w-8 items-center justify-center text-muted-foreground hover:text-destructive hover:bg-destructive/10 rounded-md transition-colors shrink-0 -mt-1.5 -mr-1.5 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
           >
             ×
           </button>
@@ -205,6 +206,14 @@ function CertCard({ cert }: { cert: Certification }) {
           </p>
         )}
       </div>
+      <ConfirmSheet
+        open={confirmOpen}
+        title="자격증을 삭제할까요?"
+        description={`${cert.name} 항목이 삭제되며 되돌릴 수 없습니다.`}
+        isLoading={isLoading}
+        onConfirm={handleDelete}
+        onClose={() => setConfirmOpen(false)}
+      />
     </CardWrap>
   );
 }

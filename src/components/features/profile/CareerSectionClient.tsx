@@ -4,14 +4,12 @@ import { useState } from "react";
 import { useRouter } from "next/navigation";
 import { Plus, Pencil, Trash2, X, Check } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
-import { Button } from "@/components/ui/button";
-import { FormField } from "@/components/ui/form-field";
-import { Input } from "@/components/ui/input";
-import { Textarea } from "@/components/ui/textarea";
-import { MonthYearPicker } from "@/components/ui/month-year-picker";
-import { ErrorMessage } from "@/components/ui/error-message";
 import { CareerTimelineDot } from "@/components/features/profile/CareerTimelineDot";
-import { cn } from "@/lib/utils/cn";
+import { CareerForm, EMPTY_FORM, careerToForm } from "./CareerForm";
+import type { CareerFormState, CareerFieldErrors } from "./CareerForm";
+import { useToast } from "@/components/ui/toast";
+import { useSubmit } from "@/hooks/useSubmit";
+import { profileApi } from "@/lib/api/profile";
 import { formatMonthYear } from "@/lib/utils/format";
 import type { Career, AddCareerRequest } from "@/types";
 
@@ -19,55 +17,20 @@ interface CareerSectionClientProps {
   careers: Career[];
 }
 
-interface CareerFormState {
-  company: string;
-  role: string;
-  startDate: string;
-  endDate: string;
-  isCurrent: boolean;
-  description: string;
-  techStackInput: string;
-}
-
-interface CareerFieldErrors {
-  company?: string;
-  role?: string;
-  startDate?: string;
-  endDate?: string;
-  description?: string;
-}
-
-const EMPTY_FORM: CareerFormState = {
-  company: "",
-  role: "",
-  startDate: "",
-  endDate: "",
-  isCurrent: false,
-  description: "",
-  techStackInput: "",
-};
-
-function careerToForm(career: Career): CareerFormState {
-  return {
-    company: career.company,
-    role: career.role,
-    startDate: career.startDate,
-    endDate: career.endDate ?? "",
-    isCurrent: career.isCurrent,
-    description: career.description,
-    techStackInput: career.techStack.join(", "),
-  };
-}
+// 아이콘 액션 버튼 공통 클래스 (터치 타깃 확보 + 포커스 링)
+const ICON_BUTTON_CLASS =
+  "flex h-8 w-8 -my-1.5 items-center justify-center rounded-md transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring";
 
 export function CareerSectionClient({ careers }: CareerSectionClientProps) {
   const router = useRouter();
+  const { showToast } = useToast();
   const [editingId, setEditingId] = useState<string | null>(null);
   const [isAdding, setIsAdding] = useState(false);
   const [deletingId, setDeletingId] = useState<string | null>(null);
+  const [isDeleting, setIsDeleting] = useState(false);
   const [form, setForm] = useState<CareerFormState>(EMPTY_FORM);
   const [fieldErrors, setFieldErrors] = useState<CareerFieldErrors>({});
-  const [serverError, setServerError] = useState("");
-  const [isSubmitting, setIsSubmitting] = useState(false);
+  const { isLoading: isSubmitting, error: serverError, setError: setServerError, submit } = useSubmit();
 
   function openAdd() {
     setForm(EMPTY_FORM);
@@ -135,54 +98,35 @@ export function CareerSectionClient({ careers }: CareerSectionClientProps) {
       techStack,
     };
 
-    setIsSubmitting(true);
-    setServerError("");
-    try {
-      let res: Response;
-      if (editingId) {
-        res = await fetch(`/api/profile/careers/${editingId}`, {
-          method: "PUT",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify(payload),
-        });
-      } else {
-        res = await fetch("/api/profile/careers", {
-          method: "POST",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify(payload),
-        });
+    await submit(
+      () => (editingId ? profileApi.updateCareer(editingId, payload) : profileApi.addCareer(payload)),
+      {
+        onSuccess: () => {
+          showToast("저장되었습니다");
+          closeForm();
+          router.refresh();
+        },
       }
-
-      const data = await res.json() as { error?: string };
-      if (!res.ok) {
-        setServerError(data.error ?? "저장에 실패했습니다");
-        return;
-      }
-
-      closeForm();
-      router.refresh();
-    } catch {
-      setServerError("네트워크 오류가 발생했습니다");
-    } finally {
-      setIsSubmitting(false);
-    }
+    );
   }
 
+  // 1차 클릭: 확인 모드 진입(check/x 노출) → 2차 클릭: 실제 삭제 (의도된 인라인 2단계 확인 패턴)
   async function handleDelete(id: string) {
     if (deletingId !== id) {
       setDeletingId(id);
       return;
     }
 
-    setIsSubmitting(true);
+    setIsDeleting(true);
     try {
-      const res = await fetch(`/api/profile/careers/${id}`, { method: "DELETE" });
-      if (res.ok) {
-        setDeletingId(null);
-        router.refresh();
-      }
+      await profileApi.deleteCareer(id);
+      setDeletingId(null);
+      showToast("삭제되었습니다");
+      router.refresh();
+    } catch {
+      showToast("삭제에 실패했습니다. 다시 시도해주세요", "error");
     } finally {
-      setIsSubmitting(false);
+      setIsDeleting(false);
     }
   }
 
@@ -196,7 +140,7 @@ export function CareerSectionClient({ careers }: CareerSectionClientProps) {
           <button
             type="button"
             onClick={openAdd}
-            className="flex items-center gap-1 text-xs text-muted-foreground hover:text-foreground transition-colors"
+            className="flex items-center gap-1 text-xs text-muted-foreground hover:text-foreground transition-colors rounded-md px-2 py-1.5 -mr-2 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
           >
             <Plus className="h-3.5 w-3.5" />
             추가
@@ -248,7 +192,7 @@ export function CareerSectionClient({ careers }: CareerSectionClientProps) {
                           <button
                             type="button"
                             onClick={() => openEdit(career)}
-                            className="p-1 text-muted-foreground hover:text-foreground transition-colors"
+                            className={`${ICON_BUTTON_CLASS} text-muted-foreground hover:text-foreground hover:bg-muted`}
                             aria-label="경력 수정"
                           >
                             <Pencil className="h-3.5 w-3.5" />
@@ -258,8 +202,8 @@ export function CareerSectionClient({ careers }: CareerSectionClientProps) {
                               <button
                                 type="button"
                                 onClick={() => handleDelete(career.id)}
-                                disabled={isSubmitting}
-                                className="p-1 text-destructive hover:text-destructive/80 transition-colors"
+                                disabled={isDeleting}
+                                className={`${ICON_BUTTON_CLASS} text-destructive hover:text-destructive/80 hover:bg-destructive/10`}
                                 aria-label="삭제 확인"
                               >
                                 <Check className="h-3.5 w-3.5" />
@@ -267,7 +211,7 @@ export function CareerSectionClient({ careers }: CareerSectionClientProps) {
                               <button
                                 type="button"
                                 onClick={() => setDeletingId(null)}
-                                className="p-1 text-muted-foreground hover:text-foreground transition-colors"
+                                className={`${ICON_BUTTON_CLASS} text-muted-foreground hover:text-foreground hover:bg-muted`}
                                 aria-label="삭제 취소"
                               >
                                 <X className="h-3.5 w-3.5" />
@@ -277,7 +221,7 @@ export function CareerSectionClient({ careers }: CareerSectionClientProps) {
                             <button
                               type="button"
                               onClick={() => handleDelete(career.id)}
-                              className="p-1 text-muted-foreground hover:text-destructive transition-colors"
+                              className={`${ICON_BUTTON_CLASS} text-muted-foreground hover:text-destructive hover:bg-destructive/10`}
                               aria-label="경력 삭제"
                             >
                               <Trash2 className="h-3.5 w-3.5" />
@@ -332,118 +276,5 @@ export function CareerSectionClient({ careers }: CareerSectionClientProps) {
         />
       )}
     </div>
-  );
-}
-
-interface CareerFormProps {
-  form: CareerFormState;
-  fieldErrors: CareerFieldErrors;
-  serverError: string;
-  isSubmitting: boolean;
-  isEdit: boolean;
-  onUpdate: (field: keyof CareerFormState, value: string | boolean) => void;
-  onSubmit: (e: React.FormEvent) => void;
-  onCancel: () => void;
-}
-
-function CareerForm({
-  form,
-  fieldErrors,
-  serverError,
-  isSubmitting,
-  isEdit,
-  onUpdate,
-  onSubmit,
-  onCancel,
-}: CareerFormProps) {
-  const inputClass = (error?: string) =>
-    cn(
-      "w-full rounded-lg border bg-background px-3 py-2 text-sm text-foreground placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2",
-      error ? "border-destructive/50" : "border-input"
-    );
-
-  return (
-    <form onSubmit={onSubmit} className="space-y-3.5 bg-muted/50 rounded-xl p-4">
-      <p className="text-sm font-semibold">{isEdit ? "경력 수정" : "경력 추가"}</p>
-
-      <div className="grid grid-cols-2 gap-3">
-        <FormField label="회사명" required error={fieldErrors.company}>
-          <input
-            type="text"
-            value={form.company}
-            onChange={(e) => onUpdate("company", e.target.value)}
-            placeholder="테크밋"
-            className={inputClass(fieldErrors.company)}
-          />
-        </FormField>
-        <FormField label="직무/역할" required error={fieldErrors.role}>
-          <input
-            type="text"
-            value={form.role}
-            onChange={(e) => onUpdate("role", e.target.value)}
-            placeholder="프론트엔드 개발자"
-            className={inputClass(fieldErrors.role)}
-          />
-        </FormField>
-      </div>
-
-      <div className="grid grid-cols-2 gap-3">
-        <FormField label="시작일" required error={fieldErrors.startDate}>
-          <MonthYearPicker
-            value={form.startDate ? form.startDate.slice(0, 7) : ""}
-            onChange={(v) => onUpdate("startDate", v ? `${v}-01` : "")}
-            error={!!fieldErrors.startDate}
-          />
-        </FormField>
-        <FormField label="종료일" error={fieldErrors.endDate}>
-          <MonthYearPicker
-            value={form.endDate ? form.endDate.slice(0, 7) : ""}
-            onChange={(v) => onUpdate("endDate", v ? `${v}-01` : "")}
-            disabled={form.isCurrent}
-            error={!!fieldErrors.endDate}
-          />
-        </FormField>
-      </div>
-
-      <label className="flex items-center gap-2 cursor-pointer">
-        <input
-          type="checkbox"
-          checked={form.isCurrent}
-          onChange={(e) => onUpdate("isCurrent", e.target.checked)}
-          className="rounded"
-        />
-        <span className="text-sm text-foreground">현재 재직 중</span>
-      </label>
-
-      <FormField label="업무 설명" required error={fieldErrors.description}>
-        <Textarea
-          value={form.description}
-          onChange={(e) => onUpdate("description", e.target.value)}
-          placeholder="담당한 업무와 성과를 간략히 적어주세요"
-          rows={3}
-          className={fieldErrors.description ? "border-destructive/50" : ""}
-        />
-      </FormField>
-
-      <FormField label="기술 스택" optional hint="쉼표(,)로 구분하여 입력">
-        <Input
-          type="text"
-          value={form.techStackInput}
-          onChange={(e) => onUpdate("techStackInput", e.target.value)}
-          placeholder="React, TypeScript, Node.js"
-        />
-      </FormField>
-
-      <ErrorMessage>{serverError}</ErrorMessage>
-
-      <div className="flex gap-2">
-        <Button type="submit" size="sm" disabled={isSubmitting} className="flex-1">
-          {isSubmitting ? "저장 중..." : isEdit ? "수정 완료" : "추가"}
-        </Button>
-        <Button type="button" size="sm" variant="outline" onClick={onCancel} disabled={isSubmitting}>
-          취소
-        </Button>
-      </div>
-    </form>
   );
 }

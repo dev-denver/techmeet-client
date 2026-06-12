@@ -5,18 +5,17 @@ import { useRouter } from "next/navigation";
 import type { FreelancerProfile } from "@/types";
 import { AvailabilityStatus } from "@/types";
 import { AVAILABILITY_TOGGLE_CONFIG } from "@/lib/constants";
-import { AvailabilityToggle } from "./AvailabilityToggle";
+import { BasicInfoTab } from "./BasicInfoTab";
 import { EducationTab } from "./tabs/EducationTab";
 import { SkillTab } from "./tabs/SkillTab";
 import { ResumeTab } from "./tabs/ResumeTab";
 import { CareerSectionClient } from "./CareerSectionClient";
 import { ProfileBasicForm } from "./ProfileBasicForm";
 import { ProfileCompletionBar } from "./ProfileCompletionBar";
-import { CardWrap, FieldRow, SectionHeader } from "./tabs/TabShared";
 import { PageHero } from "@/components/ui/page-hero";
-import { Pencil, Save } from "lucide-react";
-import { cn } from "@/lib/utils/cn";
-import { formatExperience } from "@/lib/utils/format";
+import { useToast } from "@/components/ui/toast";
+import { profileApi } from "@/lib/api/profile";
+import { Pencil } from "lucide-react";
 import { getProfileCompletion } from "@/lib/utils/profile-completion";
 
 type Tab = "basic" | "education" | "career" | "skill" | "resume";
@@ -29,130 +28,6 @@ const TABS: { key: Tab; label: string }[] = [
   { key: "resume", label: "이력서" },
 ];
 
-interface BasicInfoTabProps {
-  profile: FreelancerProfile;
-  availStatus: AvailabilityStatus;
-  availFromDate: string | null;
-  isDirty: boolean;
-  isSaving: boolean;
-  onStatusChange: (status: AvailabilityStatus, date?: string | null) => void;
-  onSave: () => void;
-}
-
-function BasicInfoTab({ profile, availStatus, availFromDate, isDirty, isSaving, onStatusChange, onSave }: BasicInfoTabProps) {
-  const genderLabel = profile.gender === "male" ? "남" : profile.gender === "female" ? "여" : null;
-
-  return (
-    <div className="space-y-5">
-      <div>
-        <SectionHeader title="기본 정보" />
-        <CardWrap>
-          <div className="grid grid-cols-2">
-            <div className="px-4 py-3 border-b border-r border-border">
-              <p className="text-[10px] text-muted-foreground font-medium mb-0.5">이름</p>
-              <p className="text-sm text-foreground font-medium">{profile.name}</p>
-            </div>
-            <div className="px-4 py-3 border-b border-border">
-              <p className="text-[10px] text-muted-foreground font-medium mb-0.5">성별</p>
-              <p className="text-sm text-foreground font-medium">{genderLabel || "-"}</p>
-            </div>
-            <div className="px-4 py-3 border-b border-r border-border">
-              <p className="text-[10px] text-muted-foreground font-medium mb-0.5">생년월일</p>
-              <p className="text-sm text-foreground font-medium">
-                {profile.birthDate ? profile.birthDate.slice(0, 10).replace(/-/g, ". ") : "-"}
-              </p>
-            </div>
-            <div className="px-4 py-3 border-b border-border">
-              <p className="text-[10px] text-muted-foreground font-medium mb-0.5">경력</p>
-              <p className="text-sm text-foreground font-medium">
-                {profile.experienceYears !== null || profile.experienceMonths > 0
-                  ? formatExperience(profile.experienceYears, profile.experienceMonths)
-                  : "-"}
-              </p>
-            </div>
-          </div>
-          <FieldRow label="병역 (역종)" value={profile.militaryService} />
-        </CardWrap>
-      </div>
-
-      <div>
-        <SectionHeader title="소속 정보" />
-        <CardWrap>
-          <div className="grid grid-cols-2">
-            <div className="px-4 py-3 border-b border-r border-border">
-              <p className="text-[10px] text-muted-foreground font-medium mb-0.5">소속</p>
-              <p className="text-sm text-foreground font-medium">{profile.affiliation || "-"}</p>
-            </div>
-            <div className="px-4 py-3 border-b border-border">
-              <p className="text-[10px] text-muted-foreground font-medium mb-0.5">입사일</p>
-              <p className="text-sm text-foreground font-medium">
-                {profile.joiningDate ? profile.joiningDate.slice(0, 10).replace(/-/g, ". ") : "-"}
-              </p>
-            </div>
-            <div className="px-4 py-3 border-r border-border">
-              <p className="text-[10px] text-muted-foreground font-medium mb-0.5">부서</p>
-              <p className="text-sm text-foreground font-medium">{profile.department || "-"}</p>
-            </div>
-            <div className="px-4 py-3">
-              <p className="text-[10px] text-muted-foreground font-medium mb-0.5">직위</p>
-              <p className="text-sm text-foreground font-medium">{profile.positionTitle || "-"}</p>
-            </div>
-          </div>
-        </CardWrap>
-      </div>
-
-      <div>
-        <SectionHeader title="연락처 및 주소" />
-        <CardWrap>
-          <div className="divide-y divide-border">
-            <FieldRow label="휴대폰번호" value={profile.phone} />
-            <FieldRow label="이메일" value={profile.email} />
-            <FieldRow label="주소" value={profile.address} />
-          </div>
-        </CardWrap>
-      </div>
-
-      {/* 투입 가능 상태 — 수동 저장 방식 */}
-      <div>
-        <SectionHeader title="투입 가능 상태" />
-        <AvailabilityToggle
-          status={availStatus}
-          availableFromDate={availFromDate}
-          isDirty={isDirty}
-          onStatusChange={onStatusChange}
-        />
-      </div>
-
-      {/* 투입 상태 저장 버튼 (변경 있을 때만) */}
-      {isDirty && (
-        <button
-          type="button"
-          onClick={onSave}
-          disabled={isSaving}
-          className={cn(
-            "w-full flex items-center justify-center gap-2.5 rounded-xl py-3.5 text-base font-semibold transition-all",
-            "focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2",
-            "disabled:opacity-50 bg-status-info text-white hover:opacity-90 active:opacity-80"
-          )}
-        >
-          {isSaving ? (
-            <>
-              <span className="w-4 h-4 border-2 border-white/30 border-t-white rounded-full animate-spin shrink-0" />
-              저장 중...
-            </>
-          ) : (
-            <>
-              <Save className="h-4 w-4 shrink-0" />
-              투입 상태 저장하기
-            </>
-          )}
-        </button>
-      )}
-
-    </div>
-  );
-}
-
 function CareerTab({ profile }: { profile: FreelancerProfile }) {
   return <CareerSectionClient careers={profile.careers} />;
 }
@@ -163,6 +38,7 @@ interface ProfileTabsClientProps {
 
 export function ProfileTabsClient({ profile }: ProfileTabsClientProps) {
   const router = useRouter();
+  const { showToast } = useToast();
   const [tab, setTab] = useState<Tab>("basic");
   const [editingBasic, setEditingBasic] = useState(false);
   const [availStatus, setAvailStatus] = useState<AvailabilityStatus>(
@@ -187,16 +63,14 @@ export function ProfileTabsClient({ profile }: ProfileTabsClientProps) {
   async function handleSave() {
     setIsSaving(true);
     try {
-      const res = await fetch("/api/profile/availability", {
-        method: "PUT",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ status: availStatus, availableFromDate: availFromDate }),
-      });
-      if (res.ok) {
-        setSavedStatus(availStatus);
-        setSavedFromDate(availFromDate);
-        router.refresh();
-      }
+      await profileApi.updateAvailability({ status: availStatus, availableFromDate: availFromDate });
+      setSavedStatus(availStatus);
+      setSavedFromDate(availFromDate);
+      showToast("투입 상태가 저장되었습니다");
+      router.refresh();
+    } catch {
+      // 실패해도 입력값(availStatus)은 유지 — 사용자가 다시 저장 시도 가능
+      showToast("저장에 실패했습니다. 다시 시도해주세요", "error");
     } finally {
       setIsSaving(false);
     }
@@ -273,7 +147,8 @@ export function ProfileTabsClient({ profile }: ProfileTabsClientProps) {
             <button
               key={key}
               onClick={() => selectTab(key)}
-              className={`flex-1 min-w-fit py-3 px-3 text-xs font-medium whitespace-nowrap transition-colors border-b-2 ${
+              aria-current={tab === key ? "true" : undefined}
+              className={`flex-1 min-w-fit py-3 px-3 text-xs font-medium whitespace-nowrap transition-colors border-b-2 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-inset ${
                 tab === key
                   ? "text-foreground border-foreground"
                   : "text-muted-foreground border-transparent hover:text-foreground/70"

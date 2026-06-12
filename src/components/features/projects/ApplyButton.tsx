@@ -8,9 +8,12 @@ import { ErrorMessage } from "@/components/ui/error-message";
 import { FormField } from "@/components/ui/form-field";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
+import { useSubmit } from "@/hooks/useSubmit";
+import { applicationsApi } from "@/lib/api/applications";
+import { LIMITS } from "@/lib/constants/limits";
 import { cn } from "@/lib/utils/cn";
 
-const MAX_COVER_LETTER = 1000;
+const MAX_COVER_LETTER = LIMITS.COVER_LETTER_MAX;
 // BottomSheet footer에 제출 버튼을 두고, form은 sheet body 안에 있어 별도 id로 연결
 const FORM_ID = "apply-form";
 
@@ -26,7 +29,8 @@ function validateCoverLetter(value: string): string {
 function validateRate(value: string): string {
   const rate = Number(value);
   if (!value) return "희망 단가를 입력해주세요";
-  if (isNaN(rate) || rate <= 0) return "올바른 금액을 입력해주세요";
+  if (isNaN(rate) || rate < LIMITS.RATE_MIN) return "올바른 금액을 입력해주세요";
+  if (rate > LIMITS.RATE_MAX) return `희망 단가는 ${LIMITS.RATE_MAX.toLocaleString()}만원 이하로 입력해주세요`;
   return "";
 }
 
@@ -37,8 +41,7 @@ export function ApplyButton({ projectId }: ApplyButtonProps) {
   const [expectedRate, setExpectedRate] = useState("");
   const [coverLetterError, setCoverLetterError] = useState("");
   const [rateError, setRateError] = useState("");
-  const [serverError, setServerError] = useState("");
-  const [isSubmitting, setIsSubmitting] = useState(false);
+  const { isLoading: isSubmitting, error: serverError, setError: setServerError, submit } = useSubmit();
 
   async function handleSubmit(e: React.FormEvent) {
     e.preventDefault();
@@ -49,32 +52,20 @@ export function ApplyButton({ projectId }: ApplyButtonProps) {
     setRateError(rErr);
     if (clErr || rErr) return;
 
-    setServerError("");
-    setIsSubmitting(true);
-    try {
-      const res = await fetch("/api/applications", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
+    await submit(
+      () =>
+        applicationsApi.create({
           projectId,
           coverLetter: coverLetter.trim(),
           expectedRate: Number(expectedRate),
         }),
-      });
-
-      const data = await res.json() as { error?: string };
-      if (!res.ok) {
-        setServerError(data.error ?? "지원 신청에 실패했습니다");
-        return;
+      {
+        onSuccess: () => {
+          setOpen(false);
+          router.push("/projects/applications");
+        },
       }
-
-      setOpen(false);
-      router.push("/projects/applications");
-    } catch {
-      setServerError("네트워크 오류가 발생했습니다");
-    } finally {
-      setIsSubmitting(false);
-    }
+    );
   }
 
   function handleOpen() {
@@ -112,6 +103,7 @@ export function ApplyButton({ projectId }: ApplyButtonProps) {
               type="submit"
               form={FORM_ID}
               disabled={isSubmitting}
+              aria-busy={isSubmitting || undefined}
               className="w-full h-12 text-base font-semibold"
             >
               {isSubmitting ? "제출 중..." : "지원 신청"}
@@ -162,7 +154,8 @@ export function ApplyButton({ projectId }: ApplyButtonProps) {
                     if (rateError) setRateError(validateRate(e.target.value));
                   }}
                   placeholder="예: 600"
-                  min={1}
+                  min={LIMITS.RATE_MIN}
+                  max={LIMITS.RATE_MAX}
                   className={cn("pr-16", rateError ? "border-destructive/50" : "")}
                 />
                 <span className="absolute right-3 top-1/2 -translate-y-1/2 text-sm text-muted-foreground pointer-events-none">

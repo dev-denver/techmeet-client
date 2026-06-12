@@ -9,9 +9,8 @@ import { RecordRecentProject } from "@/components/features/projects/RecordRecent
 import { getProjectById } from "@/lib/supabase/queries/projects";
 import { getApplicationForProject } from "@/lib/supabase/queries/applications";
 import { getProfile } from "@/lib/supabase/queries/profile";
-import { createServerClient } from "@/lib/supabase/server";
 import { formatDate, formatDeadlineDays, getDeadlineDays, formatWorkType } from "@/lib/utils/format";
-import { getMySkills, countSkillMatches, isSkillMatched } from "@/lib/utils/skills";
+import { getMySkills, getMatchedSkillSet } from "@/lib/utils/skills";
 import { APPLICATION_STATUS_CONFIG } from "@/lib/constants";
 import { cn } from "@/lib/utils/cn";
 import { ApplicationStatus, ProjectStatus } from "@/types";
@@ -22,20 +21,20 @@ interface ProjectDetailPageProps {
 
 export default async function ProjectDetailPage({ params }: ProjectDetailPageProps) {
   const { id } = await params;
-  const [result, supabase, myApplication, profileResult] = await Promise.all([
+  const [result, myApplication, profileResult] = await Promise.all([
     getProjectById(id),
-    createServerClient(),
     getApplicationForProject(id),
     getProfile(),
   ]);
-  const { data: { user } } = await supabase.auth.getUser();
-  const currentUserId = user?.id ?? null;
+  // getProfile()이 이미 인증 사용자 기준으로 조회하므로 별도 auth.getUser() 호출 불필요
+  const currentUserId = profileResult?.data.id ?? null;
 
   if (!result) notFound();
 
   const { data: project } = result;
   const mySkills = profileResult?.data ? getMySkills(profileResult.data) : [];
-  const matchCount = countSkillMatches(project.techStack, mySkills);
+  const matchedSkills = getMatchedSkillSet(project.techStack, mySkills);
+  const matchCount = matchedSkills.size;
   const isRecruiting = project.status === ProjectStatus.Recruiting;
   const deadlineText = formatDeadlineDays(project.deadline);
   const deadlineDays = getDeadlineDays(project.deadline);
@@ -125,7 +124,7 @@ export default async function ProjectDetailPage({ params }: ProjectDetailPagePro
           </div>
           <div className="flex flex-wrap gap-2">
             {project.techStack.map((tech) => {
-              const matched = isSkillMatched(tech, mySkills);
+              const matched = matchedSkills.has(tech);
               return (
                 <span
                   key={tech}

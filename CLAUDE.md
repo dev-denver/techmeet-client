@@ -33,7 +33,7 @@
 
 ## UI/UX 방향
 
-- **모바일 앱형 웹**: 데스크탑에서 접속해도 모바일 폭(`max-w-[430px]`)으로 중앙 정렬
+- **모바일 앱형 웹**: 데스크탑에서 접속해도 모바일 폭(`max-w-[600px]`)으로 중앙 정렬
 - 웹/앱 링크 동일 화면 제공 (반응형 X, 고정 모바일 폭)
 - **상단 바**: 페이지 타이틀 + 뒤로가기 버튼, 스크롤 시 햄버거 메뉴 표시
 - **하단 네비게이션 바**: 홈 / 프로젝트 관리 / 내 정보 / 설정
@@ -86,7 +86,7 @@
 
 ## 모바일 레이아웃 구현 규칙
 
-- 최상위 레이아웃에서 `max-w-[430px] mx-auto` 적용
+- 최상위 레이아웃에서 `max-w-[600px] mx-auto` 적용
 - 상단 TopBar, 하단 BottomNavigation은 모든 인증된 페이지에 고정
 - 콘텐츠 영역은 상단/하단 바 높이만큼 padding 확보
 
@@ -96,12 +96,16 @@
   - `PROJECT_STATUS_CONFIG`, `APPLICATION_STATUS_CONFIG`, `AVAILABILITY_STATUS_CONFIG`
   - 컴포넌트에서 로컬 statusConfig 정의 금지, 반드시 import 사용
 - 상태 색상은 CSS custom properties 기반 (`--status-success`, `--status-info` 등)
+- 입력 길이·범위 제한은 `/lib/constants/limits.ts`의 `LIMITS` 객체에서 중앙 관리
+  - 클라이언트 `maxLength`와 서버 검증이 반드시 같은 상수를 사용 (값 하드코딩 금지)
+- 시맨틱 색상 토큰 사용: 에러는 `text-destructive`/`bg-destructive/10`, 본문은 `text-foreground`, 보조 텍스트는 `text-muted-foreground` (raw `red-*`/`zinc-*` 직접 사용 금지, 카카오 브랜드 `#FEE500` 등 브랜드 색상은 예외)
 
 ## 유틸리티 함수
 
 - `format.ts`: `formatDate`, `formatShortDate`, `formatDeadlineDays`, `getDeadlineDays`, `formatMonthYear`, `maskPhone`
-- `validation.ts`: `validatePassword`, `validatePhone`, `validateEmail`, `validateAge`, `formatPhone`, `UUID_REGEX`
+- `validation.ts`: `validatePassword`, `validatePhone`, `validateEmail`, `formatPhone`, `UUID_REGEX`, `validateLength`, `validateStringArray`
 - `cn.ts`: Tailwind 클래스 병합 (`clsx` + `tailwind-merge`)
+- `skills.ts`: `getMySkills`, `countSkillMatches`, `isSkillMatched`, `getMatchedSkillSet`
 
 ## 컴포넌트 네이밍 규칙
 
@@ -157,9 +161,25 @@
 ## BottomSheet 패턴
 
 - 하단에서 올라오는 모달 → `src/components/ui/bottom-sheet.tsx` 사용
-- Props: `{ open, onClose, hasBottomNav?, children }`
+- Props: `{ open, onClose, hasBottomNav?, maxWidth?, header?, footer?, children }`
 - BottomNavigation 위에 표시 필요 시 `hasBottomNav={true}` (pb-16 추가)
 - 내부 컨텐츠는 children으로 전달, 패딩/레이아웃은 children 내부에서 처리
+- 주의: 기본 `maxWidth="sm"`은 430px로 앱 프레임(600px)보다 좁음 — 전체 폭이 필요하면 `maxWidth="lg"` 사용
+- 삭제 등 파괴적 작업 확인은 `window.confirm()` 대신 `ConfirmSheet` (`components/ui/confirm-sheet.tsx`) 사용
+
+## 폼 제출 패턴 (useSubmit + *Api + Toast)
+
+- 클라이언트 폼 제출은 `useSubmit()` 훅 (`src/hooks/useSubmit.ts`) 사용 — 로딩/에러/try-catch 공통화
+- API 호출은 반드시 `lib/api/`의 `*Api` 객체 사용 (`profileApi`, `applicationsApi` 등) — raw `fetch("/api/...")` 금지
+- 저장/삭제 성공 피드백은 `useToast()` (`components/ui/toast.tsx`)의 `showToast("저장되었습니다")` 사용
+  - `ToastProvider`는 `(auth)/layout.tsx`에 마운트되어 있음 ((auth) 그룹 안에서만 사용 가능)
+- 예시:
+  ```ts
+  const { isLoading, error, submit } = useSubmit();
+  await submit(() => profileApi.deleteCareer(id), {
+    onSuccess: () => { showToast("삭제되었습니다"); router.refresh(); },
+  });
+  ```
 
 ## 수평 스크롤 패턴
 
@@ -190,6 +210,8 @@
 - `TechStackInput` (`components/features/profile/`): 기술 스택 입력 (Enter/추가 버튼, 태그 삭제)
 - `CareerTimelineDot` (`components/features/profile/`): 경력 타임라인 dot + line
 - `BottomSheet` (`components/ui/`): 하단 모달 오버레이
+- `ConfirmSheet` (`components/ui/`): 삭제 확인 바텀시트 (`{ open, title, description?, confirmLabel?, destructive?, isLoading?, onConfirm, onClose }`)
+- `ToastProvider` / `useToast` (`components/ui/toast.tsx`): 경량 토스트 (성공/에러 피드백, 의존성 없음)
 - `EmptyState` (`components/ui/`): 데이터 없을 때 빈 상태 표시 (icon, title, description, action, iconShape, iconSize)
 - `ErrorMessage` (`components/ui/`): 폼 서버 오류 메시지 (size="xs"|"sm", children이 falsy면 렌더링 안 함)
 - `PageHero` (`components/ui/`): 상단 다크 헤더 배경 래퍼 (`bg-primary px-5 pt-6 pb-5`, className으로 pb 오버라이드)

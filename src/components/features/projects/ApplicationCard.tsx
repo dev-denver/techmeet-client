@@ -4,6 +4,8 @@ import { useState } from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { Button } from "@/components/ui/button";
+import { useToast } from "@/components/ui/toast";
+import { applicationsApi } from "@/lib/api/applications";
 import { formatDate } from "@/lib/utils/format";
 import { APPLICATION_STATUS_CONFIG } from "@/lib/constants";
 import { ApplicationStatus } from "@/types";
@@ -21,9 +23,11 @@ export function ApplicationCard({
 }: ApplicationCardProps) {
   const config = APPLICATION_STATUS_CONFIG[application.status];
   const router = useRouter();
+  const { showToast } = useToast();
   const [isCancelling, setIsCancelling] = useState(false);
   const [confirmCancel, setConfirmCancel] = useState(false);
 
+  // 1차 클릭: 확인 문구 노출 → 2차 클릭: 실제 취소 (인라인 2단계 확인 패턴)
   async function handleCancel(e: React.MouseEvent) {
     e.preventDefault();
     e.stopPropagation();
@@ -35,10 +39,11 @@ export function ApplicationCard({
 
     setIsCancelling(true);
     try {
-      const res = await fetch(`/api/applications/${application.id}`, {
-        method: "DELETE",
-      });
-      if (res.ok) router.refresh();
+      await applicationsApi.withdraw(application.id);
+      showToast("지원이 취소되었습니다");
+      router.refresh();
+    } catch {
+      showToast("지원 취소에 실패했습니다. 다시 시도해주세요", "error");
     } finally {
       setIsCancelling(false);
       setConfirmCancel(false);

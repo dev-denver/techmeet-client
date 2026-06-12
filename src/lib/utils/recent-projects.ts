@@ -31,7 +31,13 @@ function parse(raw: string | null): RecentProject[] {
 /** 최근 본 프로젝트 스냅샷 (최신순). 캐시 적용 — useSyncExternalStore의 getSnapshot으로 사용 */
 export function getRecentProjects(): RecentProject[] {
   if (typeof window === "undefined") return EMPTY;
-  const raw = window.localStorage.getItem(STORAGE_KEY);
+  let raw: string | null;
+  try {
+    raw = window.localStorage.getItem(STORAGE_KEY);
+  } catch {
+    // 일부 프라이빗 모드에서 localStorage 접근 자체가 SecurityError를 던짐
+    return EMPTY;
+  }
   if (raw === snapshotRaw) return snapshotValue;
   snapshotRaw = raw;
   snapshotValue = parse(raw);

@@ -5,6 +5,10 @@ import { useRouter } from "next/navigation";
 import type { SkillInventory } from "@/types";
 import { formatDate } from "@/lib/utils/format";
 import { DateSelectPicker } from "@/components/ui/date-select-picker";
+import { ConfirmSheet } from "@/components/ui/confirm-sheet";
+import { useToast } from "@/components/ui/toast";
+import { useSubmit } from "@/hooks/useSubmit";
+import { profileApi } from "@/lib/api/profile";
 import {
   CardWrap, SectionHeader, EditDeleteActions, DashedAddButton,
   BottomSheetForm, FormInput, TagInput, Tag, ChevronDown, ChevronUp,
@@ -13,8 +17,8 @@ import {
 
 function SkillForm({ open, onClose, initial }: { open: boolean; onClose: () => void; initial?: SkillInventory }) {
   const router = useRouter();
-  const [isLoading, setIsLoading] = useState(false);
-  const [formError, setFormError] = useState("");
+  const { showToast } = useToast();
+  const { isLoading, error, setError, submit } = useSubmit();
   const [languages, setLanguages] = useState<string[]>(initial?.languages ?? []);
   const [tools, setTools] = useState<string[]>(initial?.tools ?? []);
 
@@ -26,8 +30,7 @@ function SkillForm({ open, onClose, initial }: { open: boolean; onClose: () => v
     const startDate = g("startDate");
     const endDate = g("endDate");
     const rangeErr = startDate && endDate ? validateDateRange(startDate, endDate) : null;
-    if (rangeErr) { setFormError(rangeErr); return; }
-    setFormError("");
+    if (rangeErr) { setError(rangeErr); return; }
 
     const payload = {
       projectName: fd.get("projectName") as string,
@@ -46,28 +49,21 @@ function SkillForm({ open, onClose, initial }: { open: boolean; onClose: () => v
       others: g("others"),
     };
 
-    setIsLoading(true);
-    try {
-      const url = initial ? `/api/profile/skill-inventories/${initial.id}` : "/api/profile/skill-inventories";
-      const method = initial ? "PUT" : "POST";
-      const res = await fetch(url, { method, headers: { "Content-Type": "application/json" }, body: JSON.stringify(payload) });
-      if (!res.ok) {
-        const data = await res.json() as { error?: string };
-        setFormError(data.error ?? "저장에 실패했습니다");
-        return;
+    await submit(
+      () => (initial ? profileApi.updateSkillInventory(initial.id, payload) : profileApi.addSkillInventory(payload)),
+      {
+        onSuccess: () => {
+          showToast("저장되었습니다");
+          router.refresh();
+          onClose();
+        },
       }
-      router.refresh();
-      onClose();
-    } catch {
-      setFormError("네트워크 오류가 발생했습니다");
-    } finally {
-      setIsLoading(false);
-    }
+    );
   }
 
   return (
-    <BottomSheetForm title={initial ? "프로젝트 수정" : "프로젝트 추가"} open={open} onClose={onClose} onSubmit={handleSubmit} isLoading={isLoading} error={formError}>
-      <FormInput label="프로젝트명" name="projectName" required defaultValue={initial?.projectName ?? ""} placeholder="ex. 공공기관 민원 통합 시스템 구축" />
+    <BottomSheetForm title={initial ? "프로젝트 수정" : "프로젝트 추가"} open={open} onClose={onClose} onSubmit={handleSubmit} isLoading={isLoading} error={error}>
+      <FormInput label="프로젝트명" name="projectName" required maxLength={100} defaultValue={initial?.projectName ?? ""} placeholder="ex. 공공기관 민원 통합 시스템 구축" />
       <div className="grid grid-cols-2 gap-3">
         <div>
           <label className="block text-xs font-medium text-muted-foreground mb-1.5">참여 시작</label>
@@ -105,15 +101,19 @@ function SkillForm({ open, onClose, initial }: { open: boolean; onClose: () => v
 
 function SkillCard({ skill, onEdit }: { skill: SkillInventory; onEdit: () => void }) {
   const router = useRouter();
+  const { showToast } = useToast();
+  const { isLoading: deleting, submit } = useSubmit();
   const [open, setOpen] = useState(false);
-  const [deleting, setDeleting] = useState(false);
+  const [confirmOpen, setConfirmOpen] = useState(false);
 
   async function handleDelete() {
-    if (!confirm("삭제할까요?")) return;
-    setDeleting(true);
-    await fetch(`/api/profile/skill-inventories/${skill.id}`, { method: "DELETE" });
-    router.refresh();
-    setDeleting(false);
+    await submit(() => profileApi.deleteSkillInventory(skill.id), {
+      onSuccess: () => {
+        showToast("삭제되었습니다");
+        setConfirmOpen(false);
+        router.refresh();
+      },
+    });
   }
 
   const startLabel = skill.startDate ? formatDate(skill.startDate) : null;
@@ -132,11 +132,11 @@ function SkillCard({ skill, onEdit }: { skill: SkillInventory; onEdit: () => voi
           {period && <p className="text-xs text-muted-foreground mt-0.5">{period}</p>}
         </button>
         <div className="flex items-center gap-1 shrink-0">
-          <EditDeleteActions onEdit={onEdit} onDelete={handleDelete} />
+          <EditDeleteActions onEdit={onEdit} onDelete={() => setConfirmOpen(true)} />
           <button
             type="button"
             onClick={() => setOpen(!open)}
-            className="p-1.5 text-muted-foreground hover:text-foreground transition-colors"
+            className="flex h-9 w-9 items-center justify-center text-muted-foreground hover:text-foreground rounded-lg transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
             aria-label={open ? "접기" : "펼치기"}
           >
             {open ? <ChevronUp className="h-4 w-4" /> : <ChevronDown className="h-4 w-4" />}
@@ -202,6 +202,14 @@ function SkillCard({ skill, onEdit }: { skill: SkillInventory; onEdit: () => voi
         </div>
       )}
       {deleting && <div className="px-4 py-1 text-xs text-muted-foreground border-t border-border">삭제 중...</div>}
+      <ConfirmSheet
+        open={confirmOpen}
+        title="프로젝트를 삭제할까요?"
+        description={`${skill.projectName} 항목이 삭제되며 되돌릴 수 없습니다.`}
+        isLoading={deleting}
+        onConfirm={handleDelete}
+        onClose={() => setConfirmOpen(false)}
+      />
     </CardWrap>
   );
 }

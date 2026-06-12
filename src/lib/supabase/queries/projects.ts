@@ -50,9 +50,13 @@ export async function getProjects(params?: GetProjectsParams): Promise<GetProjec
   const pageSize = params?.pageSize ?? 20;
   const offset = (page - 1) * pageSize;
 
+  // 주의: ProjectRow 인터페이스에 컬럼을 추가하면 아래 select 목록도 함께 갱신할 것
   let query = supabase
     .from("projects")
-    .select("*", { count: "exact" })
+    .select(
+      "id, title, description, client_name, project_type, work_type, status, tech_stack, duration_start_date, duration_end_date, deadline, headcount, location, requirements, created_at, updated_at",
+      { count: "exact" }
+    )
     .order("created_at", { ascending: false })
     .range(offset, offset + pageSize - 1);
 

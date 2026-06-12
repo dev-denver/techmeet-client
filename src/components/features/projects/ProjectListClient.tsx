@@ -24,8 +24,11 @@ export function ProjectListClient({ initialProjects, initialTotal, mySkills }: P
   const [page, setPage]         = useState(1);
   const [total, setTotal]       = useState(initialTotal);
   const [isLoading, setIsLoading] = useState(false);
+  const [loadError, setLoadError] = useState("");
   const searchRef = useRef<HTMLInputElement>(null);
   const debounceRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+  // 요청 순번 — 디바운스 검색과 더보기가 겹칠 때 늦게 도착한 이전 응답이 최신 상태를 덮어쓰지 않도록 함
+  const requestSeqRef = useRef(0);
 
   // 언마운트 시 대기 중인 디바운스 타이머 정리
   useEffect(() => () => {
@@ -40,7 +43,9 @@ export function ProjectListClient({ initialProjects, initialTotal, mySkills }: P
     append: boolean,
     searchValue?: string,
   ) {
+    const seq = ++requestSeqRef.current;
     setIsLoading(true);
+    setLoadError("");
     try {
       const params = new URLSearchParams({
         status,
@@ -51,13 +56,18 @@ export function ProjectListClient({ initialProjects, initialTotal, mySkills }: P
       if (q.trim()) params.set("search", q.trim());
 
       const res = await fetch(`/api/projects?${params}`);
-      if (!res.ok) throw new Error("fetch failed");
+      if (!res.ok) throw new Error(`projects fetch failed: ${res.status}`);
       const result: GetProjectsResponse = await res.json();
+      if (seq !== requestSeqRef.current) return; // 더 최신 요청이 있으면 이 응답은 무시
       setTotal(result.total);
       setProjects(append ? (prev) => [...prev, ...result.data] : result.data);
       setPage(nextPage);
+    } catch {
+      if (seq === requestSeqRef.current) {
+        setLoadError("프로젝트 목록을 불러오지 못했습니다. 잠시 후 다시 시도해주세요.");
+      }
     } finally {
-      setIsLoading(false);
+      if (seq === requestSeqRef.current) setIsLoading(false);
     }
   }
 
@@ -116,6 +126,13 @@ export function ProjectListClient({ initialProjects, initialTotal, mySkills }: P
       </div>
 
       <div className="px-4 pt-4 pb-6 space-y-3">
+        {/* 로드 실패 메시지 */}
+        {loadError && (
+          <p className="text-sm text-destructive bg-destructive/10 rounded-lg px-3 py-2.5">
+            {loadError}
+          </p>
+        )}
+
         {/* 총 개수 */}
         {!isLoading && (
           <p className="text-xs text-muted-foreground">

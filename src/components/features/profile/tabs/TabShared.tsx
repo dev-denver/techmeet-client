@@ -30,7 +30,7 @@ export function SectionHeader({ title, onAdd }: { title: string; onAdd?: () => v
       {onAdd && (
         <button
           onClick={onAdd}
-          className="flex items-center gap-1 text-xs text-muted-foreground hover:text-foreground border border-border rounded-lg px-2.5 py-1.5 hover:border-muted-foreground transition-colors bg-background"
+          className="flex items-center gap-1 text-xs text-muted-foreground hover:text-foreground border border-border rounded-lg px-2.5 py-1.5 hover:border-muted-foreground transition-colors bg-background focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2"
         >
           <Plus className="h-3 w-3" />
           추가
@@ -52,14 +52,16 @@ export function EditDeleteActions({
       {onEdit && (
         <button
           onClick={onEdit}
-          className="p-1.5 text-muted-foreground hover:text-foreground hover:bg-muted rounded-lg transition-colors"
+          aria-label="수정"
+          className="flex h-9 w-9 items-center justify-center text-muted-foreground hover:text-foreground hover:bg-muted rounded-lg transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
         >
           <Pencil className="h-3.5 w-3.5" />
         </button>
       )}
       <button
         onClick={onDelete}
-        className="p-1.5 text-muted-foreground hover:text-destructive hover:bg-destructive/10 rounded-lg transition-colors"
+        aria-label="삭제"
+        className="flex h-9 w-9 items-center justify-center text-muted-foreground hover:text-destructive hover:bg-destructive/10 rounded-lg transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
       >
         <Trash2 className="h-3.5 w-3.5" />
       </button>
@@ -71,7 +73,7 @@ export function DashedAddButton({ label, onClick }: { label: string; onClick: ()
   return (
     <button
       onClick={onClick}
-      className="w-full flex items-center justify-center gap-2 py-4 rounded-xl border border-dashed border-border text-xs text-muted-foreground hover:border-muted-foreground hover:text-foreground transition-colors"
+      className="w-full flex items-center justify-center gap-2 py-4 rounded-xl border border-dashed border-border text-xs text-muted-foreground hover:border-muted-foreground hover:text-foreground transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2"
     >
       <Plus className="h-3.5 w-3.5" />
       {label}
@@ -101,7 +103,7 @@ export function FormInput({
       </label>
       <input
         {...props}
-        className="w-full px-3 py-2.5 rounded-lg border border-input text-sm text-foreground placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-ring focus:border-transparent transition-all bg-background"
+        className="w-full px-3 py-2.5 rounded-lg border border-input text-sm text-foreground placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:border-transparent transition-all bg-background"
       />
     </div>
   );
@@ -121,7 +123,7 @@ export function FormSelect({
       </label>
       <select
         {...props}
-        className="w-full px-3 py-2.5 rounded-lg border border-input text-sm text-foreground focus:outline-none focus:ring-2 focus:ring-ring focus:border-transparent transition-all bg-background"
+        className="w-full px-3 py-2.5 rounded-lg border border-input text-sm text-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:border-transparent transition-all bg-background"
       >
         {children}
       </select>
@@ -163,7 +165,13 @@ export function BottomSheetForm({
       header={
         <div className="flex items-center justify-between px-5 py-4 border-b border-border">
           <h3 className="text-sm font-bold text-foreground">{title}</h3>
-          <button type="button" onClick={onClose} className="text-muted-foreground hover:text-foreground text-xs font-medium">닫기</button>
+          <button
+            type="button"
+            onClick={onClose}
+            className="text-muted-foreground hover:text-foreground text-xs font-medium rounded-md px-2 py-1.5 -mr-2 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
+          >
+            닫기
+          </button>
         </div>
       }
       footer={
@@ -206,7 +214,14 @@ export function TagInput({
         {tags.map((t) => (
           <span key={t} className="flex items-center gap-1 text-xs bg-primary text-primary-foreground px-2 py-0.5 rounded-md">
             {t}
-            <button type="button" onClick={() => onChange(tags.filter((x) => x !== t))} className="hover:text-red-300">×</button>
+            <button
+              type="button"
+              onClick={() => onChange(tags.filter((x) => x !== t))}
+              aria-label={`${t} 삭제`}
+              className="hover:text-primary-foreground/60 focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring rounded-sm"
+            >
+              ×
+            </button>
           </span>
         ))}
         <input

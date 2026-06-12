@@ -1,7 +1,17 @@
 import { NextRequest, NextResponse } from "next/server";
 import { getProfile, updateProfile } from "@/lib/supabase/queries/profile";
-import { validatePhone, validateBirthDate } from "@/lib/utils/validation";
+import {
+  validatePhone,
+  validateBirthDate,
+  validatePastOrPresentDate,
+  validateLength,
+  validateStringArray,
+} from "@/lib/utils/validation";
+import { LIMITS } from "@/lib/constants/limits";
+import { Gender } from "@/types";
 import type { UpdateProfileRequest } from "@/types";
+
+const VALID_GENDERS = new Set<string>(Object.values(Gender));
 
 export async function GET() {
   try {
@@ -25,8 +35,35 @@ export async function PUT(request: NextRequest) {
     if (body.name !== undefined) {
       const trimmed = body.name.trim();
       if (!trimmed) return NextResponse.json({ error: "이름을 입력해주세요" }, { status: 400 });
-      if (trimmed.length > 50) return NextResponse.json({ error: "이름은 50자 이하로 입력해주세요" }, { status: 400 });
+      if (trimmed.length > LIMITS.NAME_MAX)
+        return NextResponse.json({ error: `이름은 ${LIMITS.NAME_MAX}자 이하로 입력해주세요` }, { status: 400 });
       body.name = trimmed;
+    }
+
+    // 길이 제한이 있는 텍스트 필드 일괄 검증 (클라이언트 maxLength와 동일 기준)
+    const lengthChecks: Array<[string | null | undefined, number, string]> = [
+      [body.bio, LIMITS.BIO_MAX, "자기소개"],
+      [body.affiliation, LIMITS.AFFILIATION_MAX, "소속"],
+      [body.department, LIMITS.DEPARTMENT_MAX, "부서"],
+      [body.positionTitle, LIMITS.POSITION_MAX, "직급"],
+      [body.militaryService, LIMITS.MILITARY_MAX, "병역사항"],
+      [body.address, LIMITS.ADDRESS_MAX, "주소"],
+    ];
+    for (const [value, max, label] of lengthChecks) {
+      if (typeof value === "string") {
+        const lengthError = validateLength(value, max, label);
+        if (lengthError) return NextResponse.json({ error: lengthError }, { status: 400 });
+      }
+    }
+
+    // 기술스택: 배열 형식·항목 수·항목 길이
+    if (body.techStack !== undefined) {
+      const techError = validateStringArray(body.techStack, {
+        itemMax: LIMITS.TECH_ITEM_MAX,
+        countMax: LIMITS.TECH_COUNT_MAX,
+        label: "기술스택",
+      });
+      if (techError) return NextResponse.json({ error: techError }, { status: 400 });
     }
 
     // 휴대폰: 형식 검사
@@ -39,14 +76,33 @@ export async function PUT(request: NextRequest) {
       return NextResponse.json({ error: "올바른 생년월일을 입력해주세요" }, { status: 400 });
     }
 
+    // 경력 연차: 0~50 정수
+    if (
+      body.experienceYears !== undefined &&
+      (!Number.isInteger(body.experienceYears) ||
+        body.experienceYears < 0 ||
+        body.experienceYears > LIMITS.EXPERIENCE_YEARS_MAX)
+    ) {
+      return NextResponse.json(
+        { error: `경력 연차는 0~${LIMITS.EXPERIENCE_YEARS_MAX} 사이여야 합니다` },
+        { status: 400 }
+      );
+    }
+
     // 경력 개월: 0-11 범위
     if (body.experienceMonths !== undefined && (body.experienceMonths < 0 || body.experienceMonths > 11)) {
       return NextResponse.json({ error: "경력 개월 수는 0~11 사이여야 합니다" }, { status: 400 });
     }
 
-    // 성별: 허용값만
-    if (body.gender !== undefined && body.gender !== null && body.gender !== "male" && body.gender !== "female") {
+    // 성별: 허용값만 (Gender enum 기준)
+    if (body.gender !== undefined && body.gender !== null && !VALID_GENDERS.has(body.gender)) {
       return NextResponse.json({ error: "올바른 성별 값이 아닙니다" }, { status: 400 });
+    }
+
+    // 입사년월: 과거~오늘만 허용 (클라이언트와 동일 검증)
+    if (body.joiningDate) {
+      const joiningError = validatePastOrPresentDate(body.joiningDate);
+      if (joiningError) return NextResponse.json({ error: joiningError }, { status: 400 });
     }
 
     await updateProfile(body);
