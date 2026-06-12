@@ -10,6 +10,8 @@ import { encryptPassword } from "@/lib/crypto/client";
 import { Input } from "@/components/ui/input";
 import { LIMITS } from "@/lib/constants/limits";
 import { cn } from "@/lib/utils/cn";
+import { authApi } from "@/lib/api/auth";
+import { ApiError } from "@/lib/api/client";
 
 const KAKAO_ERROR_MESSAGES: Record<string, string> = {
   email_required: "이메일 제공에 동의해주셔야 로그인이 가능합니다",
@@ -50,33 +52,21 @@ function LoginForm() {
     setIsLoading(true);
 
     try {
-      const pkRes = await fetch("/api/auth/public-key");
-      const { publicKey } = (await pkRes.json()) as { publicKey: string };
+      const { publicKey } = await authApi.getPublicKey();
       const encryptedPassword = await encryptPassword(password, publicKey);
 
-      const res = await fetch("/api/auth/login", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ email, encryptedPassword }),
-      });
-
-      const data = (await res.json()) as {
-        success?: boolean;
-        error?: string;
-        code?: string;
-      };
-      if (!res.ok) {
-        if (res.status === 403 && data.code === AccountStatus.Withdrawn) {
-          setError("탈퇴한 계정입니다. 카카오 로그인으로 신규 가입해주세요.");
-          return;
-        }
-        setError(data.error ?? "로그인 중 오류가 발생했습니다");
-        return;
-      }
-
+      await authApi.login({ email, encryptedPassword });
       router.replace("/");
-    } catch {
-      setError("네트워크 오류가 발생했습니다");
+    } catch (err) {
+      if (err instanceof ApiError) {
+        setError(
+          err.code === AccountStatus.Withdrawn
+            ? "탈퇴한 계정입니다. 카카오 로그인으로 신규 가입해주세요."
+            : err.message
+        );
+      } else {
+        setError("네트워크 오류가 발생했습니다");
+      }
     } finally {
       setIsLoading(false);
     }

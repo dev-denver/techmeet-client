@@ -16,6 +16,7 @@ export type {
   PaginatedResponse,
   SignupRequest,
   LoginRequest,
+  GetPublicKeyResponse,
   GetProjectsParams,
   GetProjectsResponse,
   GetProjectByIdResponse,
@@ -40,4 +41,6 @@ export type {
   SetReferrerResponse,
   ReferrerSearchResult,
   SearchReferrerResponse,
+  LookupReferrerResponse,
+  UploadResumeResponse,
 } from "./api";

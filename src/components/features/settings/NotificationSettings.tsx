@@ -2,6 +2,8 @@
 
 import { useState, useEffect } from "react";
 import { cn } from "@/lib/utils/cn";
+import { settingsApi } from "@/lib/api/settings";
+import { useToast } from "@/components/ui/toast";
 import type { NotificationSettings as NotificationSettingsType } from "@/types";
 
 interface ToggleProps {
@@ -64,10 +66,11 @@ export function NotificationSettings() {
   });
   const [isSaving, setIsSaving] = useState(false);
   const [loadError, setLoadError] = useState(false);
+  const { showToast } = useToast();
 
   useEffect(() => {
-    fetch("/api/settings/notifications")
-      .then((res) => res.json() as Promise<{ data: NotificationSettingsType }>)
+    settingsApi
+      .getNotifications()
       .then(({ data }) => setSettings(data))
       .catch(() => setLoadError(true));
   }, []);
@@ -77,13 +80,10 @@ export function NotificationSettings() {
     setSettings((s) => ({ ...s, [id]: value }));
     setIsSaving(true);
     try {
-      await fetch("/api/settings/notifications", {
-        method: "PUT",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ [id]: value }),
-      });
+      await settingsApi.updateNotifications({ [id]: value });
     } catch {
       setSettings(prev);
+      showToast("설정 저장에 실패했습니다", "error");
     } finally {
       setIsSaving(false);
     }

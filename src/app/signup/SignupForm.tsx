@@ -12,6 +12,9 @@ import { DateSelectPicker } from "@/components/ui/date-select-picker";
 import { cn } from "@/lib/utils/cn";
 import type { ReferrerSearchResult } from "@/types/api";
 import { encryptPassword } from "@/lib/crypto/client";
+import { authApi } from "@/lib/api/auth";
+import { profileApi } from "@/lib/api/profile";
+import { ApiError } from "@/lib/api/client";
 
 function PasswordStrength({ password }: { password: string }) {
   if (!password) return null;
@@ -91,10 +94,8 @@ export function SignupForm({ maskedEmail, kakaoId, name, refParam }: SignupFormP
     if (!refParam || !/^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i.test(refParam)) return;
     void (async () => {
       try {
-        const res = await fetch(`/api/profile/referrer/lookup?id=${encodeURIComponent(refParam)}`);
-        if (!res.ok) return;
-        const { data } = (await res.json()) as { data?: ReferrerSearchResult };
-        if (data) setReferrer(data);
+        const { data } = await profileApi.lookupReferrer(refParam);
+        setReferrer(data);
       } catch {
         /* fallback to manual input */
       }
@@ -167,43 +168,25 @@ export function SignupForm({ maskedEmail, kakaoId, name, refParam }: SignupFormP
 
     setIsLoading(true);
     try {
-      const pkRes = await fetch("/api/auth/public-key");
-      if (!pkRes.ok) {
-        const pkData = await pkRes.json().catch(() => ({})) as { error?: string };
-        setServerError(pkData.error ?? "서버 오류가 발생했습니다. 잠시 후 다시 시도해주세요.");
-        return;
-      }
-      const pkData = (await pkRes.json()) as { publicKey: string };
-      if (!pkData.publicKey) {
-        setServerError("서버 설정 오류가 발생했습니다. 관리자에게 문의해주세요.");
-        return;
-      }
-      const encryptedPassword = await encryptPassword(password, pkData.publicKey);
+      const { publicKey } = await authApi.getPublicKey();
+      const encryptedPassword = await encryptPassword(password, publicKey);
 
-      const res = await fetch("/api/auth/signup", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
-          encryptedPassword,
-          name: formName,
-          birth_date: birthDate,
-          phone,
-          kakaoId,
-          agree_marketing: agreeMarketing,
-          referrer_id: referrer?.id ?? null,
-        }),
+      await authApi.signup({
+        encryptedPassword,
+        name: formName,
+        birth_date: birthDate,
+        phone,
+        kakaoId,
+        agree_marketing: agreeMarketing,
+        referrer_id: referrer?.id ?? null,
       });
-
-      const data = (await res.json()) as { success?: boolean; error?: string };
-      if (!res.ok) {
-        setServerError(data.error ?? "회원가입 중 오류가 발생했습니다");
-        return;
-      }
 
       router.replace("/");
     } catch (err) {
       console.error("[회원가입] 클라이언트 오류:", err);
-      setServerError("네트워크 오류가 발생했습니다. 인터넷 연결을 확인해주세요.");
+      setServerError(
+        err instanceof ApiError ? err.message : "네트워크 오류가 발생했습니다. 인터넷 연결을 확인해주세요."
+      );
     } finally {
       setIsLoading(false);
     }

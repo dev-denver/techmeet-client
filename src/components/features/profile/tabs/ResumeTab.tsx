@@ -8,6 +8,8 @@ import { formatShortDate } from "@/lib/utils/format";
 import { ErrorMessage } from "@/components/ui/error-message";
 import { EmptyState } from "@/components/ui/empty-state";
 import { SectionHeader } from "./TabShared";
+import { profileApi } from "@/lib/api/profile";
+import { ApiError } from "@/lib/api/client";
 
 const MAX_RESUME_COUNT = 10;
 
@@ -40,19 +42,11 @@ export function ResumeTab({ resumes: initialResumes }: ResumeTabProps) {
     setUploadingName(file.name);
 
     try {
-      const fd = new FormData();
-      fd.append("file", file);
-
-      const res = await fetch("/api/profile/resumes", { method: "POST", body: fd });
-      const json = await res.json();
-
-      if (!res.ok) {
-        setError(json.error ?? "업로드에 실패했습니다");
-        return;
-      }
-
-      setResumes((prev) => [json.resume as ProfileResume, ...prev]);
+      const { resume } = await profileApi.uploadResume(file);
+      setResumes((prev) => [resume, ...prev]);
       router.refresh();
+    } catch (err) {
+      setError(err instanceof ApiError ? err.message : "업로드에 실패했습니다");
     } finally {
       setIsUploading(false);
       setUploadingName("");
@@ -63,14 +57,11 @@ export function ResumeTab({ resumes: initialResumes }: ResumeTabProps) {
     setDeletingId(id);
     setError("");
     try {
-      const res = await fetch(`/api/profile/resumes/${id}`, { method: "DELETE" });
-      if (!res.ok) {
-        const json = await res.json();
-        setError(json.error ?? "삭제에 실패했습니다");
-        return;
-      }
+      await profileApi.deleteResume(id);
       setResumes((prev) => prev.filter((r) => r.id !== id));
       router.refresh();
+    } catch (err) {
+      setError(err instanceof ApiError ? err.message : "삭제에 실패했습니다");
     } finally {
       setDeletingId(null);
     }

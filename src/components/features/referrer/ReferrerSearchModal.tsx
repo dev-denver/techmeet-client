@@ -3,6 +3,8 @@
 import { useState } from "react";
 import { X, Search, Check } from "lucide-react";
 import { BottomSheet } from "@/components/ui/bottom-sheet";
+import { profileApi } from "@/lib/api/profile";
+import { useSubmit } from "@/hooks/useSubmit";
 import type { ReferrerSearchResult } from "@/types/api";
 
 interface Props {
@@ -16,9 +18,8 @@ export function ReferrerSearchModal({ onSelect, onClose, hasBottomNav = false, m
   const [query, setQuery] = useState("");
   const [results, setResults] = useState<ReferrerSearchResult[]>([]);
   const [selected, setSelected] = useState<ReferrerSearchResult | null>(null);
-  const [isLoading, setIsLoading] = useState(false);
-  const [error, setError] = useState("");
   const [searched, setSearched] = useState(false);
+  const { isLoading, error, setError, submit } = useSubmit();
 
   async function handleSearch() {
     const q = query.trim();
@@ -26,24 +27,14 @@ export function ReferrerSearchModal({ onSelect, onClose, hasBottomNav = false, m
       setError("검색어는 2자 이상 입력해주세요");
       return;
     }
-    setError("");
-    setIsLoading(true);
     setSearched(false);
     setSelected(null);
-    try {
-      const res = await fetch(`/api/profile/referrer/search?q=${encodeURIComponent(q)}`);
-      const data = await res.json() as { data?: ReferrerSearchResult[]; error?: string };
-      if (!res.ok) {
-        setError(data.error ?? "검색 중 오류가 발생했습니다");
-        return;
-      }
-      setResults(data.data ?? []);
-      setSearched(true);
-    } catch {
-      setError("네트워크 오류가 발생했습니다");
-    } finally {
-      setIsLoading(false);
-    }
+    await submit(() => profileApi.searchReferrer(q), {
+      onSuccess: ({ data }) => {
+        setResults(data);
+        setSearched(true);
+      },
+    });
   }
 
   function handleConfirm() {

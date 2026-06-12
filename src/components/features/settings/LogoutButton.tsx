@@ -1,23 +1,22 @@
 "use client";
 
 import { LogOut } from "lucide-react";
-import { useState } from "react";
 import { useRouter } from "next/navigation";
 import { useToast } from "@/components/ui/toast";
+import { useSubmit } from "@/hooks/useSubmit";
+import { authApi } from "@/lib/api/auth";
 
 export function LogoutButton() {
   const router = useRouter();
   const { showToast } = useToast();
-  const [isLoading, setIsLoading] = useState(false);
+  const { isLoading, submit } = useSubmit();
 
   async function handleLogout() {
-    setIsLoading(true);
-    try {
-      await fetch("/api/auth/logout", { method: "POST" });
+    const success = await submit(() => authApi.logout());
+    if (success) {
       router.replace("/login");
-    } catch {
+    } else {
       showToast("로그아웃에 실패했습니다", "error");
-      setIsLoading(false);
     }
   }
 

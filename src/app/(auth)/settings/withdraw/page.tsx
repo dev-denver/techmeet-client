@@ -4,6 +4,8 @@ import { useState } from "react";
 import { useRouter } from "next/navigation";
 import { AlertTriangle } from "lucide-react";
 import { ErrorMessage } from "@/components/ui/error-message";
+import { authApi } from "@/lib/api/auth";
+import { ApiError } from "@/lib/api/client";
 
 export default function WithdrawPage() {
   const router = useRouter();
@@ -17,15 +19,10 @@ export default function WithdrawPage() {
     setError("");
 
     try {
-      const res = await fetch("/api/auth/withdraw", { method: "POST" });
-      if (!res.ok) {
-        const data = await res.json() as { error?: string };
-        setError(data.error ?? "탈퇴 처리 중 오류가 발생했습니다.");
-        return;
-      }
+      await authApi.withdraw();
       router.replace("/login");
-    } catch {
-      setError("네트워크 오류가 발생했습니다.");
+    } catch (err) {
+      setError(err instanceof ApiError ? err.message : "네트워크 오류가 발생했습니다.");
     } finally {
       setIsLoading(false);
     }

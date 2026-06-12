@@ -4,6 +4,9 @@ import { useState } from "react";
 import { useRouter } from "next/navigation";
 import { UserCheck } from "lucide-react";
 import { ReferrerSearchModal } from "./ReferrerSearchModal";
+import { profileApi } from "@/lib/api/profile";
+import { useSubmit } from "@/hooks/useSubmit";
+import { useToast } from "@/components/ui/toast";
 import type { ReferrerSearchResult } from "@/types/api";
 
 interface Props {
@@ -12,31 +15,18 @@ interface Props {
 
 export function ReferrerSection({ currentReferrerName }: Props) {
   const router = useRouter();
+  const { showToast } = useToast();
   const [showModal, setShowModal] = useState(false);
-  const [isLoading, setIsLoading] = useState(false);
-  const [error, setError] = useState("");
+  const { isLoading, error, submit } = useSubmit();
 
   async function handleSelect(referrer: ReferrerSearchResult) {
     setShowModal(false);
-    setError("");
-    setIsLoading(true);
-    try {
-      const res = await fetch("/api/profile/referrer", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ referrerId: referrer.id }),
-      });
-      const data = await res.json() as { success?: boolean; error?: string };
-      if (!res.ok) {
-        setError(data.error ?? "추천인 등록 중 오류가 발생했습니다");
-        return;
-      }
-      router.refresh();
-    } catch {
-      setError("네트워크 오류가 발생했습니다");
-    } finally {
-      setIsLoading(false);
-    }
+    await submit(() => profileApi.setReferrer({ referrerId: referrer.id }), {
+      onSuccess: () => {
+        showToast("추천인이 등록되었습니다");
+        router.refresh();
+      },
+    });
   }
 
   if (currentReferrerName) {

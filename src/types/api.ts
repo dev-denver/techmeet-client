@@ -1,5 +1,5 @@
 import type { Project, ProjectFilterValue } from "./project";
-import type { FreelancerProfile, AvailabilityStatus } from "./user";
+import type { FreelancerProfile, AvailabilityStatus, ProfileResume } from "./user";
 import type { Application } from "./application";
 import type { Notice } from "./notice";
 
@@ -21,18 +21,21 @@ export interface PaginatedResponse<T> {
 
 // ── Auth ──────────────────────────────────────────────
 export interface SignupRequest {
-  email: string;
-  password: string;
+  encryptedPassword: string;
   name: string;
-  birthDate: string;
+  birth_date: string;
   phone: string;
   kakaoId: string;
+  agree_marketing: boolean;
+  referrer_id: string | null;
 }
 
 export interface LoginRequest {
   email: string;
-  password: string;
+  encryptedPassword: string;
 }
+
+export type GetPublicKeyResponse = { publicKey: string };
 
 // ── Projects ──────────────────────────────────────────
 export interface GetProjectsParams {
@@ -122,11 +125,14 @@ export interface SaveSkillInventoryRequest {
   others?: string | null;
 }
 
+export type UploadResumeResponse = ApiSuccessResponse & { resume: ProfileResume };
+
 // ── Referrer ──────────────────────────────────────────
 export interface SetReferrerRequest { referrerId: string; }
 export type SetReferrerResponse = ApiSuccessResponse;
 export interface ReferrerSearchResult { id: string; name: string; maskedPhone: string; }
 export type SearchReferrerResponse = { data: ReferrerSearchResult[] };
+export type LookupReferrerResponse = { data: ReferrerSearchResult };
 
 // ── Notices ───────────────────────────────────────────
 export interface GetNoticesParams {

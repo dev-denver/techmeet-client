@@ -340,6 +340,12 @@ src/
 - [x] 대형 파일 분리: CareerSectionClient → `CareerForm.tsx` 분리, ProfileTabsClient → `BasicInfoTab.tsx` 분리 (로직 변경 없음)
 - [x] `PullToRefresh` — non-null assertion(`main!`) 제거
 - [x] CLAUDE.md/PROJECT.md `max-w-[430px]` → `600px` 표기 정정, BottomSheet 기본폭(sm=430px) 안내 추가, 폼 제출 패턴(useSubmit) 문서화
+- [x] `apiFetch`/`ApiError` 확장 — `code` 필드(탈퇴 계정 등 에러 코드 식별) + `FormData` 바디 지원(Content-Type 강제 지정 안 함)
+- [x] `authApi` 신규 — `signup`/`login`/`logout`/`withdraw`/`getPublicKey` (타입 불일치였던 `SignupRequest`/`LoginRequest`를 실제 요청 바디에 맞게 수정)
+- [x] `profileApi` 확장 — `searchReferrer`/`lookupReferrer`/`setReferrer`/`uploadResume`/`deleteResume`
+- [x] raw fetch → `*Api` + `useSubmit`/`useToast` 이관 (후속): NotificationSettings, ReferrerSection, ReferrerSearchModal, LogoutButton
+- [x] ResumeTab — FormData 업로드/삭제를 `profileApi.uploadResume`/`deleteResume` + `ApiError`로 이관
+- [x] SignupForm/login/withdraw — public-key 조회, 추천인 lookup, 회원가입/로그인/탈퇴를 `authApi`/`profileApi`로 이관 (탈퇴 계정 로그인 시 `code` 기반 안내 메시지 처리)
 
 ---
 
@@ -356,12 +362,6 @@ src/
 
 - [ ] **비밀번호 변경**: 이메일 로그인 계정용 비밀번호 변경 기능
 - [ ] **다크 모드 토글**: globals.css에 `.dark` CSS 변수 정의됨, 토글 UI 미구현
-
-### 후속 작업 (2026-06-12 품질 업그레이드에서 발견)
-
-- [ ] NotificationSettings, ReferrerSection, LogoutButton — raw fetch를 `*Api` + `useSubmit`으로 이관 (가치 대비 변경량이 낮아 이번 작업에서는 제외)
-- [ ] ResumeTab — FormData 업로드 방식이라 `apiFetch`와 호환이 어려움, 별도 패턴 검토 필요
-- [ ] SignupForm/login/withdraw — raw fetch 이관 (탈퇴 회원 재가입 플로우 작업이 먼저 마무리되어야 충돌 없이 진행 가능)
 
 ---
 
