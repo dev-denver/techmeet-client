@@ -1,21 +1,22 @@
 "use client";
 
 import { LogOut } from "lucide-react";
-import { useState } from "react";
 import { useRouter } from "next/navigation";
+import { useToast } from "@/components/ui/toast";
+import { useSubmit } from "@/hooks/useSubmit";
+import { authApi } from "@/lib/api/auth";
 
 export function LogoutButton() {
   const router = useRouter();
-  const [isLoading, setIsLoading] = useState(false);
+  const { showToast } = useToast();
+  const { isLoading, submit } = useSubmit();
 
   async function handleLogout() {
-    setIsLoading(true);
-    try {
-      await fetch("/api/auth/logout", { method: "POST" });
+    const success = await submit(() => authApi.logout());
+    if (success) {
       router.replace("/login");
-    } catch {
-      alert("로그아웃에 실패했습니다");
-      setIsLoading(false);
+    } else {
+      showToast("로그아웃에 실패했습니다", "error");
     }
   }
 
@@ -23,7 +24,8 @@ export function LogoutButton() {
     <button
       onClick={handleLogout}
       disabled={isLoading}
-      className="flex items-center gap-2 text-sm text-muted-foreground hover:text-foreground transition-colors disabled:opacity-50 px-1 py-1"
+      aria-busy={isLoading || undefined}
+      className="flex items-center gap-2 text-sm text-muted-foreground hover:text-foreground transition-colors disabled:opacity-50 px-2 py-2 -mx-1 rounded-md focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
     >
       <LogOut className="h-3.5 w-3.5" />
       {isLoading ? "로그아웃 중..." : "로그아웃"}

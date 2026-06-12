@@ -11,6 +11,8 @@ import { FormField } from "@/components/ui/form-field";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { DateSelectPicker } from "@/components/ui/date-select-picker";
+import { profileApi } from "@/lib/api/profile";
+import { ApiError } from "@/lib/api/client";
 import type { FreelancerProfile } from "@/types";
 
 function SectionDivider({ label }: { label: string }) {
@@ -93,35 +95,26 @@ export function ProfileBasicForm({ initial, onSuccess, onCancel }: ProfileBasicF
     setIsSaving(true);
     setSaveSuccess(false);
     try {
-      const res = await fetch("/api/profile", {
-        method: "PUT",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
-          name,
-          birthDate: birthDate || null,
-          gender: gender || null,
-          militaryService: militaryService || null,
-          affiliation: affiliation || null,
-          joiningDate: joiningDate || null,
-          department: department || null,
-          positionTitle: positionTitle || null,
-          phone,
-          address: address || null,
-          experienceYears,
-          experienceMonths,
-          techStack,
-          bio,
-        }),
+      await profileApi.update({
+        name,
+        birthDate: birthDate || null,
+        gender: gender || null,
+        militaryService: militaryService || null,
+        affiliation: affiliation || null,
+        joiningDate: joiningDate || null,
+        department: department || null,
+        positionTitle: positionTitle || null,
+        phone,
+        address: address || null,
+        experienceYears,
+        experienceMonths,
+        techStack,
+        bio,
       });
-      if (!res.ok) {
-        const data = await res.json() as { error?: string };
-        setServerError(data.error ?? "저장 중 오류가 발생했습니다.");
-        return;
-      }
       setSaveSuccess(true);
       setTimeout(onSuccess, 700);
-    } catch {
-      setServerError("네트워크 오류가 발생했습니다.");
+    } catch (err) {
+      setServerError(err instanceof ApiError ? err.message : "네트워크 오류가 발생했습니다.");
     } finally {
       setIsSaving(false);
     }
@@ -138,7 +131,7 @@ export function ProfileBasicForm({ initial, onSuccess, onCancel }: ProfileBasicF
           value={name}
           maxLength={50}
           onChange={(e) => { setName(e.target.value); if (nameError) setNameError(e.target.value.trim() ? "" : "이름을 입력해주세요"); }}
-          className={nameError ? "border-red-300" : ""}
+          className={nameError ? "border-destructive/50" : ""}
         />
       </FormField>
 
@@ -205,7 +198,7 @@ export function ProfileBasicForm({ initial, onSuccess, onCancel }: ProfileBasicF
           onBlur={() => { if (phone && !validatePhone(phone)) setPhoneError("올바른 휴대폰 번호 형식이 아닙니다 (010-XXXX-XXXX)"); }}
           placeholder="010-0000-0000"
           maxLength={13}
-          className={phoneError ? "border-red-300" : ""}
+          className={phoneError ? "border-destructive/50" : ""}
         />
       </FormField>
 

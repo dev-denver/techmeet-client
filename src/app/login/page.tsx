@@ -2,19 +2,23 @@
 
 import { MessageSquare, Eye, EyeOff, Loader2 } from "lucide-react";
 import { useState, Suspense } from "react";
+import Link from "next/link";
 import { useRouter, useSearchParams } from "next/navigation";
 import { publicEnv } from "@/lib/config/env";
 import { AccountStatus } from "@/types";
 import { encryptPassword } from "@/lib/crypto/client";
 import { Input } from "@/components/ui/input";
+import { LIMITS } from "@/lib/constants/limits";
 import { cn } from "@/lib/utils/cn";
+import { authApi } from "@/lib/api/auth";
+import { ApiError } from "@/lib/api/client";
 
 const KAKAO_ERROR_MESSAGES: Record<string, string> = {
   email_required: "이메일 제공에 동의해주셔야 로그인이 가능합니다",
   kakao_api_error: "카카오 로그인 처리 중 오류가 발생했습니다",
   session_error: "로그인 세션 생성에 실패했습니다. 다시 시도해주세요",
   missing_code: "잘못된 접근입니다",
-  [AccountStatus.Withdrawn]: "탈퇴한 계정입니다. 재가입이 필요합니다.",
+  [AccountStatus.Withdrawn]: "탈퇴한 계정입니다. 카카오 로그인으로 신규 가입해주세요.",
 };
 
 function LoginForm() {
@@ -24,7 +28,6 @@ function LoginForm() {
   const [password, setPassword] = useState("");
   const [showPassword, setShowPassword] = useState(false);
   const [error, setError] = useState("");
-  const [withdrawnEmail, setWithdrawnEmail] = useState<string | null>(null);
   const [isLoading, setIsLoading] = useState(false);
   const [isKakaoLoading, setIsKakaoLoading] = useState(false);
 
@@ -49,33 +52,21 @@ function LoginForm() {
     setIsLoading(true);
 
     try {
-      const pkRes = await fetch("/api/auth/public-key");
-      const { publicKey } = (await pkRes.json()) as { publicKey: string };
+      const { publicKey } = await authApi.getPublicKey();
       const encryptedPassword = await encryptPassword(password, publicKey);
 
-      const res = await fetch("/api/auth/login", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ email, encryptedPassword }),
-      });
-
-      const data = (await res.json()) as {
-        success?: boolean;
-        error?: string;
-        code?: string;
-      };
-      if (!res.ok) {
-        if (res.status === 403 && data.code === AccountStatus.Withdrawn) {
-          setWithdrawnEmail(email);
-          return;
-        }
-        setError(data.error ?? "로그인 중 오류가 발생했습니다");
-        return;
-      }
-
+      await authApi.login({ email, encryptedPassword });
       router.replace("/");
-    } catch {
-      setError("네트워크 오류가 발생했습니다");
+    } catch (err) {
+      if (err instanceof ApiError) {
+        setError(
+          err.code === AccountStatus.Withdrawn
+            ? "탈퇴한 계정입니다. 카카오 로그인으로 신규 가입해주세요."
+            : err.message
+        );
+      } else {
+        setError("네트워크 오류가 발생했습니다");
+      }
     } finally {
       setIsLoading(false);
     }
@@ -87,8 +78,8 @@ function LoginForm() {
         <div className="flex-1 flex flex-col items-center justify-center w-full gap-8">
           {/* 로고 */}
           <div className="flex flex-col items-center gap-3">
-            <div className="w-16 h-16 rounded-2xl bg-zinc-900 flex items-center justify-center">
-              <span className="text-white text-2xl font-bold">T</span>
+            <div className="w-16 h-16 rounded-2xl bg-primary flex items-center justify-center">
+              <span className="text-primary-foreground text-2xl font-bold">T</span>
             </div>
             <div className="text-center">
               <h1 className="text-2xl font-bold tracking-tight">테크밋</h1>
@@ -98,7 +89,7 @@ function LoginForm() {
 
           {/* 설명 */}
           <div className="text-center space-y-1.5">
-            <p className="text-lg font-medium text-zinc-800">
+            <p className="text-lg font-medium text-foreground">
               프리랜서 개발자를 위한
               <br />
               전용 프로젝트 플랫폼
@@ -110,14 +101,14 @@ function LoginForm() {
 
           <div className="w-full flex flex-col gap-4">
             {kakaoErrorMessage && (
-              <p className="text-sm text-red-600 text-center bg-red-50 rounded-lg px-4 py-3">
+              <p className="text-sm text-destructive text-center bg-destructive/10 rounded-lg px-4 py-3">
                 {kakaoErrorMessage}
               </p>
             )}
 
             {/* 카카오 로그인 버튼 */}
             <button
-              className="flex w-full items-center justify-center gap-3 rounded-xl px-6 py-4 text-[15px] font-semibold text-[#3C1E1E] transition-opacity hover:opacity-90 active:opacity-80 disabled:opacity-60"
+              className="flex w-full items-center justify-center gap-3 rounded-xl px-6 py-4 text-[15px] font-semibold text-[#3C1E1E] transition-opacity hover:opacity-90 active:opacity-80 disabled:opacity-60 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2"
               style={{ backgroundColor: "#FEE500" }}
               onClick={handleKakaoLogin}
               disabled={isKakaoLoading}
@@ -132,9 +123,9 @@ function LoginForm() {
 
             {/* 구분선 */}
             <div className="flex items-center gap-3">
-              <div className="flex-1 h-px bg-zinc-200" />
-              <span className="text-xs text-zinc-400 whitespace-nowrap">또는 이메일로 로그인</span>
-              <div className="flex-1 h-px bg-zinc-200" />
+              <div className="flex-1 h-px bg-border" />
+              <span className="text-xs text-muted-foreground whitespace-nowrap">또는 이메일로 로그인</span>
+              <div className="flex-1 h-px bg-border" />
             </div>
 
             {/* 이메일 로그인 폼 */}
@@ -144,6 +135,7 @@ function LoginForm() {
                 value={email}
                 onChange={(e) => setEmail(e.target.value)}
                 required
+                maxLength={LIMITS.EMAIL_MAX}
                 placeholder="이메일"
               />
               <div className="relative">
@@ -158,7 +150,8 @@ function LoginForm() {
                 <button
                   type="button"
                   onClick={() => setShowPassword((v) => !v)}
-                  className="absolute right-3 top-1/2 -translate-y-1/2 text-zinc-400 hover:text-zinc-600"
+                  aria-label={showPassword ? "비밀번호 숨기기" : "비밀번호 표시"}
+                  className="absolute right-3 top-1/2 -translate-y-1/2 text-muted-foreground hover:text-foreground transition-colors"
                   tabIndex={-1}
                 >
                   {showPassword ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
@@ -166,33 +159,18 @@ function LoginForm() {
               </div>
 
               {error && (
-                <p className="text-sm text-red-600 text-center bg-red-50 rounded-lg px-3 py-2.5">
+                <p className="text-sm text-destructive text-center bg-destructive/10 rounded-lg px-3 py-2.5">
                   {error}
                 </p>
-              )}
-
-              {withdrawnEmail && (
-                <div className="text-sm text-center bg-red-50 rounded-lg px-4 py-3 space-y-2">
-                  <p className="text-red-600 font-medium">탈퇴한 계정입니다.</p>
-                  <button
-                    type="button"
-                    onClick={() =>
-                      router.push(
-                        `/signup?email=${encodeURIComponent(withdrawnEmail)}&reactivate=true`
-                      )
-                    }
-                    className="text-zinc-800 underline underline-offset-2 font-semibold"
-                  >
-                    재가입하기
-                  </button>
-                </div>
               )}
 
               <button
                 type="submit"
                 disabled={isLoading}
+                aria-busy={isLoading || undefined}
                 className={cn(
-                  "flex w-full items-center justify-center gap-2 rounded-xl bg-zinc-900 py-3.5 text-[15px] font-semibold text-white transition-opacity hover:opacity-90 active:opacity-80 disabled:opacity-50"
+                  "flex w-full items-center justify-center gap-2 rounded-xl bg-primary py-3.5 text-[15px] font-semibold text-primary-foreground transition-opacity hover:opacity-90 active:opacity-80 disabled:opacity-50",
+                  "focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2"
                 )}
               >
                 {isLoading && <Loader2 className="h-4 w-4 animate-spin" />}
@@ -204,13 +182,13 @@ function LoginForm() {
 
         <p className="text-xs text-muted-foreground text-center leading-relaxed">
           로그인 시{" "}
-          <button className="underline underline-offset-2 hover:text-foreground transition-colors">
+          <Link href="/terms" className="underline underline-offset-2 hover:text-foreground transition-colors">
             이용약관
-          </button>{" "}
+          </Link>{" "}
           및{" "}
-          <button className="underline underline-offset-2 hover:text-foreground transition-colors">
+          <Link href="/privacy" className="underline underline-offset-2 hover:text-foreground transition-colors">
             개인정보 처리방침
-          </button>
+          </Link>
           에 동의하게 됩니다.
         </p>
       </div>

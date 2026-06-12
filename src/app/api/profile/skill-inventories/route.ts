@@ -1,6 +1,9 @@
 import { NextResponse } from "next/server";
 import { requireAuth } from "@/lib/api/server";
 import { getSkillInventories, addSkillInventory } from "@/lib/supabase/queries/resume";
+import { LIMITS } from "@/lib/constants/limits";
+import { validateSkillInventoryBody } from "./validate";
+import type { SaveSkillInventoryRequest } from "@/types";
 
 export async function GET() {
   const { errorResponse } = await requireAuth();
@@ -14,19 +17,17 @@ export async function POST(req: Request) {
   const { errorResponse } = await requireAuth();
   if (errorResponse) return errorResponse;
 
-  const body = await req.json();
+  const body = (await req.json()) as Partial<SaveSkillInventoryRequest>;
 
   if (!body.projectName || typeof body.projectName !== "string" || !body.projectName.trim()) {
     return NextResponse.json({ error: "프로젝트명은 필수입니다" }, { status: 400 });
   }
-  if (body.projectName.trim().length > 100) {
-    return NextResponse.json({ error: "프로젝트명은 100자 이하로 입력해주세요" }, { status: 400 });
+  if (body.projectName.trim().length > LIMITS.PROJECT_NAME_MAX) {
+    return NextResponse.json({ error: `프로젝트명은 ${LIMITS.PROJECT_NAME_MAX}자 이하로 입력해주세요` }, { status: 400 });
   }
 
-  // 날짜 역전 검사
-  if (body.startDate && body.endDate && body.endDate <= body.startDate) {
-    return NextResponse.json({ error: "종료일은 시작일보다 이후여야 합니다" }, { status: 400 });
-  }
+  const invalid = validateSkillInventoryBody(body);
+  if (invalid) return invalid;
 
   try {
     await addSkillInventory({
@@ -47,6 +48,7 @@ export async function POST(req: Request) {
     });
     return NextResponse.json({ success: true });
   } catch (e) {
-    return NextResponse.json({ error: String(e) }, { status: 500 });
+    console.error("[스킬 인벤토리 추가]", e);
+    return NextResponse.json({ error: "스킬 인벤토리 저장에 실패했습니다" }, { status: 500 });
   }
 }

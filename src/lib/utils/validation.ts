@@ -4,9 +4,6 @@ export function validatePassword(password: string): { valid: boolean; errors: st
   if (password.length < 8) {
     errors.push("최소 8자 이상이어야 합니다");
   }
-  if (!/[A-Z]/.test(password)) {
-    errors.push("영문 대문자를 1자 이상 포함해야 합니다");
-  }
   if (!/[a-z]/.test(password)) {
     errors.push("영문 소문자를 1자 이상 포함해야 합니다");
   }
@@ -76,6 +73,32 @@ export function validateFutureDate(date: string): string | null {
 }
 
 export const UUID_REGEX = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
+
+/**
+ * 문자열 길이 상한 검증 (클라이언트·서버 공용).
+ * 초과 시 한국어 에러 메시지, 통과 시 null을 반환한다.
+ */
+export function validateLength(value: string, max: number, label: string): string | null {
+  if (value.length > max) return `${label}은(는) ${max}자 이하로 입력해주세요`;
+  return null;
+}
+
+/**
+ * 문자열 배열(기술스택·언어·도구 등) 검증: 배열 여부, 항목 수 상한, 항목당 길이 상한.
+ * 통과 시 null을 반환한다.
+ */
+export function validateStringArray(
+  arr: unknown,
+  { itemMax, countMax, label }: { itemMax: number; countMax: number; label: string }
+): string | null {
+  if (!Array.isArray(arr)) return `${label} 형식이 올바르지 않습니다`;
+  if (arr.length > countMax) return `${label}은(는) 최대 ${countMax}개까지 등록할 수 있습니다`;
+  for (const item of arr) {
+    if (typeof item !== "string" || !item.trim()) return `${label} 형식이 올바르지 않습니다`;
+    if (item.length > itemMax) return `${label} 항목은 ${itemMax}자 이하로 입력해주세요`;
+  }
+  return null;
+}
 
 export function validatePastOrCurrentMonth(monthYear: string): string | null {
   if (!monthYear) return null;

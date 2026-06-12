@@ -1,7 +1,8 @@
 import { NextRequest, NextResponse } from "next/server";
 import { createServerClient } from "@supabase/ssr";
 import { createClient, type SupabaseClient } from "@supabase/supabase-js";
-import { validatePassword, validatePhone, validateBirthDate } from "@/lib/utils/validation";
+import { validatePassword, validatePhone, validateBirthDate, UUID_REGEX } from "@/lib/utils/validation";
+import { LIMITS } from "@/lib/constants/limits";
 import { type CookieOptions } from "@supabase/ssr";
 import { publicEnv, serverEnv } from "@/lib/config/env";
 import { AccountStatus } from "@/types";
@@ -47,7 +48,6 @@ export async function POST(request: NextRequest) {
     birth_date?: unknown;
     phone?: unknown;
     kakaoId?: unknown;
-    reactivate?: unknown;
     referrer_id?: unknown;
     agree_marketing?: unknown;
   };
@@ -62,7 +62,6 @@ export async function POST(request: NextRequest) {
     const { encryptedPassword, name, birth_date, phone, kakaoId } = body;
     const referrerId = typeof body.referrer_id === "string" && body.referrer_id ? body.referrer_id : null;
     const agreeMarketing = typeof body.agree_marketing === "boolean" ? body.agree_marketing : false;
-    const reactivate = body.reactivate === true;
 
     if (
       typeof encryptedPassword !== "string" ||
@@ -74,6 +73,18 @@ export async function POST(request: NextRequest) {
         { error: "모든 필드를 올바르게 입력해주세요" },
         { status: 400 }
       );
+    }
+
+    const trimmedName = name.trim();
+    if (!trimmedName || trimmedName.length > LIMITS.NAME_MAX) {
+      return NextResponse.json(
+        { error: `이름은 1~${LIMITS.NAME_MAX}자로 입력해주세요` },
+        { status: 400 }
+      );
+    }
+
+    if (referrerId && !UUID_REGEX.test(referrerId)) {
+      return NextResponse.json({ error: "올바르지 않은 추천인입니다" }, { status: 400 });
     }
 
     let password: string;
@@ -134,88 +145,27 @@ export async function POST(request: NextRequest) {
       }
     );
 
-    if (reactivate) {
-      const { data: existingProfile } = await supabaseAdmin
-        .from("profiles")
-        .select("id, account_status")
-        .eq("email", email)
-        .single();
-
-      if (!existingProfile || existingProfile.account_status !== AccountStatus.Withdrawn) {
-        return NextResponse.json({ error: "재가입할 수 없는 계정입니다." }, { status: 400 });
-      }
-
-      // 기존 계정 완전 삭제 — profiles·career_items·applications 모두 CASCADE 삭제
-      const { error: deleteError } = await supabaseAdmin.auth.admin.deleteUser(existingProfile.id);
-      if (deleteError) {
-        console.error("[재가입] 기존 계정 삭제 실패:", deleteError);
-        return NextResponse.json({ error: "재가입 처리에 실패했습니다." }, { status: 500 });
-      }
-
-      // 새 auth 계정 생성 (이메일 확인 즉시 처리)
-      const { data: newUser, error: createError } = await supabaseAdmin.auth.admin.createUser({
-        email,
-        password,
-        email_confirm: true,
-        user_metadata: { name, phone, birth_date },
-      });
-
-      if (createError || !newUser.user) {
-        console.error("[재가입] 신규 계정 생성 실패:", createError);
-        return NextResponse.json({ error: "재가입에 실패했습니다." }, { status: 500 });
-      }
-
-      const newProfileInsert: Record<string, unknown> = {
-        id: newUser.user.id,
-        name,
-        email,
-        phone,
-        birth_date,
-        kakao_id: typeof kakaoId === "string" && kakaoId ? kakaoId : null,
-        notification_marketing: agreeMarketing,
-        account_status: AccountStatus.Active,
-      };
-      if (referrerId) newProfileInsert.referrer_id = referrerId;
-
-      const { error: profileError } = await supabaseAdmin
-        .from("profiles")
-        .upsert(newProfileInsert, { onConflict: "id" });
-
-      if (profileError) {
-        console.error("[재가입] 프로필 생성 실패:", profileError);
-        await supabaseAdmin.auth.admin.deleteUser(newUser.user.id).catch((e) =>
-          console.error("[재가입] 롤백 실패 — auth.users 고아 행 남음:", e)
-        );
-        return NextResponse.json({ error: "프로필 정보 저장에 실패했습니다." }, { status: 500 });
-      }
-
-      const { error: signInError } = await supabase.auth.signInWithPassword({
-        email,
-        password,
-      });
-
-      if (signInError) {
-        console.error("[재가입] 로그인 실패:", signInError);
-        await supabaseAdmin.auth.admin.deleteUser(newUser.user.id).catch((e) =>
-          console.error("[재가입] 롤백 실패 — auth.users 고아 행 남음:", e)
-        );
-        return NextResponse.json({ error: "로그인에 실패했습니다." }, { status: 500 });
-      }
-
-      return supabaseResponse;
-    }
-
     // 이메일 중복 확인 (admin API로 rate limit 없이 조회)
     const { data: existingUser } = await supabaseAdmin
       .from("profiles")
-      .select("id")
+      .select("id, account_status")
       .eq("email", email)
       .maybeSingle();
 
     if (existingUser) {
-      const linked = await checkAdminAccount(email, supabaseAdmin);
-      if (linked) return linked;
-      return NextResponse.json({ error: "이미 사용 중인 이메일입니다" }, { status: 409 });
+      if (existingUser.account_status === AccountStatus.Withdrawn) {
+        // 탈퇴 계정: 기존 계정을 완전 삭제하고 신규 회원으로 가입 진행
+        // (profiles·career_items·applications 모두 CASCADE 삭제)
+        const { error: deleteError } = await supabaseAdmin.auth.admin.deleteUser(existingUser.id);
+        if (deleteError) {
+          console.error("[회원가입] 탈퇴 계정 삭제 실패:", deleteError);
+          return NextResponse.json({ error: "회원가입에 실패했습니다" }, { status: 500 });
+        }
+      } else {
+        const linked = await checkAdminAccount(email, supabaseAdmin);
+        if (linked) return linked;
+        return NextResponse.json({ error: "이미 사용 중인 이메일입니다" }, { status: 409 });
+      }
     }
 
     // admin API로 생성 — rate limit 우회, 이메일 확인 즉시 처리
@@ -223,7 +173,7 @@ export async function POST(request: NextRequest) {
       email,
       password,
       email_confirm: true,
-      user_metadata: { name, phone, birth_date },
+      user_metadata: { name: trimmedName, phone, birth_date },
     });
 
     if (createError || !newUser.user) {
@@ -238,7 +188,7 @@ export async function POST(request: NextRequest) {
 
     const profileUpsert: Record<string, unknown> = {
       id: newUser.user.id,
-      name,
+      name: trimmedName,
       email,
       phone,
       birth_date,

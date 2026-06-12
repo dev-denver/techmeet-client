@@ -13,6 +13,7 @@ const pageTitles: Record<string, string> = {
   "/profile": "내 정보",
   "/settings": "설정",
   "/settings/profile": "내 정보 수정",
+  "/settings/password": "비밀번호 변경",
   "/settings/withdraw": "회원 탈퇴",
   "/notifications": "알림 내역",
   "/notices": "공지사항",
@@ -37,7 +38,7 @@ function isDetailPage(pathname: string): boolean {
   ) {
     return true;
   }
-  if (pathname === "/settings/profile" || pathname === "/settings/withdraw") {
+  if (pathname === "/settings/profile" || pathname === "/settings/password" || pathname === "/settings/withdraw") {
     return true;
   }
   if (pathname === "/notifications") {
@@ -67,7 +68,7 @@ export function TopBar() {
         {showBackButton && (
           <button
             onClick={() => router.back()}
-            className="p-1 -ml-1 rounded-md hover:bg-accent active:bg-accent/80 transition-colors"
+            className="flex h-10 w-10 -ml-2.5 items-center justify-center rounded-md hover:bg-accent active:bg-accent/80 transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
             aria-label="뒤로가기"
           >
             <ArrowLeft className="h-5 w-5" />
@@ -79,7 +80,7 @@ export function TopBar() {
         {!showBackButton && (
           <Link
             href="/notifications"
-            className="p-1 -mr-1 rounded-md hover:bg-accent active:bg-accent/80 transition-colors"
+            className="flex h-10 w-10 -mr-2.5 items-center justify-center rounded-md hover:bg-accent active:bg-accent/80 transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
             aria-label="알림 내역"
           >
             <Bell className="h-5 w-5" />

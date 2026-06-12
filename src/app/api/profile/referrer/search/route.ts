@@ -1,15 +1,23 @@
 import { NextRequest, NextResponse } from "next/server";
 import { createAdminClient, createServerClient } from "@/lib/supabase/server";
 import { maskPhone } from "@/lib/utils/format";
+import { LIMITS } from "@/lib/constants/limits";
 import { AccountStatus } from "@/types";
 
 export async function GET(request: NextRequest) {
   const { searchParams } = new URL(request.url);
-  const q = searchParams.get("q")?.trim() ?? "";
+  // PostgREST or() 필터에 보간되므로 구분자로 쓰이는 특수문자(쉼표·괄호)는 제거
+  const q = (searchParams.get("q")?.trim() ?? "").replace(/[,()]/g, "");
 
   if (q.length < 2) {
     return NextResponse.json(
       { error: "검색어는 2자 이상 입력해주세요" },
+      { status: 400 }
+    );
+  }
+  if (q.length > LIMITS.SEARCH_MAX) {
+    return NextResponse.json(
+      { error: `검색어는 ${LIMITS.SEARCH_MAX}자 이하로 입력해주세요` },
       { status: 400 }
     );
   }

@@ -38,9 +38,10 @@ export async function getNoticeById(id: string): Promise<Notice | null> {
 export async function getNotices(params?: GetNoticesParams): Promise<GetNoticesResponse> {
   const supabase = await createServerClient();
 
+  // 주의: NoticeRow 인터페이스에 컬럼을 추가하면 아래 select 목록도 함께 갱신할 것
   let query = supabase
     .from("notices")
-    .select("*", { count: "exact" })
+    .select("id, title, content, is_important, created_at, attachments", { count: "exact" })
     .order("is_important", { ascending: false })
     .order("created_at", { ascending: false });
 

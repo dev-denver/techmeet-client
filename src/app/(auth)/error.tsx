@@ -16,12 +16,12 @@ export default function AuthError({ error, reset }: ErrorProps) {
 
   return (
     <div className="flex flex-col items-center justify-center min-h-[60vh] px-6 text-center gap-4">
-      <div className="w-14 h-14 rounded-full bg-red-50 flex items-center justify-center">
-        <AlertCircle className="h-7 w-7 text-red-400" />
+      <div className="w-14 h-14 rounded-full bg-destructive/10 flex items-center justify-center">
+        <AlertCircle className="h-7 w-7 text-destructive/70" />
       </div>
       <div className="space-y-1">
-        <p className="text-base font-semibold text-zinc-800">페이지를 불러오지 못했습니다</p>
-        <p className="text-sm text-zinc-500">잠시 후 다시 시도해주세요</p>
+        <p className="text-base font-semibold text-foreground">페이지를 불러오지 못했습니다</p>
+        <p className="text-sm text-muted-foreground">잠시 후 다시 시도해주세요</p>
       </div>
       <Button variant="outline" onClick={reset} className="mt-2">
         다시 시도

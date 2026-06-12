@@ -34,9 +34,11 @@ export function PullToRefresh() {
   useEffect(() => {
     const main = document.querySelector("main");
     if (!main) return;
+    // 클로저 안에서도 null 아님이 유지되도록 지역 상수에 바인딩 (non-null 단언 제거)
+    const el = main;
 
     function onTouchStart(e: TouchEvent) {
-      if (!refreshingRef.current && main!.scrollTop <= 0) {
+      if (!refreshingRef.current && el.scrollTop <= 0) {
         startYRef.current = e.touches[0].clientY;
       } else {
         startYRef.current = null;
@@ -46,7 +48,7 @@ export function PullToRefresh() {
     function onTouchMove(e: TouchEvent) {
       if (startYRef.current === null || refreshingRef.current) return;
       const dy = e.touches[0].clientY - startYRef.current;
-      if (dy > 0 && main!.scrollTop <= 0) {
+      if (dy > 0 && el.scrollTop <= 0) {
         const dist = Math.min(MAX_PULL, dy * RESISTANCE);
         updatePull(dist);
         if (dist > 4) e.preventDefault(); // 당기는 동안 네이티브 오버스크롤 방지

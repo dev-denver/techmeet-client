@@ -31,6 +31,7 @@ export function BottomNavigation() {
               aria-current={isActive ? "page" : undefined}
               className={cn(
                 "flex flex-1 flex-col items-center justify-center gap-1 text-xs transition-colors",
+                "focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-inset",
                 isActive
                   ? "text-primary"
                   : "text-muted-foreground hover:text-foreground"

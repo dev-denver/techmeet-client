@@ -43,9 +43,10 @@ function mapRowToResume(row: ProfileResumeRow): ProfileResume {
 
 export async function getProfileResumes(userId: string): Promise<ProfileResume[]> {
   const supabase = await createServerClient();
+  // 주의: ProfileResumeRow 인터페이스에 컬럼을 추가하면 아래 select 목록도 함께 갱신할 것
   const { data, error } = await supabase
     .from("profile_resumes")
-    .select("*")
+    .select("id, profile_id, file_name, file_path, file_size, mime_type, created_at")
     .eq("profile_id", userId)
     .order("created_at", { ascending: false });
 
@@ -194,10 +195,11 @@ export async function getProfile(): Promise<GetProfileResponse | null> {
   const { data: { user } } = await supabase.auth.getUser();
   if (!user) return null;
 
+  // referrer는 self-join embed로 한 번에 조회 (별도 순차 쿼리 방지)
   const [profileResult, educations, certifications, skillInventories, resumes] = await Promise.all([
     supabase
       .from("profiles")
-      .select("*, careers(*)")
+      .select("*, careers(*), referrer:referrer_id(name)")
       .eq("id", user.id)
       .single(),
     getEducations(),
@@ -213,19 +215,9 @@ export async function getProfile(): Promise<GetProfileResponse | null> {
 
   const row = profileResult.data as ProfileRow;
 
-  let referrerName: string | undefined;
-  if (row.referrer_id) {
-    const { data: referrer } = await supabase
-      .from("profiles")
-      .select("name")
-      .eq("id", row.referrer_id)
-      .single();
-    referrerName = referrer?.name ?? undefined;
-  }
-
   return {
     data: mapRowToProfile(
-      { ...row, referrer: referrerName ? { name: referrerName } : null },
+      row,
       { educations, certifications, skillInventories, resumes }
     ),
   };

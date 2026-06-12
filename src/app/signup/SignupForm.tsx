@@ -6,64 +6,25 @@ import { Eye, EyeOff, X } from "lucide-react";
 import { validatePassword, validatePhone, validateBirthDateWithMessage, formatPhone } from "@/lib/utils/validation";
 import { ReferrerSearchModal } from "@/components/features/referrer/ReferrerSearchModal";
 import { PolicyModal } from "@/components/features/signup/PolicyModal";
+import { PasswordStrength } from "@/components/features/signup/PasswordStrength";
 import { FormField } from "@/components/ui/form-field";
 import { Input } from "@/components/ui/input";
 import { DateSelectPicker } from "@/components/ui/date-select-picker";
 import { cn } from "@/lib/utils/cn";
 import type { ReferrerSearchResult } from "@/types/api";
 import { encryptPassword } from "@/lib/crypto/client";
-
-function PasswordStrength({ password }: { password: string }) {
-  if (!password) return null;
-
-  const checks = [
-    { label: "8자 이상", ok: password.length >= 8 },
-    { label: "대문자", ok: /[A-Z]/.test(password) },
-    { label: "소문자", ok: /[a-z]/.test(password) },
-    { label: "숫자", ok: /[0-9]/.test(password) },
-    { label: "특수문자", ok: /[!@#$%^&*()_+\-=]/.test(password) },
-  ];
-
-  const passCount = checks.filter((c) => c.ok).length;
-  const strengthLabel = passCount <= 2 ? "약함" : passCount <= 4 ? "보통" : "강함";
-  const strengthColor =
-    passCount <= 2 ? "bg-red-500" : passCount <= 4 ? "bg-yellow-500" : "bg-green-500";
-
-  return (
-    <div className="space-y-2 pt-0.5">
-      <div className="flex items-center gap-2">
-        <div className="flex-1 h-1.5 bg-zinc-100 rounded-full overflow-hidden">
-          <div
-            className={`h-full rounded-full transition-all ${strengthColor}`}
-            style={{ width: `${(passCount / 5) * 100}%` }}
-          />
-        </div>
-        <span className="text-xs text-zinc-500 w-6 text-right">{strengthLabel}</span>
-      </div>
-      <div className="flex flex-wrap gap-1">
-        {checks.map((c) => (
-          <span
-            key={c.label}
-            className={`text-xs px-1.5 py-0.5 rounded ${c.ok ? "bg-green-100 text-green-700" : "bg-zinc-100 text-zinc-400"
-              }`}
-          >
-            {c.label}
-          </span>
-        ))}
-      </div>
-    </div>
-  );
-}
+import { authApi } from "@/lib/api/auth";
+import { profileApi } from "@/lib/api/profile";
+import { ApiError } from "@/lib/api/client";
 
 interface SignupFormProps {
   maskedEmail: string;
   kakaoId: string;
   name: string;
-  reactivate: boolean;
   refParam: string;
 }
 
-export function SignupForm({ maskedEmail, kakaoId, name, reactivate, refParam }: SignupFormProps) {
+export function SignupForm({ maskedEmail, kakaoId, name, refParam }: SignupFormProps) {
   const router = useRouter();
 
   const [formName, setFormName] = useState(name);
@@ -93,10 +54,8 @@ export function SignupForm({ maskedEmail, kakaoId, name, reactivate, refParam }:
     if (!refParam || !/^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i.test(refParam)) return;
     void (async () => {
       try {
-        const res = await fetch(`/api/profile/referrer/lookup?id=${encodeURIComponent(refParam)}`);
-        if (!res.ok) return;
-        const { data } = (await res.json()) as { data?: ReferrerSearchResult };
-        if (data) setReferrer(data);
+        const { data } = await profileApi.lookupReferrer(refParam);
+        setReferrer(data);
       } catch {
         /* fallback to manual input */
       }
@@ -169,44 +128,25 @@ export function SignupForm({ maskedEmail, kakaoId, name, reactivate, refParam }:
 
     setIsLoading(true);
     try {
-      const pkRes = await fetch("/api/auth/public-key");
-      if (!pkRes.ok) {
-        const pkData = await pkRes.json().catch(() => ({})) as { error?: string };
-        setServerError(pkData.error ?? "서버 오류가 발생했습니다. 잠시 후 다시 시도해주세요.");
-        return;
-      }
-      const pkData = (await pkRes.json()) as { publicKey: string };
-      if (!pkData.publicKey) {
-        setServerError("서버 설정 오류가 발생했습니다. 관리자에게 문의해주세요.");
-        return;
-      }
-      const encryptedPassword = await encryptPassword(password, pkData.publicKey);
+      const { publicKey } = await authApi.getPublicKey();
+      const encryptedPassword = await encryptPassword(password, publicKey);
 
-      const res = await fetch("/api/auth/signup", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
-          encryptedPassword,
-          name: formName,
-          birth_date: birthDate,
-          phone,
-          kakaoId,
-          agree_marketing: agreeMarketing,
-          reactivate,
-          referrer_id: referrer?.id ?? null,
-        }),
+      await authApi.signup({
+        encryptedPassword,
+        name: formName,
+        birth_date: birthDate,
+        phone,
+        kakaoId,
+        agree_marketing: agreeMarketing,
+        referrer_id: referrer?.id ?? null,
       });
-
-      const data = (await res.json()) as { success?: boolean; error?: string };
-      if (!res.ok) {
-        setServerError(data.error ?? "회원가입 중 오류가 발생했습니다");
-        return;
-      }
 
       router.replace("/");
     } catch (err) {
       console.error("[회원가입] 클라이언트 오류:", err);
-      setServerError("네트워크 오류가 발생했습니다. 인터넷 연결을 확인해주세요.");
+      setServerError(
+        err instanceof ApiError ? err.message : "네트워크 오류가 발생했습니다. 인터넷 연결을 확인해주세요."
+      );
     } finally {
       setIsLoading(false);
     }
@@ -214,17 +154,8 @@ export function SignupForm({ maskedEmail, kakaoId, name, reactivate, refParam }:
 
   return (
     <form onSubmit={handleSubmit} className="flex flex-col gap-5">
-      {reactivate && (
-        <div className="bg-amber-50 border border-amber-200 rounded-lg px-4 py-3 text-sm text-amber-800">
-          이전에 탈퇴하신 계정입니다. 아래 정보를 입력하고 재가입을 완료해주세요.
-        </div>
-      )}
-
       {/* 이메일 (마스킹 표시) */}
-      <FormField
-        label="이메일"
-        hint={reactivate ? "이전에 사용하던 이메일로 고정됩니다" : "카카오 계정 이메일로 고정됩니다"}
-      >
+      <FormField label="이메일" hint="카카오 계정 이메일로 고정됩니다">
         <Input type="text" value={maskedEmail} disabled />
       </FormField>
 
@@ -259,7 +190,7 @@ export function SignupForm({ maskedEmail, kakaoId, name, reactivate, refParam }:
                 );
               }
             }}
-            placeholder="영문 대소문자·숫자·특수문자 포함 8자 이상"
+            placeholder="영문 소문자·숫자·특수문자 포함 8자 이상"
             className={cn("pr-10", passwordError ? "border-red-300" : "")}
           />
           <button
@@ -448,7 +379,7 @@ export function SignupForm({ maskedEmail, kakaoId, name, reactivate, refParam }:
         disabled={isLoading}
         className="mt-1 w-full rounded-xl bg-zinc-900 py-3.5 text-[15px] font-semibold text-white transition-opacity hover:opacity-90 active:opacity-80 disabled:opacity-50"
       >
-        {isLoading ? "처리 중..." : reactivate ? "재가입 완료" : "회원가입 완료"}
+        {isLoading ? "처리 중..." : "회원가입 완료"}
       </button>
 
       {showReferrerModal && (

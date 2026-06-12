@@ -31,6 +31,20 @@ export function countSkillMatches(techStack: string[], mySkills: string[]): numb
   return techStack.reduce((n, t) => (set.has(t.trim().toLowerCase()) ? n + 1 : n), 0);
 }
 
+/**
+ * 프로젝트 요구 기술 중 내 기술과 일치하는 항목의 Set (원본 표기 그대로 보관).
+ * 매치 수와 항목별 매치 여부를 한 번의 순회로 처리할 때 사용한다.
+ */
+export function getMatchedSkillSet(techStack: string[], mySkills: string[]): Set<string> {
+  const matched = new Set<string>();
+  if (!mySkills.length) return matched;
+  const mine = new Set(mySkills);
+  for (const tech of techStack) {
+    if (mine.has(tech.trim().toLowerCase())) matched.add(tech);
+  }
+  return matched;
+}
+
 /** 특정 기술이 내 기술과 일치하는지 */
 export function isSkillMatched(tech: string, mySkills: string[]): boolean {
   return mySkills.includes(tech.trim().toLowerCase());
