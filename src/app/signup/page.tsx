@@ -5,7 +5,7 @@ import { maskEmail } from "@/lib/utils/format";
 import { SignupForm } from "./SignupForm";
 
 interface SignupPageProps {
-  searchParams: Promise<{ name?: string; kakao_id?: string; reactivate?: string; ref?: string }>;
+  searchParams: Promise<{ name?: string; kakao_id?: string; ref?: string }>;
 }
 
 export default async function SignupPage({ searchParams }: SignupPageProps) {
@@ -33,7 +33,6 @@ export default async function SignupPage({ searchParams }: SignupPageProps) {
             maskedEmail={maskEmail(email)}
             kakaoId={params.kakao_id ?? ""}
             name={params.name ?? ""}
-            reactivate={params.reactivate === "true"}
             refParam={params.ref ?? ""}
           />
         </Suspense>

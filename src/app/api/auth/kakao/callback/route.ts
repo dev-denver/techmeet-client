@@ -78,6 +78,12 @@ export async function GET(request: NextRequest) {
       errorMessage: profileError?.message,
     });
 
+    // 탈퇴 회원은 기존 계정과 연결하지 않고 신규 회원으로 가입 처리
+    if (profile?.account_status === AccountStatus.Withdrawn) {
+      console.log("[카카오 콜백] Step 3: 탈퇴 회원 → 신규 가입 플로우로 진행");
+      profile = null;
+    }
+
     // kakao_id로 못 찾은 경우, 같은 이메일의 기존 프로필이 있으면 kakao_id 자동 연결
     if (!profile && email) {
       const { data: emailProfileRows } = await supabaseAdmin
@@ -88,7 +94,8 @@ export async function GET(request: NextRequest) {
 
       const emailProfile = emailProfileRows?.[0] ?? null;
 
-      if (emailProfile) {
+      // 탈퇴 프로필에는 kakao_id를 연결하지 않음 (신규 가입 플로우로 진행)
+      if (emailProfile && emailProfile.account_status !== AccountStatus.Withdrawn) {
         console.log("[카카오 콜백] Step 3-1: 이메일 일치 프로필 발견 → kakao_id 연결");
         await supabaseAdmin
           .from("profiles")
@@ -99,25 +106,6 @@ export async function GET(request: NextRequest) {
     }
 
     if (profile) {
-      // 탈퇴 회원 → 재가입 페이지로
-      if (profile.account_status === AccountStatus.Withdrawn) {
-        const reactivateUrl = new URL("/signup", request.url);
-        reactivateUrl.searchParams.set("name", name ?? "");
-        reactivateUrl.searchParams.set("kakao_id", kakaoId);
-        reactivateUrl.searchParams.set("reactivate", "true");
-        if (isValidRef) reactivateUrl.searchParams.set("ref", pendingReferral!);
-        const reactivateResponse = NextResponse.redirect(reactivateUrl);
-        reactivateResponse.cookies.set("pending_referral", "", { maxAge: 0, path: "/" });
-        reactivateResponse.cookies.set("signup_email", profile.email, {
-          httpOnly: true,
-          sameSite: "lax",
-          secure: process.env.NODE_ENV === "production",
-          maxAge: 600,
-          path: "/",
-        });
-        return reactivateResponse;
-      }
-
       // 기존 유저: 매직 링크 생성 (이메일 발송 없음)
       const { data: linkData, error: linkError } =
         await supabaseAdmin.auth.admin.generateLink({

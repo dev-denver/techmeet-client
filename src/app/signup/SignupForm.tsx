@@ -18,16 +18,15 @@ function PasswordStrength({ password }: { password: string }) {
 
   const checks = [
     { label: "8자 이상", ok: password.length >= 8 },
-    { label: "대문자", ok: /[A-Z]/.test(password) },
     { label: "소문자", ok: /[a-z]/.test(password) },
     { label: "숫자", ok: /[0-9]/.test(password) },
     { label: "특수문자", ok: /[!@#$%^&*()_+\-=]/.test(password) },
   ];
 
   const passCount = checks.filter((c) => c.ok).length;
-  const strengthLabel = passCount <= 2 ? "약함" : passCount <= 4 ? "보통" : "강함";
+  const strengthLabel = passCount <= 1 ? "약함" : passCount <= 3 ? "보통" : "강함";
   const strengthColor =
-    passCount <= 2 ? "bg-red-500" : passCount <= 4 ? "bg-yellow-500" : "bg-green-500";
+    passCount <= 1 ? "bg-red-500" : passCount <= 3 ? "bg-yellow-500" : "bg-green-500";
 
   return (
     <div className="space-y-2 pt-0.5">
@@ -35,7 +34,7 @@ function PasswordStrength({ password }: { password: string }) {
         <div className="flex-1 h-1.5 bg-zinc-100 rounded-full overflow-hidden">
           <div
             className={`h-full rounded-full transition-all ${strengthColor}`}
-            style={{ width: `${(passCount / 5) * 100}%` }}
+            style={{ width: `${(passCount / checks.length) * 100}%` }}
           />
         </div>
         <span className="text-xs text-zinc-500 w-6 text-right">{strengthLabel}</span>
@@ -59,11 +58,10 @@ interface SignupFormProps {
   maskedEmail: string;
   kakaoId: string;
   name: string;
-  reactivate: boolean;
   refParam: string;
 }
 
-export function SignupForm({ maskedEmail, kakaoId, name, reactivate, refParam }: SignupFormProps) {
+export function SignupForm({ maskedEmail, kakaoId, name, refParam }: SignupFormProps) {
   const router = useRouter();
 
   const [formName, setFormName] = useState(name);
@@ -192,7 +190,6 @@ export function SignupForm({ maskedEmail, kakaoId, name, reactivate, refParam }:
           phone,
           kakaoId,
           agree_marketing: agreeMarketing,
-          reactivate,
           referrer_id: referrer?.id ?? null,
         }),
       });
@@ -214,17 +211,8 @@ export function SignupForm({ maskedEmail, kakaoId, name, reactivate, refParam }:
 
   return (
     <form onSubmit={handleSubmit} className="flex flex-col gap-5">
-      {reactivate && (
-        <div className="bg-amber-50 border border-amber-200 rounded-lg px-4 py-3 text-sm text-amber-800">
-          이전에 탈퇴하신 계정입니다. 아래 정보를 입력하고 재가입을 완료해주세요.
-        </div>
-      )}
-
       {/* 이메일 (마스킹 표시) */}
-      <FormField
-        label="이메일"
-        hint={reactivate ? "이전에 사용하던 이메일로 고정됩니다" : "카카오 계정 이메일로 고정됩니다"}
-      >
+      <FormField label="이메일" hint="카카오 계정 이메일로 고정됩니다">
         <Input type="text" value={maskedEmail} disabled />
       </FormField>
 
@@ -259,7 +247,7 @@ export function SignupForm({ maskedEmail, kakaoId, name, reactivate, refParam }:
                 );
               }
             }}
-            placeholder="영문 대소문자·숫자·특수문자 포함 8자 이상"
+            placeholder="영문 소문자·숫자·특수문자 포함 8자 이상"
             className={cn("pr-10", passwordError ? "border-red-300" : "")}
           />
           <button
@@ -448,7 +436,7 @@ export function SignupForm({ maskedEmail, kakaoId, name, reactivate, refParam }:
         disabled={isLoading}
         className="mt-1 w-full rounded-xl bg-zinc-900 py-3.5 text-[15px] font-semibold text-white transition-opacity hover:opacity-90 active:opacity-80 disabled:opacity-50"
       >
-        {isLoading ? "처리 중..." : reactivate ? "재가입 완료" : "회원가입 완료"}
+        {isLoading ? "처리 중..." : "회원가입 완료"}
       </button>
 
       {showReferrerModal && (
