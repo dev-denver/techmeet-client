@@ -24,7 +24,7 @@ export function BottomSheet({ open, onClose, hasBottomNav = false, header, foote
     >
       <div
         className={cn(
-          "w-full max-w-[600px] rounded-t-2xl bg-card flex flex-col max-h-[85vh] overflow-hidden animate-in slide-in-from-bottom duration-300",
+          "w-full max-w-[600px] rounded-t-2xl bg-card flex flex-col max-h-[85vh] overflow-hidden shadow-[0_-8px_30px_rgba(0,0,0,0.12)] animate-in slide-in-from-bottom duration-300",
           hasBottomNav && "mb-16"
         )}
         onClick={(e) => e.stopPropagation()}
