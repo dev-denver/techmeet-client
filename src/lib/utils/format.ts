@@ -36,6 +36,7 @@ export function getDeadlineDays(deadline: string | null | undefined): number | n
 }
 
 export function formatDeadlineDays(deadline: string | null | undefined): string {
+  if (!deadline) return "";
   const days = getDeadlineDays(deadline);
   if (days === null) return "마감";
   if (days === 0) return "오늘 마감";
