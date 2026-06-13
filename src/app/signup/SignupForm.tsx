@@ -389,7 +389,6 @@ export function SignupForm({ maskedEmail, kakaoId, name, refParam }: SignupFormP
             setShowReferrerModal(false);
           }}
           onClose={() => setShowReferrerModal(false)}
-          maxWidth="lg"
         />
       )}
 
