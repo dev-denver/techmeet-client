@@ -1,5 +1,6 @@
 import { createServerClient } from "@/lib/supabase/server";
-import type { Project, ProjectStatus } from "@/types";
+import { ProjectStatus } from "@/types";
+import type { Project } from "@/types";
 import type { GetProjectsParams, GetProjectsResponse, GetProjectByIdResponse } from "@/types";
 
 interface ProjectRow {
@@ -62,6 +63,11 @@ export async function getProjects(params?: GetProjectsParams): Promise<GetProjec
 
   if (params?.status && params.status !== "all") {
     query = query.eq("status", params.status);
+  }
+  if (params?.status === ProjectStatus.Recruiting) {
+    // 모집중 상태라도 지원 마감일이 지난 프로젝트는 제외
+    const today = new Date().toISOString().slice(0, 10);
+    query = query.or(`deadline.is.null,deadline.gte.${today}`);
   }
   if (params?.search) {
     // 제목 + 소개 동시 검색. `.or()` DSL을 깨뜨릴 수 있는 문자는 공백으로 치환
