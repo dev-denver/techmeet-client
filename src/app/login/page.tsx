@@ -82,8 +82,8 @@ function LoginForm() {
               <span className="text-primary-foreground text-2xl font-bold">T</span>
             </div>
             <div className="text-center">
-              <h1 className="text-2xl font-bold tracking-tight">테크밋</h1>
-              <p className="text-sm text-muted-foreground mt-1">프리랜서 전용</p>
+              <h1 className="text-2xl font-bold tracking-tight">TechMeet</h1>
+              <p className="text-sm text-muted-foreground mt-1">테크밋 회원 전용</p>
             </div>
           </div>
 
