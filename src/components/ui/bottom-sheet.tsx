@@ -6,14 +6,13 @@ interface BottomSheetProps {
   open: boolean;
   onClose: () => void;
   hasBottomNav?: boolean;
-  maxWidth?: "sm" | "lg";
   /** 고정 헤더 영역 (스크롤되지 않음). 지정 시 기본 드래그 핸들 대신 표시 */
   header?: React.ReactNode;
   footer?: React.ReactNode;
   children: React.ReactNode;
 }
 
-export function BottomSheet({ open, onClose, hasBottomNav = false, maxWidth = "sm", header, footer, children }: BottomSheetProps) {
+export function BottomSheet({ open, onClose, hasBottomNav = false, header, footer, children }: BottomSheetProps) {
   if (!open) return null;
 
   return (
@@ -25,8 +24,7 @@ export function BottomSheet({ open, onClose, hasBottomNav = false, maxWidth = "s
     >
       <div
         className={cn(
-          "w-full rounded-t-2xl bg-card flex flex-col max-h-[85vh] overflow-hidden animate-in slide-in-from-bottom duration-300",
-          maxWidth === "lg" ? "max-w-[600px]" : "max-w-[430px]",
+          "w-full max-w-[600px] rounded-t-2xl bg-card flex flex-col max-h-[85vh] overflow-hidden animate-in slide-in-from-bottom duration-300",
           hasBottomNav && "mb-16"
         )}
         onClick={(e) => e.stopPropagation()}

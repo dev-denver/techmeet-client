@@ -161,13 +161,13 @@
 ## BottomSheet 패턴
 
 - 하단에서 올라오는 모달 → `src/components/ui/bottom-sheet.tsx` 사용
-- Props: `{ open, onClose, hasBottomNav?, maxWidth?, header?, footer?, children }`
+- Props: `{ open, onClose, hasBottomNav?, header?, footer?, children }`
+- 너비는 항상 `max-w-[600px]`로 앱 프레임과 동일 (모바일에서는 100vw로 자동 축소)
 - BottomNavigation 위에 표시 필요 시 `hasBottomNav={true}` (pb-16 추가)
 - 내부 컨텐츠는 children으로 전달, 패딩/레이아웃은 children 내부에서 처리
-- 주의: 기본 `maxWidth="sm"`은 430px로 앱 프레임(600px)보다 좁음 — 전체 폭이 필요하면 `maxWidth="lg"` 사용
 - 삭제 등 파괴적 작업 확인은 `window.confirm()` 대신 `ConfirmSheet` (`components/ui/confirm-sheet.tsx`) 사용
 
-## 폼 제출 패턴 (useSubmit + *Api + Toast)
+## 폼 제출 패턴 (useSubmit + \*Api + Toast)
 
 - 클라이언트 폼 제출은 `useSubmit()` 훅 (`src/hooks/useSubmit.ts`) 사용 — 로딩/에러/try-catch 공통화
 - API 호출은 반드시 `lib/api/`의 `*Api` 객체 사용 (`profileApi`, `applicationsApi` 등) — raw `fetch("/api/...")` 금지
@@ -177,7 +177,10 @@
   ```ts
   const { isLoading, error, submit } = useSubmit();
   await submit(() => profileApi.deleteCareer(id), {
-    onSuccess: () => { showToast("삭제되었습니다"); router.refresh(); },
+    onSuccess: () => {
+      showToast("삭제되었습니다");
+      router.refresh();
+    },
   });
   ```
 
@@ -217,11 +220,11 @@
 
 ## Supabase 클라이언트 사용
 
-| 상황                                          | 클라이언트                                            |
-| --------------------------------------------- | ----------------------------------------------------- |
-| Client Component                              | `createClient()` from `@/lib/supabase/client`         |
-| Server Component / API Route (인증 세션 필요) | `createServerClient()` from `@/lib/supabase/server`   |
-| API Route (RLS bypass — 추천인 검색 등)       | `createAdminClient()` from `@/lib/supabase/server`    |
+| 상황                                          | 클라이언트                                          |
+| --------------------------------------------- | --------------------------------------------------- |
+| Client Component                              | `createClient()` from `@/lib/supabase/client`       |
+| Server Component / API Route (인증 세션 필요) | `createServerClient()` from `@/lib/supabase/server` |
+| API Route (RLS bypass — 추천인 검색 등)       | `createAdminClient()` from `@/lib/supabase/server`  |
 
 > `createAdminClient()`는 service_role 키를 사용해 RLS를 우회합니다. 반드시 서버 사이드에서만 호출해야 합니다.
 
