@@ -194,12 +194,6 @@
 - 네비게이션 활성 항목에 `aria-current="page"` 적용 (BottomNavigation)
 - 로딩 중인 제출 버튼에 `aria-busy={isLoading || undefined}` 적용 (SaveButton)
 
-## 다크 모드
-
-- CSS custom properties로 `.dark` 클래스 기반 정의됨
-- `ThemeProvider`/`useTheme` (`components/ui/theme-provider.tsx`)로 토글 구현, `/settings` "화면 설정" 섹션에 `ThemeToggle` 노출
-- 루트 레이아웃(`app/layout.tsx`)의 인라인 스크립트가 `localStorage.theme` 값을 읽어 hydration 전에 `.dark` 클래스 적용 (FOUC 방지), `<html suppressHydrationWarning>` 적용
-
 ## 환경변수 관리
 
 - `lib/config/env.ts`에서 getter 기반 lazy validation으로 타입 안전 접근

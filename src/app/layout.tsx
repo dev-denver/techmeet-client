@@ -2,7 +2,6 @@ import type { Metadata } from "next";
 import { Geist, Geist_Mono } from "next/font/google";
 import { SpeedInsights } from "@vercel/speed-insights/next";
 import { Analytics } from "@vercel/analytics/next";
-import { ThemeProvider } from "@/components/ui/theme-provider";
 import "./globals.css";
 const geistSans = Geist({
   variable: "--font-geist-sans",
@@ -25,22 +24,13 @@ export default function RootLayout({
   children: React.ReactNode;
 }>) {
   return (
-    <html lang="ko" suppressHydrationWarning>
-      <head>
-        <script
-          dangerouslySetInnerHTML={{
-            __html: `try{if(localStorage.getItem('theme')==='dark'){document.documentElement.classList.add('dark')}}catch(e){}`,
-          }}
-        />
-      </head>
+    <html lang="ko">
       <body
         className={`${geistSans.variable} ${geistMono.variable} antialiased bg-page-bg`}
       >
-        <ThemeProvider>
-          {children}
-          <SpeedInsights />
-          <Analytics />
-        </ThemeProvider>
+        {children}
+        <SpeedInsights />
+        <Analytics />
       </body>
     </html>
   );

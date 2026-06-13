@@ -2,7 +2,6 @@ import Link from "next/link";
 import { ChevronRight, Shield, Info, UserCog, UserX, KeyRound } from "lucide-react";
 import { NotificationSettings } from "@/components/features/settings/NotificationSettings";
 import { LogoutButton } from "@/components/features/settings/LogoutButton";
-import { ThemeToggle } from "@/components/features/settings/ThemeToggle";
 import { PageHero } from "@/components/ui/page-hero";
 import { getProfile } from "@/lib/supabase/queries/profile";
 import { ReferrerSection } from "@/components/features/referrer/ReferrerSection";
@@ -77,14 +76,6 @@ export default async function SettingsPage() {
           <SectionLabel>알림 설정</SectionLabel>
           <div className="rounded-xl border bg-card overflow-hidden">
             <NotificationSettings />
-          </div>
-        </div>
-
-        {/* 화면 설정 */}
-        <div>
-          <SectionLabel>화면 설정</SectionLabel>
-          <div className="rounded-xl border bg-card overflow-hidden">
-            <ThemeToggle />
           </div>
         </div>
 
