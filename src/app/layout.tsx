@@ -15,7 +15,7 @@ const geistMono = Geist_Mono({
 });
 
 export const metadata: Metadata = {
-  title: "테크밋 프리랜서",
+  title: "TechMeet",
   description: "테크밋 소속 프리랜서 전용 앱",
 };
 
