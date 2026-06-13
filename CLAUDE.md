@@ -163,7 +163,7 @@
 - 하단에서 올라오는 모달 → `src/components/ui/bottom-sheet.tsx` 사용
 - Props: `{ open, onClose, hasBottomNav?, header?, footer?, children }`
 - 너비는 항상 `max-w-[600px]`로 앱 프레임과 동일 (모바일에서는 100vw로 자동 축소)
-- BottomNavigation 위에 표시 필요 시 `hasBottomNav={true}` (pb-16 추가)
+- BottomNavigation 위에 표시 필요 시 `hasBottomNav={true}` — 배경 오버레이가 `bottom-16`까지만 덮어 BottomNavigation이 가려지지 않고, 패널 높이는 `max-h-[calc(85vh-4rem)]`로 축소됨
 - 내부 컨텐츠는 children으로 전달, 패딩/레이아웃은 children 내부에서 처리
 - 삭제 등 파괴적 작업 확인은 `window.confirm()` 대신 `ConfirmSheet` (`components/ui/confirm-sheet.tsx`) 사용
 

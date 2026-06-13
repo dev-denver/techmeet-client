@@ -17,15 +17,18 @@ export function BottomSheet({ open, onClose, hasBottomNav = false, header, foote
 
   return (
     <div
-      className="fixed inset-0 bg-black/50 z-[60] flex items-end justify-center animate-in fade-in duration-200"
+      className={cn(
+        "fixed inset-x-0 top-0 bg-black/50 z-[60] flex items-end justify-center animate-in fade-in duration-200",
+        hasBottomNav ? "bottom-16" : "bottom-0"
+      )}
       onClick={(e) => {
         if (e.target === e.currentTarget) onClose();
       }}
     >
       <div
         className={cn(
-          "w-full max-w-[600px] rounded-t-2xl bg-card flex flex-col max-h-[85vh] overflow-hidden shadow-[0_-8px_30px_rgba(0,0,0,0.12)] animate-in slide-in-from-bottom duration-300",
-          hasBottomNav && "mb-16"
+          "w-full max-w-[600px] rounded-t-2xl bg-card flex flex-col overflow-hidden shadow-[0_-8px_30px_rgba(0,0,0,0.12)] animate-in slide-in-from-bottom duration-300",
+          hasBottomNav ? "max-h-[calc(85vh-4rem)]" : "max-h-[85vh]"
         )}
         onClick={(e) => e.stopPropagation()}
       >
