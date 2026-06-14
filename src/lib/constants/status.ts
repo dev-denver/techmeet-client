@@ -88,7 +88,13 @@ export const AVAILABILITY_TOGGLE_CONFIG: Record<AvailabilityStatus, StatusConfig
   },
 };
 
-export const CONTRACT_TYPE_CONFIG: Record<ContractType, { label: string }> = {
-  [ContractType.Business]: { label: "사업자" },
-  [ContractType.Individual]: { label: "3.3%" },
+export const CONTRACT_TYPE_CONFIG: Record<ContractType, StatusConfig> = {
+  [ContractType.Business]: {
+    label: "사업자",
+    className: "bg-primary/10 text-primary border-primary/20",
+  },
+  [ContractType.Individual]: {
+    label: "3.3%",
+    className: "bg-primary/10 text-primary border-primary/20",
+  },
 };

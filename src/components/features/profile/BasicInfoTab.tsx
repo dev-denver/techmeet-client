@@ -1,12 +1,13 @@
 "use client";
 
+import { useState } from "react";
 import type { ContractDocument, FreelancerProfile } from "@/types";
 import { AvailabilityStatus, ContractType } from "@/types";
-import { AvailabilityToggle } from "./AvailabilityToggle";
+import { AvailabilityEditSheet } from "./AvailabilityEditSheet";
 import { CardWrap, FieldRow, SectionHeader } from "./tabs/TabShared";
-import { Save } from "lucide-react";
+import { Pencil } from "lucide-react";
 import { cn } from "@/lib/utils/cn";
-import { CONTRACT_TYPE_CONFIG } from "@/lib/constants/status";
+import { AVAILABILITY_STATUS_CONFIG, CONTRACT_TYPE_CONFIG } from "@/lib/constants/status";
 import type { ContractDocumentType } from "@/lib/constants/contractDocuments";
 
 function ContractDocumentRow({ label, type, document }: { label: string; type: ContractDocumentType; document: ContractDocument | null }) {
@@ -32,36 +33,37 @@ interface BasicInfoTabProps {
   profile: FreelancerProfile;
   availStatus: AvailabilityStatus;
   availFromDate: string | null;
-  isDirty: boolean;
-  isSaving: boolean;
-  onStatusChange: (status: AvailabilityStatus, date?: string | null) => void;
-  onSave: () => void;
+  onSaveAvailability: (status: AvailabilityStatus, availableFromDate: string | null) => Promise<boolean>;
 }
 
-/** 내 정보 > 기본정보 탭 (읽기 전용 뷰 + 투입 가능 상태 토글/저장) */
-export function BasicInfoTab({ profile, availStatus, availFromDate, isDirty, isSaving, onStatusChange, onSave }: BasicInfoTabProps) {
+/** 내 정보 > 기본정보 탭 (읽기 전용 뷰 + 투입 가능 상태 요약/변경) */
+export function BasicInfoTab({ profile, availStatus, availFromDate, onSaveAvailability }: BasicInfoTabProps) {
+  const [availSheetOpen, setAvailSheetOpen] = useState(false);
   const genderLabel = profile.gender === "male" ? "남" : profile.gender === "female" ? "여" : null;
 
+  const availConfig = AVAILABILITY_STATUS_CONFIG[availStatus];
+  const fromDateLabel = (() => {
+    if (availStatus !== AvailabilityStatus.Partial || !availFromDate) return null;
+    const d = new Date(availFromDate);
+    if (isNaN(d.getTime())) return null;
+    return `${d.getFullYear()}. ${d.getMonth() + 1}. ${d.getDate()}부터`;
+  })();
+
   return (
-    <div className="space-y-5">
+    <div className="space-y-6">
+      {/* 기본 정보 */}
       <div>
         <SectionHeader title="기본 정보" />
         <CardWrap>
           <div className="divide-y divide-border">
             <FieldRow label="이름" value={profile.name} />
-            <FieldRow label="성별" value={genderLabel} />
-            <FieldRow
-              label="생년월일"
-              value={profile.birthDate ? profile.birthDate.slice(0, 10).replace(/-/g, ". ") : null}
-            />
-          </div>
-        </CardWrap>
-      </div>
-
-      <div>
-        <SectionHeader title="연락처 및 주소" />
-        <CardWrap>
-          <div className="divide-y divide-border">
+            <div className="grid grid-cols-2 divide-x divide-border">
+              <FieldRow label="성별" value={genderLabel} />
+              <FieldRow
+                label="생년월일"
+                value={profile.birthDate ? profile.birthDate.slice(0, 10).replace(/-/g, ". ") : null}
+              />
+            </div>
             <FieldRow label="휴대폰번호" value={profile.phone} />
             <FieldRow label="이메일" value={profile.email} />
             <FieldRow label="주소" value={profile.address} />
@@ -69,14 +71,21 @@ export function BasicInfoTab({ profile, availStatus, availFromDate, isDirty, isS
         </CardWrap>
       </div>
 
+      {/* 계약 정보 */}
       <div>
         <SectionHeader title="계약 정보" />
         <CardWrap>
           <div className="divide-y divide-border">
-            <FieldRow
-              label="계약형태"
-              value={profile.contractType ? CONTRACT_TYPE_CONFIG[profile.contractType].label : null}
-            />
+            <div className="px-4 py-3">
+              <p className="text-[10px] text-muted-foreground font-medium mb-1">계약형태</p>
+              {profile.contractType ? (
+                <span className={cn("inline-flex text-xs font-semibold px-2 py-0.5 rounded-full", CONTRACT_TYPE_CONFIG[profile.contractType].className)}>
+                  {CONTRACT_TYPE_CONFIG[profile.contractType].label}
+                </span>
+              ) : (
+                <p className="text-sm text-foreground font-medium">-</p>
+              )}
+            </div>
             {profile.contractType === ContractType.Business && (
               <>
                 <FieldRow label="사업자명" value={profile.businessName} />
@@ -92,44 +101,42 @@ export function BasicInfoTab({ profile, availStatus, availFromDate, isDirty, isS
         </CardWrap>
       </div>
 
-      {/* 투입 가능 상태 — 수동 저장 방식 */}
+      {/* 투입 가능 상태 — 자주 바뀌지 않는 값이므로 요약만 노출, 변경은 시트에서 처리 */}
       <div>
         <SectionHeader title="투입 가능 상태" />
-        <AvailabilityToggle
-          status={availStatus}
-          availableFromDate={availFromDate}
-          isDirty={isDirty}
-          onStatusChange={onStatusChange}
-        />
+        <CardWrap>
+          <button
+            type="button"
+            onClick={() => setAvailSheetOpen(true)}
+            className="w-full flex items-center justify-between gap-3 px-4 py-3.5 hover:bg-muted/40 active:bg-muted/60 transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-inset"
+          >
+            <div className="flex items-center gap-2 min-w-0">
+              <span className={cn("text-xs font-semibold px-2 py-0.5 rounded-full shrink-0", availConfig.className)}>
+                {availConfig.label}
+              </span>
+              {fromDateLabel && (
+                <span className="text-xs text-muted-foreground truncate">{fromDateLabel}</span>
+              )}
+            </div>
+            <span className="flex items-center gap-1 text-xs font-medium text-muted-foreground shrink-0">
+              <Pencil className="h-3.5 w-3.5" />
+              변경
+            </span>
+          </button>
+        </CardWrap>
+        <p className="text-[11px] text-muted-foreground mt-2 px-1">
+          * 투입 상태는 담당 매니저에게 공유됩니다.
+        </p>
       </div>
 
-      {/* 투입 상태 저장 버튼 (변경 있을 때만) */}
-      {isDirty && (
-        <button
-          type="button"
-          onClick={onSave}
-          disabled={isSaving}
-          aria-busy={isSaving || undefined}
-          className={cn(
-            "w-full flex items-center justify-center gap-2.5 rounded-xl py-3.5 text-base font-semibold transition-all",
-            "focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2",
-            "disabled:opacity-50 bg-status-info text-white hover:opacity-90 active:opacity-80"
-          )}
-        >
-          {isSaving ? (
-            <>
-              <span className="w-4 h-4 border-2 border-white/30 border-t-white rounded-full animate-spin shrink-0" />
-              저장 중...
-            </>
-          ) : (
-            <>
-              <Save className="h-4 w-4 shrink-0" />
-              투입 상태 저장하기
-            </>
-          )}
-        </button>
-      )}
-
+      <AvailabilityEditSheet
+        key={availSheetOpen ? "open" : "closed"}
+        open={availSheetOpen}
+        onClose={() => setAvailSheetOpen(false)}
+        status={availStatus}
+        availableFromDate={availFromDate}
+        onSave={onSaveAvailability}
+      />
     </div>
   );
 }
