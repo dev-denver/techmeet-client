@@ -6,7 +6,6 @@ import { AvailabilityToggle } from "./AvailabilityToggle";
 import { CardWrap, FieldRow, SectionHeader } from "./tabs/TabShared";
 import { Save } from "lucide-react";
 import { cn } from "@/lib/utils/cn";
-import { formatExperience } from "@/lib/utils/format";
 import { CONTRACT_TYPE_CONFIG } from "@/lib/constants/status";
 import type { ContractDocumentType } from "@/lib/constants/contractDocuments";
 
@@ -48,56 +47,13 @@ export function BasicInfoTab({ profile, availStatus, availFromDate, isDirty, isS
       <div>
         <SectionHeader title="기본 정보" />
         <CardWrap>
-          <div className="grid grid-cols-2">
-            <div className="px-4 py-3 border-b border-r border-border">
-              <p className="text-[10px] text-muted-foreground font-medium mb-0.5">이름</p>
-              <p className="text-sm text-foreground font-medium">{profile.name}</p>
-            </div>
-            <div className="px-4 py-3 border-b border-border">
-              <p className="text-[10px] text-muted-foreground font-medium mb-0.5">성별</p>
-              <p className="text-sm text-foreground font-medium">{genderLabel || "-"}</p>
-            </div>
-            <div className="px-4 py-3 border-b border-r border-border">
-              <p className="text-[10px] text-muted-foreground font-medium mb-0.5">생년월일</p>
-              <p className="text-sm text-foreground font-medium">
-                {profile.birthDate ? profile.birthDate.slice(0, 10).replace(/-/g, ". ") : "-"}
-              </p>
-            </div>
-            <div className="px-4 py-3 border-b border-border">
-              <p className="text-[10px] text-muted-foreground font-medium mb-0.5">경력</p>
-              <p className="text-sm text-foreground font-medium">
-                {profile.experienceYears !== null || profile.experienceMonths > 0
-                  ? formatExperience(profile.experienceYears, profile.experienceMonths)
-                  : "-"}
-              </p>
-            </div>
-          </div>
-          <FieldRow label="병역 (역종)" value={profile.militaryService} />
-        </CardWrap>
-      </div>
-
-      <div>
-        <SectionHeader title="소속 정보" />
-        <CardWrap>
-          <div className="grid grid-cols-2">
-            <div className="px-4 py-3 border-b border-r border-border">
-              <p className="text-[10px] text-muted-foreground font-medium mb-0.5">소속</p>
-              <p className="text-sm text-foreground font-medium">{profile.affiliation || "-"}</p>
-            </div>
-            <div className="px-4 py-3 border-b border-border">
-              <p className="text-[10px] text-muted-foreground font-medium mb-0.5">입사일</p>
-              <p className="text-sm text-foreground font-medium">
-                {profile.joiningDate ? profile.joiningDate.slice(0, 10).replace(/-/g, ". ") : "-"}
-              </p>
-            </div>
-            <div className="px-4 py-3 border-r border-border">
-              <p className="text-[10px] text-muted-foreground font-medium mb-0.5">부서</p>
-              <p className="text-sm text-foreground font-medium">{profile.department || "-"}</p>
-            </div>
-            <div className="px-4 py-3">
-              <p className="text-[10px] text-muted-foreground font-medium mb-0.5">직위</p>
-              <p className="text-sm text-foreground font-medium">{profile.positionTitle || "-"}</p>
-            </div>
+          <div className="divide-y divide-border">
+            <FieldRow label="이름" value={profile.name} />
+            <FieldRow label="성별" value={genderLabel} />
+            <FieldRow
+              label="생년월일"
+              value={profile.birthDate ? profile.birthDate.slice(0, 10).replace(/-/g, ". ") : null}
+            />
           </div>
         </CardWrap>
       </div>

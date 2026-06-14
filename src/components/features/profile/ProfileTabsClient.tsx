@@ -111,11 +111,6 @@ export function ProfileTabsClient({ profile }: ProfileTabsClientProps) {
                 </span>
               )}
             </div>
-            {profile.positionTitle && (
-              <p className="text-primary-foreground/60 text-sm mt-1">
-                {profile.positionTitle}{profile.affiliation ? ` · ${profile.affiliation}` : ""}
-              </p>
-            )}
           </div>
           {tab === "basic" && !editingBasic && (
             <button

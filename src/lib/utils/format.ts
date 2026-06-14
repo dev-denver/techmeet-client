@@ -44,14 +44,6 @@ export function formatDeadlineDays(deadline: string | null | undefined): string 
   return `${days}일 후 마감`;
 }
 
-export function formatExperience(years: number | null, months: number): string {
-  const y = years ?? 0;
-  if (y === 0 && months === 0) return "경력 없음";
-  if (months === 0) return `${y}년`;
-  if (y === 0) return `${months}개월`;
-  return `${y}년 ${months}개월`;
-}
-
 export function formatMonthYear(dateString: string): string {
   const [year, month] = dateString.split("-");
   return `${year}년 ${month}월`;

@@ -28,13 +28,6 @@ export function getProfileCompletion(profile: FreelancerProfile): ProfileComplet
     { key: "phone", label: "연락처", weight: 1, tab: "basic", done: !!profile.phone },
     { key: "address", label: "주소", weight: 1, tab: "basic", done: !!profile.address },
     {
-      key: "experience",
-      label: "경력 연차",
-      weight: 1,
-      tab: "basic",
-      done: profile.experienceYears !== null || profile.experienceMonths > 0,
-    },
-    {
       key: "availability",
       label: "투입 가능 상태",
       weight: 1,
