@@ -1,4 +1,4 @@
-import { ProjectStatus, ApplicationStatus, AvailabilityStatus } from "@/types";
+import { ProjectStatus, ApplicationStatus, AvailabilityStatus, ContractType } from "@/types";
 
 interface StatusConfig {
   label: string;
@@ -86,4 +86,9 @@ export const AVAILABILITY_TOGGLE_CONFIG: Record<AvailabilityStatus, StatusConfig
     label: "투입 불가",
     className: "bg-status-danger text-white",
   },
+};
+
+export const CONTRACT_TYPE_CONFIG: Record<ContractType, { label: string }> = {
+  [ContractType.Business]: { label: "사업자" },
+  [ContractType.Individual]: { label: "3.3%" },
 };

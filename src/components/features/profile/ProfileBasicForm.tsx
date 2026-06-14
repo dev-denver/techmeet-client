@@ -4,15 +4,26 @@ import { useState } from "react";
 import { Minus, Plus } from "lucide-react";
 import { SaveButton } from "@/components/ui/save-button";
 import { ErrorMessage } from "@/components/ui/error-message";
-import { validatePhone, formatPhone, validateBirthDateWithMessage, validatePastOrPresentDate } from "@/lib/utils/validation";
+import {
+  validatePhone,
+  formatPhone,
+  validateBirthDateWithMessage,
+  validatePastOrPresentDate,
+  validateBusinessNumber,
+  formatBusinessNumber,
+} from "@/lib/utils/validation";
 import { TechStackInput } from "@/components/features/profile/TechStackInput";
 import { KakaoAddressInput } from "@/components/features/profile/KakaoAddressInput";
+import { ContractDocumentField } from "@/components/features/profile/ContractDocumentField";
 import { FormField } from "@/components/ui/form-field";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { DateSelectPicker } from "@/components/ui/date-select-picker";
 import { profileApi } from "@/lib/api/profile";
 import { ApiError } from "@/lib/api/client";
+import { LIMITS } from "@/lib/constants/limits";
+import { CONTRACT_TYPE_CONFIG } from "@/lib/constants/status";
+import { ContractType } from "@/types";
 import type { FreelancerProfile } from "@/types";
 
 function SectionDivider({ label }: { label: string }) {
@@ -62,10 +73,21 @@ export function ProfileBasicForm({ initial, onSuccess, onCancel }: ProfileBasicF
   const [techStack, setTechStack] = useState<string[]>(initial.techStack);
   const [bio, setBio] = useState(initial.bio ?? "");
 
+  // 계약 정보
+  const [contractType, setContractType] = useState<ContractType | "">(initial.contractType ?? "");
+  const [businessName, setBusinessName] = useState(initial.businessName ?? "");
+  const [businessNumber, setBusinessNumber] = useState(initial.businessNumber ?? "");
+  const [businessAddress, setBusinessAddress] = useState(initial.businessAddress ?? "");
+  const [bankName, setBankName] = useState(initial.bankName ?? "");
+  const [bankAccountNumber, setBankAccountNumber] = useState(initial.bankAccountNumber ?? "");
+
   const [nameError, setNameError] = useState("");
   const [birthDateError, setBirthDateError] = useState("");
   const [joiningDateError, setJoiningDateError] = useState("");
   const [phoneError, setPhoneError] = useState("");
+  const [businessNameError, setBusinessNameError] = useState("");
+  const [businessNumberError, setBusinessNumberError] = useState("");
+  const [businessAddressError, setBusinessAddressError] = useState("");
   const [serverError, setServerError] = useState("");
 
   function validate(): boolean {
@@ -85,6 +107,18 @@ export function ProfileBasicForm({ initial, onSuccess, onCancel }: ProfileBasicF
     } else setJoiningDateError("");
     if (phone && !validatePhone(phone)) { setPhoneError("올바른 휴대폰 번호 형식이 아닙니다 (010-XXXX-XXXX)"); valid = false; }
     else setPhoneError("");
+    if (contractType === ContractType.Business) {
+      if (!businessName.trim()) { setBusinessNameError("사업자명을 입력해주세요"); valid = false; }
+      else setBusinessNameError("");
+      if (!businessNumber || !validateBusinessNumber(businessNumber)) { setBusinessNumberError("올바른 사업자 번호 형식이 아닙니다 (000-00-00000)"); valid = false; }
+      else setBusinessNumberError("");
+      if (!businessAddress.trim()) { setBusinessAddressError("사업장 주소를 입력해주세요"); valid = false; }
+      else setBusinessAddressError("");
+    } else {
+      setBusinessNameError("");
+      setBusinessNumberError("");
+      setBusinessAddressError("");
+    }
     return valid;
   }
 
@@ -110,6 +144,12 @@ export function ProfileBasicForm({ initial, onSuccess, onCancel }: ProfileBasicF
         experienceMonths,
         techStack,
         bio,
+        contractType: contractType || null,
+        bankName: bankName || null,
+        bankAccountNumber: bankAccountNumber || null,
+        ...(contractType === ContractType.Business
+          ? { businessName, businessNumber, businessAddress }
+          : {}),
       });
       setSaveSuccess(true);
       setTimeout(onSuccess, 700);
@@ -306,6 +346,93 @@ export function ProfileBasicForm({ initial, onSuccess, onCancel }: ProfileBasicF
           maxLength={500}
         />
       </FormField>
+
+      {/* 계약 정보 */}
+      <SectionDivider label="계약 정보" />
+
+      <FormField label="계약형태" optional>
+        <select
+          value={contractType}
+          onChange={(e) => setContractType(e.target.value as ContractType | "")}
+          className="w-full h-11 px-3 rounded-lg border border-input text-sm text-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring bg-background"
+        >
+          <option value="">선택 안함</option>
+          <option value={ContractType.Business}>{CONTRACT_TYPE_CONFIG[ContractType.Business].label}</option>
+          <option value={ContractType.Individual}>{CONTRACT_TYPE_CONFIG[ContractType.Individual].label}</option>
+        </select>
+      </FormField>
+
+      {contractType === ContractType.Business && (
+        <>
+          <FormField
+            label="사업자명"
+            required
+            error={businessNameError}
+            hint={!businessNameError ? `${businessName.length}/${LIMITS.BUSINESS_NAME_MAX}` : undefined}
+          >
+            <Input
+              type="text"
+              value={businessName}
+              maxLength={LIMITS.BUSINESS_NAME_MAX}
+              onChange={(e) => { setBusinessName(e.target.value); if (businessNameError) setBusinessNameError(e.target.value.trim() ? "" : "사업자명을 입력해주세요"); }}
+              className={businessNameError ? "border-destructive/50" : ""}
+            />
+          </FormField>
+
+          <FormField
+            label="사업자 번호"
+            required
+            error={businessNumberError}
+            hint={!businessNumberError ? "000-00-00000 형식" : undefined}
+          >
+            <Input
+              type="text"
+              value={businessNumber}
+              onChange={(e) => { setBusinessNumber(formatBusinessNumber(e.target.value)); if (businessNumberError) setBusinessNumberError(""); }}
+              onBlur={() => { if (businessNumber && !validateBusinessNumber(businessNumber)) setBusinessNumberError("올바른 사업자 번호 형식이 아닙니다 (000-00-00000)"); }}
+              placeholder="514-88-01786"
+              maxLength={12}
+              className={businessNumberError ? "border-destructive/50" : ""}
+            />
+          </FormField>
+
+          <FormField label="사업장 주소" required error={businessAddressError}>
+            <KakaoAddressInput
+              value={businessAddress}
+              onChange={(v) => { setBusinessAddress(v); if (businessAddressError) setBusinessAddressError(v.trim() ? "" : "사업장 주소를 입력해주세요"); }}
+            />
+          </FormField>
+
+          <ContractDocumentField
+            documentType="business-registration"
+            label="사업자등록증"
+            accept=".pdf,.jpg,.jpeg,.png,application/pdf,image/jpeg,image/png"
+            initialDocument={initial.businessRegistrationFile}
+          />
+        </>
+      )}
+
+      <FormField label="은행" optional>
+        <Input type="text" value={bankName} maxLength={LIMITS.BANK_NAME_MAX} onChange={(e) => setBankName(e.target.value)} placeholder="ex. 국민은행" />
+      </FormField>
+
+      <FormField label="계좌번호" optional>
+        <Input
+          type="text"
+          inputMode="numeric"
+          value={bankAccountNumber}
+          maxLength={LIMITS.BANK_ACCOUNT_MAX}
+          onChange={(e) => setBankAccountNumber(e.target.value.replace(/[^0-9-]/g, ""))}
+          placeholder="계좌번호를 입력해주세요"
+        />
+      </FormField>
+
+      <ContractDocumentField
+        documentType="bank-account-image"
+        label="계좌 이미지"
+        accept=".jpg,.jpeg,.png,.webp,image/jpeg,image/png,image/webp"
+        initialDocument={initial.bankAccountImage}
+      />
 
       <ErrorMessage size="sm">{serverError}</ErrorMessage>
 

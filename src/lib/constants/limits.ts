@@ -47,4 +47,12 @@ export const LIMITS = {
   SEARCH_MAX: 100,
   /** 이메일 */
   EMAIL_MAX: 255,
+  /** 사업자명 */
+  BUSINESS_NAME_MAX: 100,
+  /** 사업장 주소 */
+  BUSINESS_ADDRESS_MAX: 200,
+  /** 은행명 */
+  BANK_NAME_MAX: 50,
+  /** 계좌번호 */
+  BANK_ACCOUNT_MAX: 30,
 } as const;

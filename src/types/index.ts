@@ -1,8 +1,8 @@
 export { ProjectStatus, ProjectType, WorkType } from "./project";
 export type { Project, ProjectFilterValue } from "./project";
 
-export { AvailabilityStatus, AccountStatus, Gender } from "./user";
-export type { FreelancerProfile, Career, Education, Certification, SkillInventory, ProfileResume } from "./user";
+export { AvailabilityStatus, AccountStatus, Gender, ContractType } from "./user";
+export type { FreelancerProfile, Career, Education, Certification, SkillInventory, ProfileResume, ContractDocument } from "./user";
 
 export { ApplicationStatus } from "./application";
 export type { Application } from "./application";
@@ -44,4 +44,5 @@ export type {
   SearchReferrerResponse,
   LookupReferrerResponse,
   UploadResumeResponse,
+  UploadContractDocumentResponse,
 } from "./api";

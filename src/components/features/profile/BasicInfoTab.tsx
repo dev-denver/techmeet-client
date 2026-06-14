@@ -1,12 +1,33 @@
 "use client";
 
-import type { FreelancerProfile } from "@/types";
-import { AvailabilityStatus } from "@/types";
+import type { ContractDocument, FreelancerProfile } from "@/types";
+import { AvailabilityStatus, ContractType } from "@/types";
 import { AvailabilityToggle } from "./AvailabilityToggle";
 import { CardWrap, FieldRow, SectionHeader } from "./tabs/TabShared";
 import { Save } from "lucide-react";
 import { cn } from "@/lib/utils/cn";
 import { formatExperience } from "@/lib/utils/format";
+import { CONTRACT_TYPE_CONFIG } from "@/lib/constants/status";
+import type { ContractDocumentType } from "@/lib/constants/contractDocuments";
+
+function ContractDocumentRow({ label, type, document }: { label: string; type: ContractDocumentType; document: ContractDocument | null }) {
+  return (
+    <div className="px-4 py-3">
+      <p className="text-[10px] text-muted-foreground font-medium mb-0.5">{label}</p>
+      {document ? (
+        <a
+          href={`/api/profile/contract-documents/${type}/download`}
+          download
+          className="text-sm text-primary font-medium underline-offset-2 hover:underline focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 rounded-sm"
+        >
+          {document.fileName}
+        </a>
+      ) : (
+        <p className="text-sm text-foreground font-medium">-</p>
+      )}
+    </div>
+  );
+}
 
 interface BasicInfoTabProps {
   profile: FreelancerProfile;
@@ -88,6 +109,29 @@ export function BasicInfoTab({ profile, availStatus, availFromDate, isDirty, isS
             <FieldRow label="휴대폰번호" value={profile.phone} />
             <FieldRow label="이메일" value={profile.email} />
             <FieldRow label="주소" value={profile.address} />
+          </div>
+        </CardWrap>
+      </div>
+
+      <div>
+        <SectionHeader title="계약 정보" />
+        <CardWrap>
+          <div className="divide-y divide-border">
+            <FieldRow
+              label="계약형태"
+              value={profile.contractType ? CONTRACT_TYPE_CONFIG[profile.contractType].label : null}
+            />
+            {profile.contractType === ContractType.Business && (
+              <>
+                <FieldRow label="사업자명" value={profile.businessName} />
+                <FieldRow label="사업자 번호" value={profile.businessNumber} />
+                <FieldRow label="사업장 주소" value={profile.businessAddress} />
+                <ContractDocumentRow label="사업자등록증" type="business-registration" document={profile.businessRegistrationFile} />
+              </>
+            )}
+            <FieldRow label="은행" value={profile.bankName} />
+            <FieldRow label="계좌번호" value={profile.bankAccountNumber} />
+            <ContractDocumentRow label="계좌 이미지" type="bank-account-image" document={profile.bankAccountImage} />
           </div>
         </CardWrap>
       </div>

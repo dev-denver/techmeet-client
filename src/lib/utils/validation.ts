@@ -32,6 +32,17 @@ export function formatPhone(value: string): string {
   return `${digits.slice(0, 3)}-${digits.slice(3, 7)}-${digits.slice(7, 11)}`;
 }
 
+export function validateBusinessNumber(value: string): boolean {
+  return /^\d{3}-\d{2}-\d{5}$/.test(value);
+}
+
+export function formatBusinessNumber(value: string): string {
+  const digits = value.replace(/\D/g, "");
+  if (digits.length <= 3) return digits;
+  if (digits.length <= 5) return `${digits.slice(0, 3)}-${digits.slice(3)}`;
+  return `${digits.slice(0, 3)}-${digits.slice(3, 5)}-${digits.slice(5, 10)}`;
+}
+
 export function validateBirthDate(birthDate: string): boolean {
   const date = new Date(birthDate);
   if (isNaN(date.getTime())) return false;
