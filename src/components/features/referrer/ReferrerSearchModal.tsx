@@ -10,10 +10,9 @@ import type { ReferrerSearchResult } from "@/types/api";
 interface Props {
   onSelect: (referrer: ReferrerSearchResult) => void;
   onClose: () => void;
-  hasBottomNav?: boolean;
 }
 
-export function ReferrerSearchModal({ onSelect, onClose, hasBottomNav = false }: Props) {
+export function ReferrerSearchModal({ onSelect, onClose }: Props) {
   const [query, setQuery] = useState("");
   const [results, setResults] = useState<ReferrerSearchResult[]>([]);
   const [selected, setSelected] = useState<ReferrerSearchResult | null>(null);
@@ -43,7 +42,7 @@ export function ReferrerSearchModal({ onSelect, onClose, hasBottomNav = false }:
   }
 
   return (
-    <BottomSheet open onClose={onClose} hasBottomNav={hasBottomNav}>
+    <BottomSheet open onClose={onClose}>
       <div className="px-4 pb-5 pt-2 flex flex-col gap-3 min-h-[320px]">
         {/* 헤더 */}
         <div className="flex items-center justify-between shrink-0">
