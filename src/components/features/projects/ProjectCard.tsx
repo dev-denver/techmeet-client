@@ -3,6 +3,7 @@ import { MapPin, Clock, Users, CalendarRange, Layers, Sparkles } from "lucide-re
 import { ProjectStatusBadge } from "./ProjectStatusBadge";
 import { formatDeadlineDays, getDeadlineDays, formatWorkType, formatProjectType, formatProjectPeriod } from "@/lib/utils/format";
 import { countSkillMatches } from "@/lib/utils/skills";
+import { cn } from "@/lib/utils/cn";
 import { ProjectStatus } from "@/types";
 import type { Project } from "@/types";
 
@@ -19,12 +20,22 @@ export function ProjectCard({ project, mySkills }: ProjectCardProps) {
     project.status === ProjectStatus.Recruiting &&
     deadlineDays !== null &&
     deadlineDays <= 7;
+  // 모집중이지만 마감일이 지난 프로젝트는 카드를 옅게 표시해 시선이 덜 가도록 처리
+  const isExpired =
+    project.status === ProjectStatus.Recruiting &&
+    !!project.deadline &&
+    deadlineDays === null;
   const period = formatProjectPeriod(project.duration.startDate, project.duration.endDate);
   const matchCount = mySkills ? countSkillMatches(project.techStack, mySkills) : 0;
 
   return (
     <Link href={`/projects/${project.id}`}>
-      <div className="rounded-xl border bg-card shadow-sm hover:shadow-md hover:-translate-y-0.5 transition-all cursor-pointer overflow-hidden">
+      <div
+        className={cn(
+          "rounded-xl border bg-card shadow-sm hover:shadow-md hover:-translate-y-0.5 transition-all cursor-pointer overflow-hidden",
+          isExpired && "opacity-60"
+        )}
+      >
         <div className="px-4 pt-4 pb-4 space-y-3">
           {/* 상태 + 마감 */}
           <div className="flex items-center justify-between gap-2">
