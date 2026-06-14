@@ -69,15 +69,8 @@ export interface UpdateProfileRequest {
   phone?: string;
   bio?: string;
   techStack?: string[];
-  experienceYears?: number;
-  experienceMonths?: number;
   birthDate?: string | null;
   gender?: "male" | "female" | null;
-  joiningDate?: string | null;
-  affiliation?: string | null;
-  department?: string | null;
-  positionTitle?: string | null;
-  militaryService?: string | null;
   address?: string | null;
   contractType?: ContractType | null;
   businessName?: string | null;

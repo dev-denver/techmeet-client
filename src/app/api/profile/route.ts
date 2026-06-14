@@ -3,7 +3,6 @@ import { getProfile, updateProfile } from "@/lib/supabase/queries/profile";
 import {
   validatePhone,
   validateBirthDate,
-  validatePastOrPresentDate,
   validateLength,
   validateStringArray,
   validateBusinessNumber,
@@ -45,10 +44,6 @@ export async function PUT(request: NextRequest) {
     // 길이 제한이 있는 텍스트 필드 일괄 검증 (클라이언트 maxLength와 동일 기준)
     const lengthChecks: Array<[string | null | undefined, number, string]> = [
       [body.bio, LIMITS.BIO_MAX, "자기소개"],
-      [body.affiliation, LIMITS.AFFILIATION_MAX, "소속"],
-      [body.department, LIMITS.DEPARTMENT_MAX, "부서"],
-      [body.positionTitle, LIMITS.POSITION_MAX, "직급"],
-      [body.militaryService, LIMITS.MILITARY_MAX, "병역사항"],
       [body.address, LIMITS.ADDRESS_MAX, "주소"],
       [body.businessName, LIMITS.BUSINESS_NAME_MAX, "사업자명"],
       [body.businessAddress, LIMITS.BUSINESS_ADDRESS_MAX, "사업장 주소"],
@@ -82,33 +77,9 @@ export async function PUT(request: NextRequest) {
       return NextResponse.json({ error: "올바른 생년월일을 입력해주세요" }, { status: 400 });
     }
 
-    // 경력 연차: 0~50 정수
-    if (
-      body.experienceYears !== undefined &&
-      (!Number.isInteger(body.experienceYears) ||
-        body.experienceYears < 0 ||
-        body.experienceYears > LIMITS.EXPERIENCE_YEARS_MAX)
-    ) {
-      return NextResponse.json(
-        { error: `경력 연차는 0~${LIMITS.EXPERIENCE_YEARS_MAX} 사이여야 합니다` },
-        { status: 400 }
-      );
-    }
-
-    // 경력 개월: 0-11 범위
-    if (body.experienceMonths !== undefined && (body.experienceMonths < 0 || body.experienceMonths > 11)) {
-      return NextResponse.json({ error: "경력 개월 수는 0~11 사이여야 합니다" }, { status: 400 });
-    }
-
     // 성별: 허용값만 (Gender enum 기준)
     if (body.gender !== undefined && body.gender !== null && !VALID_GENDERS.has(body.gender)) {
       return NextResponse.json({ error: "올바른 성별 값이 아닙니다" }, { status: 400 });
-    }
-
-    // 입사년월: 과거~오늘만 허용 (클라이언트와 동일 검증)
-    if (body.joiningDate) {
-      const joiningError = validatePastOrPresentDate(body.joiningDate);
-      if (joiningError) return NextResponse.json({ error: joiningError }, { status: 400 });
     }
 
     // 계약형태: 허용값만 (ContractType enum 기준)

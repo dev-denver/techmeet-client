@@ -1,14 +1,12 @@
 "use client";
 
 import { useState } from "react";
-import { Minus, Plus } from "lucide-react";
 import { SaveButton } from "@/components/ui/save-button";
 import { ErrorMessage } from "@/components/ui/error-message";
 import {
   validatePhone,
   formatPhone,
   validateBirthDateWithMessage,
-  validatePastOrPresentDate,
   validateBusinessNumber,
   formatBusinessNumber,
 } from "@/lib/utils/validation";
@@ -44,7 +42,7 @@ interface ProfileBasicFormProps {
 }
 
 /**
- * 기본정보 편집 폼 (이름/소속/연락처/경력/기술/소개).
+ * 기본정보 편집 폼 (이름/연락처/기술/소개/계약 정보).
  * /settings/profile 페이지와 내 정보 탭 인라인 편집에서 공유한다. PUT /api/profile 사용.
  */
 export function ProfileBasicForm({ initial, onSuccess, onCancel }: ProfileBasicFormProps) {
@@ -55,21 +53,12 @@ export function ProfileBasicForm({ initial, onSuccess, onCancel }: ProfileBasicF
   const [name, setName] = useState(initial.name);
   const [birthDate, setBirthDate] = useState(initial.birthDate?.slice(0, 10) ?? "");
   const [gender, setGender] = useState<"male" | "female" | "">((initial.gender as "male" | "female" | "") ?? "");
-  const [militaryService, setMilitaryService] = useState(initial.militaryService ?? "");
-
-  // 소속 정보
-  const [affiliation, setAffiliation] = useState(initial.affiliation ?? "");
-  const [joiningDate, setJoiningDate] = useState(initial.joiningDate?.slice(0, 10) ?? "");
-  const [department, setDepartment] = useState(initial.department ?? "");
-  const [positionTitle, setPositionTitle] = useState(initial.positionTitle ?? "");
 
   // 연락처 및 주소
   const [phone, setPhone] = useState(initial.phone ?? "");
   const [address, setAddress] = useState(initial.address ?? "");
 
-  // 경력/기술/소개
-  const [experienceYears, setExperienceYears] = useState(initial.experienceYears ?? 0);
-  const [experienceMonths, setExperienceMonths] = useState(initial.experienceMonths ?? 0);
+  // 기술/소개
   const [techStack, setTechStack] = useState<string[]>(initial.techStack);
   const [bio, setBio] = useState(initial.bio ?? "");
 
@@ -83,7 +72,6 @@ export function ProfileBasicForm({ initial, onSuccess, onCancel }: ProfileBasicF
 
   const [nameError, setNameError] = useState("");
   const [birthDateError, setBirthDateError] = useState("");
-  const [joiningDateError, setJoiningDateError] = useState("");
   const [phoneError, setPhoneError] = useState("");
   const [businessNameError, setBusinessNameError] = useState("");
   const [businessNumberError, setBusinessNumberError] = useState("");
@@ -100,11 +88,6 @@ export function ProfileBasicForm({ initial, onSuccess, onCancel }: ProfileBasicF
       if (bdErr) { setBirthDateError(bdErr); valid = false; }
       else setBirthDateError("");
     } else setBirthDateError("");
-    if (joiningDate) {
-      const jdErr = validatePastOrPresentDate(joiningDate);
-      if (jdErr) { setJoiningDateError(jdErr); valid = false; }
-      else setJoiningDateError("");
-    } else setJoiningDateError("");
     if (phone && !validatePhone(phone)) { setPhoneError("올바른 휴대폰 번호 형식이 아닙니다 (010-XXXX-XXXX)"); valid = false; }
     else setPhoneError("");
     if (contractType === ContractType.Business) {
@@ -133,15 +116,8 @@ export function ProfileBasicForm({ initial, onSuccess, onCancel }: ProfileBasicF
         name,
         birthDate: birthDate || null,
         gender: gender || null,
-        militaryService: militaryService || null,
-        affiliation: affiliation || null,
-        joiningDate: joiningDate || null,
-        department: department || null,
-        positionTitle: positionTitle || null,
         phone,
         address: address || null,
-        experienceYears,
-        experienceMonths,
         techStack,
         bio,
         contractType: contractType || null,
@@ -197,36 +173,6 @@ export function ProfileBasicForm({ initial, onSuccess, onCancel }: ProfileBasicF
         </FormField>
       </div>
 
-      <FormField label="병역 (역종)" optional>
-        <Input type="text" value={militaryService} onChange={(e) => setMilitaryService(e.target.value)} placeholder="ex. 육군 병장 만기전역" />
-      </FormField>
-
-      {/* 소속 정보 */}
-      <SectionDivider label="소속 정보" />
-
-      <div className="grid grid-cols-2 gap-3">
-        <FormField label="소속" optional>
-          <Input type="text" value={affiliation} onChange={(e) => setAffiliation(e.target.value)} placeholder="ex. 테크밋" />
-        </FormField>
-        <FormField label="입사일" optional error={joiningDateError}>
-          <DateSelectPicker
-            value={joiningDate}
-            onChange={(v) => { setJoiningDate(v); if (joiningDateError) setJoiningDateError(""); }}
-            maxDate={new Date().toISOString().split("T")[0]}
-            error={!!joiningDateError}
-          />
-        </FormField>
-      </div>
-
-      <div className="grid grid-cols-2 gap-3">
-        <FormField label="부서" optional>
-          <Input type="text" value={department} onChange={(e) => setDepartment(e.target.value)} placeholder="ex. 개발팀" />
-        </FormField>
-        <FormField label="직위" optional>
-          <Input type="text" value={positionTitle} onChange={(e) => setPositionTitle(e.target.value)} placeholder="ex. 시니어 개발자" />
-        </FormField>
-      </div>
-
       {/* 연락처 및 주소 */}
       <SectionDivider label="연락처 및 주소" />
 
@@ -246,92 +192,8 @@ export function ProfileBasicForm({ initial, onSuccess, onCancel }: ProfileBasicF
         <KakaoAddressInput value={address} onChange={setAddress} />
       </FormField>
 
-      {/* 경력 / 기술 / 소개 */}
-      <SectionDivider label="경력 및 기술" />
-
-      <FormField label="경력">
-        <div className="flex items-center gap-3">
-          {/* 연 스테퍼 */}
-          <div className="flex items-center gap-0 border border-border rounded-lg overflow-hidden">
-            <button
-              type="button"
-              onClick={() => setExperienceYears((y) => Math.max(0, y - 1))}
-              className="h-11 w-11 flex items-center justify-center text-muted-foreground hover:bg-muted/50 active:bg-muted transition-colors border-r border-border"
-              aria-label="연수 감소"
-            >
-              <Minus className="h-4 w-4" />
-            </button>
-            <div className="flex items-center justify-center gap-0.5 px-2">
-              <input
-                type="text"
-                inputMode="numeric"
-                value={experienceYears}
-                onChange={(e) => {
-                  const raw = e.target.value.replace(/\D/g, "");
-                  setExperienceYears(raw === "" ? 0 : Math.min(50, Number(raw)));
-                }}
-                onBlur={(e) => {
-                  const v = Number(e.target.value) || 0;
-                  setExperienceYears(Math.min(50, Math.max(0, v)));
-                }}
-                onFocus={(e) => e.target.select()}
-                className="w-9 text-center text-sm font-medium tabular-nums bg-transparent focus:outline-none"
-                aria-label="경력 연수"
-                maxLength={2}
-              />
-              <span className="text-sm font-medium text-foreground">년</span>
-            </div>
-            <button
-              type="button"
-              onClick={() => setExperienceYears((y) => Math.min(50, y + 1))}
-              className="h-11 w-11 flex items-center justify-center text-muted-foreground hover:bg-muted/50 active:bg-muted transition-colors border-l border-border"
-              aria-label="연수 증가"
-            >
-              <Plus className="h-4 w-4" />
-            </button>
-          </div>
-
-          {/* 월 스테퍼 */}
-          <div className="flex items-center gap-0 border border-border rounded-lg overflow-hidden">
-            <button
-              type="button"
-              onClick={() => setExperienceMonths((m) => Math.max(0, m - 1))}
-              className="h-11 w-11 flex items-center justify-center text-muted-foreground hover:bg-muted/50 active:bg-muted transition-colors border-r border-border"
-              aria-label="개월 감소"
-            >
-              <Minus className="h-4 w-4" />
-            </button>
-            <div className="flex items-center justify-center gap-0.5 px-2">
-              <input
-                type="text"
-                inputMode="numeric"
-                value={experienceMonths}
-                onChange={(e) => {
-                  const raw = e.target.value.replace(/\D/g, "");
-                  setExperienceMonths(raw === "" ? 0 : Math.min(11, Number(raw)));
-                }}
-                onBlur={(e) => {
-                  const v = Number(e.target.value) || 0;
-                  setExperienceMonths(Math.min(11, Math.max(0, v)));
-                }}
-                onFocus={(e) => e.target.select()}
-                className="w-9 text-center text-sm font-medium tabular-nums bg-transparent focus:outline-none"
-                aria-label="경력 개월수"
-                maxLength={2}
-              />
-              <span className="text-sm font-medium text-foreground">개월</span>
-            </div>
-            <button
-              type="button"
-              onClick={() => setExperienceMonths((m) => Math.min(11, m + 1))}
-              className="h-11 w-11 flex items-center justify-center text-muted-foreground hover:bg-muted/50 active:bg-muted transition-colors border-l border-border"
-              aria-label="개월 증가"
-            >
-              <Plus className="h-4 w-4" />
-            </button>
-          </div>
-        </div>
-      </FormField>
+      {/* 기술 / 소개 */}
+      <SectionDivider label="기술 및 소개" />
 
       <FormField label="기술 스택" optional>
         <TechStackInput value={techStack} onChange={setTechStack} />

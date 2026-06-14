@@ -59,9 +59,6 @@ create table if not exists public.profiles (
   phone                            text,                                                                  -- 전화번호
   bio                              text,                                                                  -- 자기소개
   tech_stack                       text[]      not null default array[]::text[],                          -- 기술 스택
-  experience_years                 integer,                                                               -- 경력 연수
-  experience_months                integer     not null default 0                                         -- 경력 개월수 (0~11)
-    check (experience_months >= 0 and experience_months <= 11),
   kakao_id                         text,                                                                  -- 카카오 ID
   availability_status              text                                                                   -- 투입 가능 상태 (available/partial/unavailable)
     check (availability_status in ('available', 'partial', 'unavailable')),
@@ -76,11 +73,6 @@ create table if not exists public.profiles (
   birth_date                       date,                                                                  -- 생년월일
   gender                           text                                                                   -- 성별 (male/female)
     check (gender in ('male', 'female')),
-  joining_date                     date,                                                                  -- 가입일 (커뮤니티 등록 기준)
-  affiliation                      text,                                                                  -- 소속사/소속 회사
-  department                       text,                                                                  -- 부서
-  position_title                   text,                                                                  -- 직함/직위
-  military_service                 text,                                                                  -- 병역 사항
   address                          text,                                                                  -- 주소
   contract_type                    text                                                                   -- 계약 형태 (business/individual=3.3%)
     check (contract_type in ('business', 'individual')),

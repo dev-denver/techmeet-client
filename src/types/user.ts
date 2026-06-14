@@ -96,15 +96,8 @@ export interface FreelancerProfile {
   skillInventories: SkillInventory[];
   resumes: ProfileResume[];
   availabilityStatus: AvailabilityStatus | null;
-  experienceYears: number | null;
-  experienceMonths: number;
   birthDate: string | null;
   gender: Gender | null;
-  joiningDate: string | null;
-  affiliation: string | null;
-  department: string | null;
-  positionTitle: string | null;
-  militaryService: string | null;
   address: string | null;
   availableFromDate: string | null;
   contractType: ContractType | null;

@@ -62,17 +62,6 @@ export function validateBirthDateWithMessage(birthDate: string): string | null {
   return null;
 }
 
-export function validatePastOrPresentDate(date: string): string | null {
-  if (!date) return null;
-  const d = new Date(date);
-  if (isNaN(d.getTime())) return "유효한 날짜를 입력해주세요";
-  const today = new Date();
-  today.setHours(0, 0, 0, 0);
-  if (d > today) return "오늘 이전 날짜를 입력해주세요";
-  if (d.getFullYear() < 1960) return "1960년 이후 날짜를 입력해주세요";
-  return null;
-}
-
 export function validateFutureDate(date: string): string | null {
   if (!date) return null;
   const d = new Date(date);
