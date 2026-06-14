@@ -34,7 +34,9 @@ export default async function ApplicationsPage() {
 
         <StatsGrid
           className="mt-5"
-          valueSize="2xl"
+          compact
+          valueSize="lg"
+          labelSize="10px"
           stats={[
             { label: "검토 중", value: reviewingCount },
             { label: "면접 예정", value: interviewCount },

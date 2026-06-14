@@ -360,7 +360,7 @@ create table if not exists public.applications (
   freelancer_id        uuid        references public.profiles(id) on delete cascade not null,           -- 지원자 프로필 ID
   status               text        not null default 'pending'                                           -- 지원 상태 (pending/reviewing/interview/accepted/rejected/withdrawn)
     check (status in ('pending', 'reviewing', 'interview', 'accepted', 'rejected', 'withdrawn')),
-  cover_letter         text,                                                                             -- 지원서 내용
+  note                 text,                                                                             -- 참고사항
   expected_rate        numeric,                                                                          -- 희망 단가
   available_start_date date,                                                                             -- 투입 가능일 (admin 전용)
   admin_memo           text,                                                                             -- 관리자 메모 (admin 전용)

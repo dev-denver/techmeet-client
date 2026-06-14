@@ -101,10 +101,10 @@ export function ApplicationCard({
               {application.projectTitle}
             </h3>
 
-            {/* 지원 동기 */}
-            {application.coverLetter && (
+            {/* 참고사항 */}
+            {application.note && (
               <p className="text-xs text-muted-foreground line-clamp-2 leading-relaxed bg-muted/40 rounded-lg px-3 py-2">
-                {application.coverLetter}
+                {application.note}
               </p>
             )}
 

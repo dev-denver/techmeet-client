@@ -1,7 +1,8 @@
 "use client";
 
 import { useState, useRef, useEffect } from "react";
-import { FolderOpen, Loader2, Search, X } from "lucide-react";
+import Link from "next/link";
+import { ClipboardList, FolderOpen, Loader2, Search, X } from "lucide-react";
 import { ProjectFilters } from "./ProjectFilters";
 import { ProjectCard } from "./ProjectCard";
 import { EmptyState } from "@/components/ui/empty-state";
@@ -120,8 +121,17 @@ export function ProjectListClient({ initialProjects, initialTotal, mySkills }: P
           </div>
         </div>
         {/* 필터 탭 */}
-        <div className="px-4 pb-3">
-          <ProjectFilters onFilterChange={handleFilterChange} />
+        <div className="px-4 pb-3 flex items-center gap-2">
+          <div className="flex-1 min-w-0">
+            <ProjectFilters onFilterChange={handleFilterChange} />
+          </div>
+          <Link
+            href="/projects/applications"
+            className="shrink-0 flex items-center gap-1 px-3 py-2 rounded-full text-sm font-medium bg-muted text-muted-foreground hover:bg-muted/80 transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2"
+          >
+            <ClipboardList className="h-3.5 w-3.5" />
+            내 신청 현황
+          </Link>
         </div>
       </div>
 

@@ -13,7 +13,7 @@ import { applicationsApi } from "@/lib/api/applications";
 import { LIMITS } from "@/lib/constants/limits";
 import { cn } from "@/lib/utils/cn";
 
-const MAX_COVER_LETTER = LIMITS.COVER_LETTER_MAX;
+const MAX_NOTE = LIMITS.NOTE_MAX;
 // BottomSheet footer에 제출 버튼을 두고, form은 sheet body 안에 있어 별도 id로 연결
 const FORM_ID = "apply-form";
 
@@ -21,8 +21,8 @@ interface ApplyButtonProps {
   projectId: string;
 }
 
-function validateCoverLetter(value: string): string {
-  if (!value.trim()) return "지원 동기를 입력해주세요";
+function validateNote(value: string): string {
+  if (!value.trim()) return "참고사항을 입력해주세요";
   return "";
 }
 
@@ -37,26 +37,26 @@ function validateRate(value: string): string {
 export function ApplyButton({ projectId }: ApplyButtonProps) {
   const router = useRouter();
   const [open, setOpen] = useState(false);
-  const [coverLetter, setCoverLetter] = useState("");
+  const [note, setNote] = useState("");
   const [expectedRate, setExpectedRate] = useState("");
-  const [coverLetterError, setCoverLetterError] = useState("");
+  const [noteError, setNoteError] = useState("");
   const [rateError, setRateError] = useState("");
   const { isLoading: isSubmitting, error: serverError, setError: setServerError, submit } = useSubmit();
 
   async function handleSubmit(e: React.FormEvent) {
     e.preventDefault();
 
-    const clErr = validateCoverLetter(coverLetter);
+    const noteErr = validateNote(note);
     const rErr = validateRate(expectedRate);
-    setCoverLetterError(clErr);
+    setNoteError(noteErr);
     setRateError(rErr);
-    if (clErr || rErr) return;
+    if (noteErr || rErr) return;
 
     await submit(
       () =>
         applicationsApi.create({
           projectId,
-          coverLetter: coverLetter.trim(),
+          note: note.trim(),
           expectedRate: Number(expectedRate),
         }),
       {
@@ -69,9 +69,9 @@ export function ApplyButton({ projectId }: ApplyButtonProps) {
   }
 
   function handleOpen() {
-    setCoverLetter("");
+    setNote("");
     setExpectedRate("");
-    setCoverLetterError("");
+    setNoteError("");
     setRateError("");
     setServerError("");
     setOpen(true);
@@ -79,12 +79,12 @@ export function ApplyButton({ projectId }: ApplyButtonProps) {
 
   function handleClose() {
     setOpen(false);
-    setCoverLetterError("");
+    setNoteError("");
     setRateError("");
     setServerError("");
   }
 
-  const charCount = coverLetter.length;
+  const charCount = note.length;
 
   return (
     <>
@@ -123,22 +123,22 @@ export function ApplyButton({ projectId }: ApplyButtonProps) {
           </div>
 
           <form id={FORM_ID} onSubmit={handleSubmit} className="space-y-5">
-            <FormField label="지원 동기" required error={coverLetterError}>
+            <FormField label="참고사항" required error={noteError}>
               <div className="relative">
                 <Textarea
-                  value={coverLetter}
+                  value={note}
                   onChange={(e) => {
-                    const value = e.target.value.slice(0, MAX_COVER_LETTER);
-                    setCoverLetter(value);
-                    if (coverLetterError) setCoverLetterError(validateCoverLetter(value));
+                    const value = e.target.value.slice(0, MAX_NOTE);
+                    setNote(value);
+                    if (noteError) setNoteError(validateNote(value));
                   }}
-                  placeholder="해당 프로젝트에 지원하는 이유와 관련 경험을 간략히 적어주세요"
+                  placeholder="프로젝트 지원과 관련해 전달하고 싶은 내용이나 참고사항을 자유롭게 적어주세요"
                   rows={5}
-                  maxLength={MAX_COVER_LETTER}
-                  className={cn("pb-7", coverLetterError ? "border-destructive/50" : "")}
+                  maxLength={MAX_NOTE}
+                  className={cn("pb-7", noteError ? "border-destructive/50" : "")}
                 />
                 <span className="absolute bottom-2.5 right-3 text-xs tabular-nums text-muted-foreground pointer-events-none">
-                  {charCount}/{MAX_COVER_LETTER}자
+                  {charCount}/{MAX_NOTE}자
                 </span>
               </div>
             </FormField>

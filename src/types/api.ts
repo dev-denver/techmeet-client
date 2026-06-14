@@ -56,7 +56,7 @@ export type GetProjectByIdResponse = { data: Project };
 // ── Applications ──────────────────────────────────────
 export interface CreateApplicationRequest {
   projectId: string;
-  coverLetter: string;
+  note: string;
   expectedRate: number;
 }
 
