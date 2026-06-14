@@ -228,11 +228,7 @@ export default async function ProjectDetailPage({ params }: ProjectDetailPagePro
           </Link>
         ) : (
           <Button className="w-full h-12 text-base font-semibold" disabled>
-            {!isRecruiting
-              ? project.status === ProjectStatus.InProgress
-                ? "진행 중인 프로젝트"
-                : "모집 종료"
-              : "지원 마감"}
+            {!isRecruiting ? "모집 종료" : "지원 마감"}
           </Button>
         )}
       </div>

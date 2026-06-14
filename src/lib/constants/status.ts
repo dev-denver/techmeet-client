@@ -11,10 +11,6 @@ export const PROJECT_STATUS_CONFIG: Record<ProjectStatus, StatusConfig> = {
     label: "모집중",
     className: "bg-status-success/10 text-status-success border-status-success/20",
   },
-  [ProjectStatus.InProgress]: {
-    label: "진행중",
-    className: "bg-status-info/10 text-status-info border-status-info/20",
-  },
   [ProjectStatus.Completed]: {
     label: "완료",
     className: "bg-status-neutral/10 text-status-neutral border-status-neutral/20",

@@ -8,7 +8,6 @@ import type { ProjectFilterValue } from "@/types";
 const filters: { value: ProjectFilterValue; label: string }[] = [
   { value: "all",                     label: "전체"  },
   { value: ProjectStatus.Recruiting,  label: "모집중" },
-  { value: ProjectStatus.InProgress,  label: "진행중" },
   { value: ProjectStatus.Completed,   label: "완료"  },
 ];
 

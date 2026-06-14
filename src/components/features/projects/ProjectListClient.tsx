@@ -154,7 +154,7 @@ export function ProjectListClient({ initialProjects, initialTotal, mySkills }: P
           />
         ) : (
           <>
-            <div className="space-y-3">
+            <div className="space-y-4">
               {projects.map((project) => (
                 <ProjectCard key={project.id} project={project} mySkills={mySkills} />
               ))}
