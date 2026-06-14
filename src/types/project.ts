@@ -1,6 +1,5 @@
 export const ProjectStatus = {
   Recruiting: "recruiting",
-  InProgress: "in_progress",
   Completed: "completed",
   Cancelled: "cancelled",
 } as const;

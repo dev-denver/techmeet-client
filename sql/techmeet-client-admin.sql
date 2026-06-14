@@ -271,8 +271,8 @@ create table if not exists public.projects (
   id                  uuid        default gen_random_uuid() primary key,                    -- 고유 식별자
   title               text        not null,                                                 -- 프로젝트명
   description         text        not null default '',                                      -- 프로젝트 설명
-  status              text        not null default 'recruiting'                             -- 진행 상태 (recruiting/in_progress/completed/cancelled)
-    check (status in ('recruiting', 'in_progress', 'completed', 'cancelled')),
+  status              text        not null default 'recruiting'                             -- 진행 상태 (recruiting/completed/cancelled)
+    check (status in ('recruiting', 'completed', 'cancelled')),
   duration_start_date date,                                                                 -- 프로젝트 시작일
   duration_end_date   date,                                                                 -- 프로젝트 종료일
   deadline            date,                                                                 -- 지원 마감일
