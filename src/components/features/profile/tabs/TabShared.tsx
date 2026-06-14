@@ -154,14 +154,13 @@ export function BottomSheetForm({
   error?: string;
   children: React.ReactNode;
 }) {
-  // 공유 BottomSheet 사용: z-index/하단 네비 여백(hasBottomNav)을 일관 처리.
+  // 공유 BottomSheet 사용: z-index를 일관 처리.
   // 제출 버튼은 footer에 있고 form은 children에 있으므로 form 속성으로 연결한다.
   const formId = useId();
   return (
     <BottomSheet
       open={open}
       onClose={onClose}
-      hasBottomNav
       header={
         <div className="flex items-center justify-between px-5 py-4 border-b border-border">
           <h3 className="text-sm font-bold text-foreground">{title}</h3>
