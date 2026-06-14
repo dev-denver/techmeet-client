@@ -47,11 +47,11 @@ export default async function HomePage() {
   return (
     <div>
       {/* 히어로 배너 */}
-      <section className="px-5 pt-6 pb-5 bg-primary">
+      <section className="px-5 pt-4 pb-3 bg-primary">
         <div className="flex items-center justify-between">
           <div>
             <p className="text-primary-foreground/50 text-xs font-medium tracking-wide">안녕하세요</p>
-            <h2 className="text-primary-foreground text-lg font-bold leading-tight mt-0.5">
+            <h2 className="text-primary-foreground text-base font-bold leading-tight mt-0.5">
               {profile ? `${profile.name}님` : "로그인 후 이용해주세요"}
             </h2>
           </div>
@@ -64,7 +64,7 @@ export default async function HomePage() {
 
         {/* 투입 가능 예정일 (partial 상태일 때만) */}
         {profile?.availabilityStatus === AvailabilityStatus.Partial && profile.availableFromDate && (
-          <div className="mt-3 flex items-center gap-1.5 text-primary-foreground/60 text-xs">
+          <div className="mt-2 flex items-center gap-1.5 text-primary-foreground/60 text-xs">
             <CalendarClock className="h-3.5 w-3.5 shrink-0" />
             <span>투입 가능 예정일: <span className="text-primary-foreground font-medium">{formatShortDate(profile.availableFromDate)}</span></span>
           </div>
@@ -72,7 +72,9 @@ export default async function HomePage() {
 
         {/* 지원 현황 요약 */}
         <StatsGrid
-          className="mt-5"
+          className="mt-3"
+          compact
+          valueSize="lg"
           labelSize="10px"
           stats={[
             { label: "전체", value: allApplications.length },
