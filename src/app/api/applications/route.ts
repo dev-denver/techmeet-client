@@ -22,11 +22,11 @@ export async function POST(request: NextRequest) {
 
   try {
     const body = (await request.json()) as Partial<CreateApplicationRequest>;
-    const { projectId, coverLetter, expectedRate } = body;
+    const { projectId, note, expectedRate } = body;
 
     if (
       typeof projectId !== "string" ||
-      typeof coverLetter !== "string" ||
+      typeof note !== "string" ||
       typeof expectedRate !== "number"
     ) {
       return NextResponse.json({ error: "필수 항목을 모두 입력해주세요" }, { status: 400 });
@@ -36,13 +36,13 @@ export async function POST(request: NextRequest) {
       return NextResponse.json({ error: "올바르지 않은 프로젝트입니다" }, { status: 400 });
     }
 
-    // 지원 동기: 필수 입력, 최대 1000자
-    const trimmedCoverLetter = coverLetter.trim();
-    if (!trimmedCoverLetter) {
-      return NextResponse.json({ error: "지원 동기를 입력해주세요" }, { status: 400 });
+    // 참고사항: 필수 입력, 최대 1000자
+    const trimmedNote = note.trim();
+    if (!trimmedNote) {
+      return NextResponse.json({ error: "참고사항을 입력해주세요" }, { status: 400 });
     }
-    if (trimmedCoverLetter.length > 1000) {
-      return NextResponse.json({ error: "지원 동기는 1000자 이하로 입력해주세요" }, { status: 400 });
+    if (trimmedNote.length > 1000) {
+      return NextResponse.json({ error: "참고사항은 1000자 이하로 입력해주세요" }, { status: 400 });
     }
 
     // 희망 단가: 1~9999만원 범위
@@ -63,7 +63,7 @@ export async function POST(request: NextRequest) {
       return NextResponse.json({ error: "지원이 마감된 프로젝트입니다" }, { status: 400 });
     }
 
-    const result = await createApplication({ projectId, coverLetter: trimmedCoverLetter, expectedRate });
+    const result = await createApplication({ projectId, note: trimmedNote, expectedRate });
     return NextResponse.json(result, { status: 201 });
   } catch (err) {
     if (err instanceof DuplicateApplicationError) {

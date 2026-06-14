@@ -23,8 +23,8 @@ export const LIMITS = {
   BIO_MAX: 500,
   /** 경력 설명 */
   DESCRIPTION_MAX: 1000,
-  /** 지원동기 */
-  COVER_LETTER_MAX: 1000,
+  /** 참고사항 */
+  NOTE_MAX: 1000,
   /** 기술스택 항목 1개당 글자 수 */
   TECH_ITEM_MAX: 50,
   /** 기술스택 최대 항목 수 */

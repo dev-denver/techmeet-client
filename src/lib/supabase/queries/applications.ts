@@ -12,7 +12,7 @@ interface ApplicationRow {
   project_id: string;
   freelancer_id: string;
   status: ApplicationStatus;
-  cover_letter: string | null;
+  note: string | null;
   expected_rate: number | null;
   applied_at: string;
   updated_at: string;
@@ -34,7 +34,7 @@ function mapRowToApplication(row: ApplicationRow): Application {
     projectTitle: row.projects?.title ?? "",
     freelancerId: row.freelancer_id,
     status: row.status,
-    coverLetter: row.cover_letter,
+    note: row.note,
     expectedRate: row.expected_rate,
     appliedAt: row.applied_at,
     updatedAt: row.updated_at,
@@ -124,7 +124,7 @@ export async function createApplication(
       .from("applications")
       .update({
         status: ApplicationStatus.Pending,
-        cover_letter: payload.coverLetter,
+        note: payload.note,
         expected_rate: payload.expectedRate,
         applied_at: new Date().toISOString(),
       })
@@ -141,7 +141,7 @@ export async function createApplication(
     .insert({
       project_id: payload.projectId,
       freelancer_id: user.id,
-      cover_letter: payload.coverLetter,
+      note: payload.note,
       expected_rate: payload.expectedRate,
     })
     .select("*, projects(title)")
