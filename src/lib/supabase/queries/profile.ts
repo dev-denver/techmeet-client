@@ -1,5 +1,6 @@
 import { createServerClient } from "@/lib/supabase/server";
-import type { FreelancerProfile, Career, AvailabilityStatus, Gender, ProfileResume } from "@/types";
+import type { FreelancerProfile, Career, AvailabilityStatus, Gender, ProfileResume, ContractType, ContractDocument } from "@/types";
+import { CONTRACT_DOCUMENT_TYPES, type ContractDocumentType } from "@/lib/constants/contractDocuments";
 
 /** "YYYY-MM" → "YYYY-MM-01" 변환. PostgreSQL date 컬럼은 "YYYY-MM-DD" 형식만 허용. */
 function toDbDate(v: string | null | undefined): string | null {
@@ -133,6 +134,16 @@ interface ProfileRow {
   position_title: string | null;
   military_service: string | null;
   address: string | null;
+  contract_type: ContractType | null;
+  business_name: string | null;
+  business_number: string | null;
+  business_address: string | null;
+  business_registration_file_path: string | null;
+  business_registration_file_name: string | null;
+  bank_name: string | null;
+  bank_account_number: string | null;
+  bank_account_image_path: string | null;
+  bank_account_image_name: string | null;
   kakao_id: string | null;
   referrer_id: string | null;
   referrer: { name: string } | null;
@@ -181,6 +192,20 @@ function mapRowToProfile(row: ProfileRow, profile: Partial<FreelancerProfile> = 
     positionTitle: row.position_title,
     militaryService: row.military_service,
     address: row.address,
+    contractType: row.contract_type,
+    businessName: row.business_name,
+    businessNumber: row.business_number,
+    businessAddress: row.business_address,
+    businessRegistrationFile:
+      row.business_registration_file_path && row.business_registration_file_name
+        ? { filePath: row.business_registration_file_path, fileName: row.business_registration_file_name }
+        : null,
+    bankName: row.bank_name,
+    bankAccountNumber: row.bank_account_number,
+    bankAccountImage:
+      row.bank_account_image_path && row.bank_account_image_name
+        ? { filePath: row.bank_account_image_path, fileName: row.bank_account_image_name }
+        : null,
     kakaoId: row.kakao_id ?? undefined,
     referrerId: row.referrer_id ?? undefined,
     referrerName: row.referrer?.name ?? undefined,
@@ -244,10 +269,54 @@ export async function updateProfile(payload: UpdateProfileRequest): Promise<void
   if ("positionTitle" in payload) updateData.position_title = (payload as Record<string, unknown>).positionTitle;
   if ("militaryService" in payload) updateData.military_service = (payload as Record<string, unknown>).militaryService;
   if ("address" in payload) updateData.address = (payload as Record<string, unknown>).address;
+  if ("contractType" in payload) updateData.contract_type = (payload as Record<string, unknown>).contractType;
+  if ("businessName" in payload) updateData.business_name = (payload as Record<string, unknown>).businessName;
+  if ("businessNumber" in payload) updateData.business_number = (payload as Record<string, unknown>).businessNumber;
+  if ("businessAddress" in payload) updateData.business_address = (payload as Record<string, unknown>).businessAddress;
+  if ("bankName" in payload) updateData.bank_name = (payload as Record<string, unknown>).bankName;
+  if ("bankAccountNumber" in payload) updateData.bank_account_number = (payload as Record<string, unknown>).bankAccountNumber;
 
   const { error } = await supabase
     .from("profiles")
     .update(updateData)
+    .eq("id", user.id);
+
+  if (error) throw error;
+}
+
+export async function getContractDocument(type: ContractDocumentType): Promise<ContractDocument | null> {
+  const supabase = await createServerClient();
+
+  const { data: { user } } = await supabase.auth.getUser();
+  if (!user) throw new Error("인증이 필요합니다");
+
+  const { pathColumn, nameColumn } = CONTRACT_DOCUMENT_TYPES[type];
+  const { data, error } = await supabase
+    .from("profiles")
+    .select(`${pathColumn}, ${nameColumn}`)
+    .eq("id", user.id)
+    .single();
+
+  if (error) throw error;
+
+  const row = data as unknown as Record<string, string | null>;
+  const filePath = row[pathColumn];
+  const fileName = row[nameColumn];
+  if (!filePath || !fileName) return null;
+
+  return { filePath, fileName };
+}
+
+export async function updateContractDocument(type: ContractDocumentType, file: ContractDocument | null): Promise<void> {
+  const supabase = await createServerClient();
+
+  const { data: { user } } = await supabase.auth.getUser();
+  if (!user) throw new Error("인증이 필요합니다");
+
+  const { pathColumn, nameColumn } = CONTRACT_DOCUMENT_TYPES[type];
+  const { error } = await supabase
+    .from("profiles")
+    .update({ [pathColumn]: file?.filePath ?? null, [nameColumn]: file?.fileName ?? null })
     .eq("id", user.id);
 
   if (error) throw error;

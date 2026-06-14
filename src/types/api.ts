@@ -1,5 +1,5 @@
 import type { Project, ProjectFilterValue } from "./project";
-import type { FreelancerProfile, AvailabilityStatus, ProfileResume } from "./user";
+import type { FreelancerProfile, AvailabilityStatus, ProfileResume, ContractType, ContractDocument } from "./user";
 import type { Application } from "./application";
 import type { Notice } from "./notice";
 
@@ -79,6 +79,12 @@ export interface UpdateProfileRequest {
   positionTitle?: string | null;
   militaryService?: string | null;
   address?: string | null;
+  contractType?: ContractType | null;
+  businessName?: string | null;
+  businessNumber?: string | null;
+  businessAddress?: string | null;
+  bankName?: string | null;
+  bankAccountNumber?: string | null;
 }
 
 export interface UpdateAvailabilityRequest {
@@ -131,6 +137,7 @@ export interface SaveSkillInventoryRequest {
 }
 
 export type UploadResumeResponse = ApiSuccessResponse & { resume: ProfileResume };
+export type UploadContractDocumentResponse = ApiSuccessResponse & { document: ContractDocument };
 
 // ── Referrer ──────────────────────────────────────────
 export interface SetReferrerRequest { referrerId: string; }

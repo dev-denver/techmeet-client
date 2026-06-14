@@ -13,7 +13,9 @@ import type {
   SetReferrerRequest,
   SetReferrerResponse,
   UploadResumeResponse,
+  UploadContractDocumentResponse,
 } from "@/types";
+import type { ContractDocumentType } from "@/lib/constants/contractDocuments";
 
 export const profileApi = {
   get: () => apiFetch<GetProfileResponse>("/api/profile"),
@@ -107,4 +109,16 @@ export const profileApi = {
 
   deleteResume: (id: string) =>
     apiFetch<{ success: true }>(`/api/profile/resumes/${id}`, { method: "DELETE" }),
+
+  uploadContractDocument: (type: ContractDocumentType, file: File) => {
+    const formData = new FormData();
+    formData.append("file", file);
+    return apiFetch<UploadContractDocumentResponse>(`/api/profile/contract-documents/${type}`, {
+      method: "POST",
+      body: formData,
+    });
+  },
+
+  deleteContractDocument: (type: ContractDocumentType) =>
+    apiFetch<{ success: true }>(`/api/profile/contract-documents/${type}`, { method: "DELETE" }),
 };

@@ -17,6 +17,17 @@ export const Gender = {
 } as const;
 export type Gender = typeof Gender[keyof typeof Gender];
 
+export const ContractType = {
+  Business: "business",
+  Individual: "individual",
+} as const;
+export type ContractType = typeof ContractType[keyof typeof ContractType];
+
+export interface ContractDocument {
+  fileName: string;
+  filePath: string;
+}
+
 export interface Career {
   id: string;
   company: string;
@@ -96,6 +107,14 @@ export interface FreelancerProfile {
   militaryService: string | null;
   address: string | null;
   availableFromDate: string | null;
+  contractType: ContractType | null;
+  businessName: string | null;
+  businessNumber: string | null;
+  businessAddress: string | null;
+  businessRegistrationFile: ContractDocument | null;
+  bankName: string | null;
+  bankAccountNumber: string | null;
+  bankAccountImage: ContractDocument | null;
   kakaoId?: string;
   referrerId?: string;
   referrerName?: string;

@@ -82,6 +82,17 @@ create table if not exists public.profiles (
   position_title                   text,                                                                  -- 직함/직위
   military_service                 text,                                                                  -- 병역 사항
   address                          text,                                                                  -- 주소
+  contract_type                    text                                                                   -- 계약 형태 (business/individual=3.3%)
+    check (contract_type in ('business', 'individual')),
+  business_name                    text,                                                                  -- 사업자명
+  business_number                  text,                                                                  -- 사업자 번호 (000-00-00000)
+  business_address                 text,                                                                  -- 사업장 주소
+  business_registration_file_path  text,                                                                  -- 사업자등록증 파일 경로
+  business_registration_file_name  text,                                                                  -- 사업자등록증 원본 파일명
+  bank_name                        text,                                                                  -- 은행명
+  bank_account_number              text,                                                                  -- 계좌번호
+  bank_account_image_path          text,                                                                  -- 계좌 이미지 파일 경로
+  bank_account_image_name          text,                                                                  -- 계좌 이미지 원본 파일명
   seq_id                           bigint      generated always as identity unique,                       -- Supabase Realtime 순서 관리 (자동)
   created_at                       timestamptz not null default now(),                                    -- 생성 일시
   updated_at                       timestamptz not null default now()                                     -- 수정 일시
@@ -610,6 +621,29 @@ create policy "본인 이력서 다운로드" on storage.objects
 create policy "본인 이력서 삭제" on storage.objects
   for delete using (
     bucket_id = 'resumes'
+    and (storage.foldername(name))[1] = auth.uid()::text
+  );
+
+-- contract-documents (사업자등록증, 계좌 이미지 등, 비공개)
+insert into storage.buckets (id, name, public)
+  values ('contract-documents', 'contract-documents', false)
+  on conflict do nothing;
+
+create policy "본인 계약서류 업로드" on storage.objects
+  for insert with check (
+    bucket_id = 'contract-documents'
+    and (storage.foldername(name))[1] = auth.uid()::text
+  );
+
+create policy "본인 계약서류 다운로드" on storage.objects
+  for select using (
+    bucket_id = 'contract-documents'
+    and (storage.foldername(name))[1] = auth.uid()::text
+  );
+
+create policy "본인 계약서류 삭제" on storage.objects
+  for delete using (
+    bucket_id = 'contract-documents'
     and (storage.foldername(name))[1] = auth.uid()::text
   );
 

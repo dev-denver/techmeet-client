@@ -242,6 +242,7 @@ src/
 - [x] 학력 CRUD (EducationTab, /api/profile/education/ CRUD)
 - [x] 자격증 CRUD (EducationTab 내 통합, /api/profile/certifications/ CRUD)
 - [x] 스킬 인벤토리 CRUD (SkillTab, /api/profile/skill-inventories/ CRUD)
+- [x] 계약 정보 (기본정보 하위 섹션, 2026-06-14): 계약형태(사업자/3.3%) 선택, 사업자 정보(사업자명/사업자번호/사업장주소/사업자등록증) + 계좌 정보(은행/계좌번호/계좌이미지) — 파일은 `contract-documents` 버킷에 즉시 업로드 (ContractDocumentField, /api/profile/contract-documents/[type])
 
 ### 설정
 
@@ -366,6 +367,9 @@ src/
   - 알림톡 API 제공사 계약 필요 (센트온)
   - 신규 프로젝트 등록 시 → 대상 프리랜서 전체 발송
   - 지원 상태 변경 시 → 해당 프리랜서에게 발송
+- [ ] **DB 마이그레이션 수동 적용 필요**: `supabase/migrations/20260614120000_profile-contract-info.sql`
+  - `profiles` 테이블에 계약 정보 컬럼 10개 추가 + `contract-documents` storage 버킷/정책 생성
+  - 적용 전까지 계약 정보 섹션 저장/파일 업로드 동작 안 함 (Supabase CLI `supabase db push` 또는 대시보드 SQL Editor에서 실행)
 
 ---
 

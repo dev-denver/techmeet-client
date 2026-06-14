@@ -6,12 +6,14 @@ import {
   validatePastOrPresentDate,
   validateLength,
   validateStringArray,
+  validateBusinessNumber,
 } from "@/lib/utils/validation";
 import { LIMITS } from "@/lib/constants/limits";
-import { Gender } from "@/types";
+import { Gender, ContractType } from "@/types";
 import type { UpdateProfileRequest } from "@/types";
 
 const VALID_GENDERS = new Set<string>(Object.values(Gender));
+const VALID_CONTRACT_TYPES = new Set<string>(Object.values(ContractType));
 
 export async function GET() {
   try {
@@ -48,6 +50,10 @@ export async function PUT(request: NextRequest) {
       [body.positionTitle, LIMITS.POSITION_MAX, "직급"],
       [body.militaryService, LIMITS.MILITARY_MAX, "병역사항"],
       [body.address, LIMITS.ADDRESS_MAX, "주소"],
+      [body.businessName, LIMITS.BUSINESS_NAME_MAX, "사업자명"],
+      [body.businessAddress, LIMITS.BUSINESS_ADDRESS_MAX, "사업장 주소"],
+      [body.bankName, LIMITS.BANK_NAME_MAX, "은행"],
+      [body.bankAccountNumber, LIMITS.BANK_ACCOUNT_MAX, "계좌번호"],
     ];
     for (const [value, max, label] of lengthChecks) {
       if (typeof value === "string") {
@@ -103,6 +109,24 @@ export async function PUT(request: NextRequest) {
     if (body.joiningDate) {
       const joiningError = validatePastOrPresentDate(body.joiningDate);
       if (joiningError) return NextResponse.json({ error: joiningError }, { status: 400 });
+    }
+
+    // 계약형태: 허용값만 (ContractType enum 기준)
+    if (body.contractType !== undefined && body.contractType !== null && !VALID_CONTRACT_TYPES.has(body.contractType)) {
+      return NextResponse.json({ error: "올바른 계약형태 값이 아닙니다" }, { status: 400 });
+    }
+
+    // 사업자 계약: 사업자명/사업자번호/사업장주소 필수
+    if (body.contractType === ContractType.Business) {
+      if (!body.businessName?.trim()) {
+        return NextResponse.json({ error: "사업자명을 입력해주세요" }, { status: 400 });
+      }
+      if (!body.businessNumber || !validateBusinessNumber(body.businessNumber)) {
+        return NextResponse.json({ error: "올바른 사업자 번호 형식이 아닙니다 (000-00-00000)" }, { status: 400 });
+      }
+      if (!body.businessAddress?.trim()) {
+        return NextResponse.json({ error: "사업장 주소를 입력해주세요" }, { status: 400 });
+      }
     }
 
     await updateProfile(body);
