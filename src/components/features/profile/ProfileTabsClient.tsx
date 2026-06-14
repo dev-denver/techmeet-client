@@ -45,34 +45,19 @@ export function ProfileTabsClient({ profile }: ProfileTabsClientProps) {
     profile.availabilityStatus ?? AvailabilityStatus.Unavailable
   );
   const [availFromDate, setAvailFromDate] = useState<string | null>(profile.availableFromDate);
-  const [isSaving, setIsSaving] = useState(false);
-  // 마지막으로 서버에 저장된 값 — isDirty 비교의 기준점
-  const [savedStatus, setSavedStatus] = useState<AvailabilityStatus>(
-    profile.availabilityStatus ?? AvailabilityStatus.Unavailable
-  );
-  const [savedFromDate, setSavedFromDate] = useState<string | null>(profile.availableFromDate);
 
-  const isDirty = availStatus !== savedStatus || availFromDate !== savedFromDate;
-
-  function handleStatusChange(status: AvailabilityStatus, date?: string | null) {
-    setAvailStatus(status);
-    setAvailFromDate(date ?? null);
-  }
-
-  // 투입 상태만 저장 (페이지 이동 없음)
-  async function handleSave() {
-    setIsSaving(true);
+  // 투입 상태 저장 (시트에서 변경 즉시 호출, 페이지 이동 없음)
+  async function handleSaveAvailability(status: AvailabilityStatus, availableFromDate: string | null): Promise<boolean> {
     try {
-      await profileApi.updateAvailability({ status: availStatus, availableFromDate: availFromDate });
-      setSavedStatus(availStatus);
-      setSavedFromDate(availFromDate);
+      await profileApi.updateAvailability({ status, availableFromDate });
+      setAvailStatus(status);
+      setAvailFromDate(availableFromDate);
       showToast("투입 상태가 저장되었습니다");
       router.refresh();
+      return true;
     } catch {
-      // 실패해도 입력값(availStatus)은 유지 — 사용자가 다시 저장 시도 가능
       showToast("저장에 실패했습니다. 다시 시도해주세요", "error");
-    } finally {
-      setIsSaving(false);
+      return false;
     }
   }
 
@@ -105,11 +90,6 @@ export function ProfileTabsClient({ profile }: ProfileTabsClientProps) {
                 {availConfig?.label}
                 {fromDateLabel && ` · ${fromDateLabel}`}
               </span>
-              {isDirty && (
-                <span className="text-[10px] font-semibold px-1.5 py-0.5 rounded-full bg-status-warning/20 text-status-warning border border-status-warning/30">
-                  미저장
-                </span>
-              )}
             </div>
           </div>
           {tab === "basic" && !editingBasic && (
@@ -169,10 +149,7 @@ export function ProfileTabsClient({ profile }: ProfileTabsClientProps) {
               profile={profile}
               availStatus={availStatus}
               availFromDate={availFromDate}
-              isDirty={isDirty}
-              isSaving={isSaving}
-              onStatusChange={handleStatusChange}
-              onSave={handleSave}
+              onSaveAvailability={handleSaveAvailability}
             />
           )
         )}
