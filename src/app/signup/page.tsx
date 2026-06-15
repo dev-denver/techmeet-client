@@ -1,11 +1,10 @@
 import { cookies } from "next/headers";
 import { redirect } from "next/navigation";
 import { Suspense } from "react";
-import { maskEmail } from "@/lib/utils/format";
 import { SignupForm } from "./SignupForm";
 
 interface SignupPageProps {
-  searchParams: Promise<{ name?: string; kakao_id?: string; ref?: string }>;
+  searchParams: Promise<{ name?: string; kakao_id?: string; ref?: string; birth_date?: string; phone?: string }>;
 }
 
 export default async function SignupPage({ searchParams }: SignupPageProps) {
@@ -30,9 +29,11 @@ export default async function SignupPage({ searchParams }: SignupPageProps) {
 
         <Suspense fallback={<div className="text-center text-sm text-zinc-400">로딩 중...</div>}>
           <SignupForm
-            maskedEmail={maskEmail(email)}
+            email={email}
             kakaoId={params.kakao_id ?? ""}
             name={params.name ?? ""}
+            birthDate={params.birth_date ?? ""}
+            phone={params.phone ?? ""}
             refParam={params.ref ?? ""}
           />
         </Suspense>

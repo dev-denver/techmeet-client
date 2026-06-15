@@ -20,6 +20,10 @@ interface KakaoUserResponse {
   kakao_account?: {
     email?: string;
     email_needs_agreement?: boolean;
+    name?: string;
+    birthyear?: string;
+    birthday?: string;
+    phone_number?: string;
     profile?: {
       nickname?: string;
       profile_image_url?: string;
@@ -31,6 +35,25 @@ export interface KakaoUserInfo {
   kakaoId: string;
   email: string | null;
   name: string | null;
+  birthDate: string | null;
+  phone: string | null;
+}
+
+/**
+ * 카카오 birthyear(YYYY) + birthday(MMDD) → ISO 날짜(YYYY-MM-DD)
+ */
+function toIsoBirthDate(birthyear?: string, birthday?: string): string | null {
+  if (!/^\d{4}$/.test(birthyear ?? "") || !/^\d{4}$/.test(birthday ?? "")) return null;
+  return `${birthyear}-${birthday!.slice(0, 2)}-${birthday!.slice(2, 4)}`;
+}
+
+/**
+ * 카카오 전화번호("+82 10-1234-5678") → 국내 형식(010-1234-5678)
+ */
+function toLocalPhone(phoneNumber?: string): string | null {
+  if (!phoneNumber) return null;
+  const localized = phoneNumber.replace(/^\+82\s*/, "0");
+  return /^0\d{1,2}-\d{3,4}-\d{4}$/.test(localized) ? localized : null;
 }
 
 /**
@@ -89,10 +112,13 @@ export async function getKakaoUserInfo(
   }
 
   const data = (await res.json()) as KakaoUserResponse;
+  const account = data.kakao_account;
 
   return {
     kakaoId: String(data.id),
-    email: data.kakao_account?.email ?? null,
-    name: data.kakao_account?.profile?.nickname ?? null,
+    email: account?.email ?? null,
+    name: account?.name ?? account?.profile?.nickname ?? null,
+    birthDate: toIsoBirthDate(account?.birthyear, account?.birthday),
+    phone: toLocalPhone(account?.phone_number),
   };
 }

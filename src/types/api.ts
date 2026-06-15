@@ -22,6 +22,7 @@ export interface PaginatedResponse<T> {
 // ── Auth ──────────────────────────────────────────────
 export interface SignupRequest {
   encryptedPassword: string;
+  email: string;
   name: string;
   birth_date: string;
   phone: string;

@@ -3,7 +3,8 @@
 import { useRouter } from "next/navigation";
 import { useEffect, useState } from "react";
 import { Eye, EyeOff, X } from "lucide-react";
-import { validatePassword, validatePhone, validateBirthDateWithMessage, formatPhone } from "@/lib/utils/validation";
+import { validatePassword, validatePhone, validateBirthDateWithMessage, validateEmail, formatPhone } from "@/lib/utils/validation";
+import { LIMITS } from "@/lib/constants/limits";
 import { ReferrerSearchModal } from "@/components/features/referrer/ReferrerSearchModal";
 import { PolicyModal } from "@/components/features/signup/PolicyModal";
 import { PasswordStrength } from "@/components/features/signup/PasswordStrength";
@@ -18,20 +19,29 @@ import { profileApi } from "@/lib/api/profile";
 import { ApiError } from "@/lib/api/client";
 
 interface SignupFormProps {
-  maskedEmail: string;
+  email: string;
   kakaoId: string;
   name: string;
+  birthDate: string;
+  phone: string;
   refParam: string;
 }
 
-export function SignupForm({ maskedEmail, kakaoId, name, refParam }: SignupFormProps) {
+export function SignupForm({ email: initialEmail, kakaoId, name, birthDate: initialBirthDate, phone: initialPhone, refParam }: SignupFormProps) {
   const router = useRouter();
 
+  const [email, setEmail] = useState(initialEmail);
+  const [emailEditable, setEmailEditable] = useState(false);
   const [formName, setFormName] = useState(name);
   const [password, setPassword] = useState("");
   const [passwordConfirm, setPasswordConfirm] = useState("");
-  const [birthDate, setBirthDate] = useState("");
-  const [phone, setPhone] = useState("");
+  const [birthDate, setBirthDate] = useState(
+    initialBirthDate && validateBirthDateWithMessage(initialBirthDate) === null ? initialBirthDate : ""
+  );
+  const [phone, setPhone] = useState(() => {
+    const formatted = initialPhone ? formatPhone(initialPhone) : "";
+    return validatePhone(formatted) ? formatted : "";
+  });
   const [showPassword, setShowPassword] = useState(false);
   const [showPasswordConfirm, setShowPasswordConfirm] = useState(false);
   const [agreeTerms, setAgreeTerms] = useState(false);
@@ -42,6 +52,7 @@ export function SignupForm({ maskedEmail, kakaoId, name, refParam }: SignupFormP
   const [showReferrerModal, setShowReferrerModal] = useState(false);
   const [policyModal, setPolicyModal] = useState<"terms" | "privacy" | null>(null);
 
+  const [emailError, setEmailError] = useState("");
   const [nameError, setNameError] = useState("");
   const [passwordError, setPasswordError] = useState("");
   const [passwordConfirmError, setPasswordConfirmError] = useState("");
@@ -72,6 +83,13 @@ export function SignupForm({ maskedEmail, kakaoId, name, refParam }: SignupFormP
     setServerError("");
 
     let valid = true;
+
+    if (!validateEmail(email)) {
+      setEmailError("올바른 이메일 형식이 아닙니다");
+      valid = false;
+    } else {
+      setEmailError("");
+    }
 
     if (!formName.trim()) {
       setNameError("이름을 입력해주세요");
@@ -133,6 +151,7 @@ export function SignupForm({ maskedEmail, kakaoId, name, refParam }: SignupFormP
 
       await authApi.signup({
         encryptedPassword,
+        email,
         name: formName,
         birth_date: birthDate,
         phone,
@@ -154,9 +173,35 @@ export function SignupForm({ maskedEmail, kakaoId, name, refParam }: SignupFormP
 
   return (
     <form onSubmit={handleSubmit} className="flex flex-col gap-5">
-      {/* 이메일 (마스킹 표시) */}
-      <FormField label="이메일" hint="카카오 계정 이메일로 고정됩니다">
-        <Input type="text" value={maskedEmail} disabled />
+      {/* 이메일 */}
+      <FormField
+        label="이메일"
+        required
+        error={emailError}
+        hint={emailEditable ? undefined : "카카오 계정 이메일이 자동 입력되었습니다"}
+      >
+        <div className="flex gap-2">
+          <Input
+            type="email"
+            value={email}
+            disabled={!emailEditable}
+            onChange={(e) => {
+              setEmail(e.target.value);
+              if (emailError) setEmailError("");
+            }}
+            maxLength={LIMITS.EMAIL_MAX}
+            className={cn("flex-1", emailError ? "border-red-300" : "")}
+          />
+          {!emailEditable && (
+            <button
+              type="button"
+              onClick={() => setEmailEditable(true)}
+              className="shrink-0 h-11 px-3 rounded-lg border border-zinc-300 text-sm text-zinc-600 hover:bg-zinc-50 transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2"
+            >
+              수정
+            </button>
+          )}
+        </div>
       </FormField>
 
       {/* 이름 */}

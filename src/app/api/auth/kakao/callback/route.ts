@@ -49,7 +49,7 @@ export async function GET(request: NextRequest) {
       );
     }
 
-    const { kakaoId, email, name } = kakaoUser;
+    const { kakaoId, email, name, birthDate, phone } = kakaoUser;
 
     // pending_referral 쿠키 읽기 (공유 링크로 접근한 경우)
     const pendingReferral = request.cookies.get("pending_referral")?.value ?? null;
@@ -174,6 +174,8 @@ export async function GET(request: NextRequest) {
     const signupUrl = new URL("/signup", request.url);
     signupUrl.searchParams.set("name", name ?? "");
     signupUrl.searchParams.set("kakao_id", kakaoId);
+    if (birthDate) signupUrl.searchParams.set("birth_date", birthDate);
+    if (phone) signupUrl.searchParams.set("phone", phone);
     if (isValidRef) signupUrl.searchParams.set("ref", pendingReferral!);
     const signupResponse = NextResponse.redirect(signupUrl);
     signupResponse.cookies.set("pending_referral", "", { maxAge: 0, path: "/" });

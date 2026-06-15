@@ -86,12 +86,3 @@ export function formatProjectPeriod(
 export function maskPhone(phone: string): string {
   return phone.replace(/(\d{3})-(\d{3,4})-(\d{4})/, (_, p1, _p2, p3) => `${p1}-****-${p3}`);
 }
-
-export function maskEmail(email: string): string {
-  const atIdx = email.indexOf("@");
-  if (atIdx < 0) return email;
-  const local = email.slice(0, atIdx);
-  const domain = email.slice(atIdx);
-  const visible = local.slice(0, Math.min(2, local.length));
-  return `${visible}${"*".repeat(Math.max(3, local.length - visible.length))}${domain}`;
-}
