@@ -42,7 +42,8 @@ function LoginForm() {
       `https://kauth.kakao.com/oauth/authorize` +
       `?client_id=${publicEnv.kakaoRestApiKey}` +
       `&redirect_uri=${encodeURIComponent(publicEnv.kakaoRedirectUri)}` +
-      `&response_type=code`;
+      `&response_type=code` +
+      `&scope=${encodeURIComponent("name,birthday,birthyear,phone_number")}`;
     window.location.href = kakaoAuthUrl;
   }
 
