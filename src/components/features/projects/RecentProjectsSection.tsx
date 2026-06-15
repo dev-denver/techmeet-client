@@ -1,8 +1,8 @@
 "use client";
 
 import { useSyncExternalStore } from "react";
-import Link from "next/link";
 import { History } from "lucide-react";
+import { NavLink } from "@/components/ui/nav-link";
 import {
   getRecentProjects,
   getRecentProjectsServerSnapshot,
@@ -33,13 +33,13 @@ export function RecentProjectsSection({ excludeId }: RecentProjectsSectionProps)
       </div>
       <div className="flex gap-2.5 overflow-x-auto pb-2 scrollbar-none px-4">
         {items.map((p) => (
-          <Link
+          <NavLink
             key={p.id}
             href={`/projects/${p.id}`}
-            className="shrink-0 min-w-[160px] max-w-[200px] rounded-xl border border-border bg-card px-3.5 py-3 hover:border-muted-foreground/40 hover:shadow-sm transition-all focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2"
+            className="block shrink-0 min-w-[160px] max-w-[200px] rounded-xl border border-border bg-card px-3.5 py-3 hover:border-muted-foreground/40 hover:shadow-sm transition-all"
           >
             <p className="text-sm font-semibold leading-snug line-clamp-2">{p.title}</p>
-          </Link>
+          </NavLink>
         ))}
       </div>
     </section>

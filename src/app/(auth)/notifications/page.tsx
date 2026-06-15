@@ -1,7 +1,7 @@
-import Link from "next/link";
 import { CheckCircle, XCircle, Clock, Megaphone, User, FolderOpen, Bell, ChevronRight } from "lucide-react";
 import { getAlimtalkLogs } from "@/lib/supabase/queries/notifications";
 import { EmptyState } from "@/components/ui/empty-state";
+import { NavLink } from "@/components/ui/nav-link";
 import { AlimtalkServiceType } from "@/types";
 import { formatDate } from "@/lib/utils/format";
 
@@ -81,13 +81,13 @@ export default async function NotificationsPage() {
             );
 
             return href ? (
-              <Link
+              <NavLink
                 key={log.id}
                 href={href}
-                className="block rounded-xl border border-border bg-card overflow-hidden hover:bg-muted/40 active:bg-muted transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2"
+                className="block rounded-xl border border-border bg-card overflow-hidden hover:bg-muted/40 active:bg-muted transition-colors"
               >
                 {cardInner}
-              </Link>
+              </NavLink>
             ) : (
               <div key={log.id} className="rounded-xl border border-border bg-card overflow-hidden">
                 {cardInner}

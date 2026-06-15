@@ -217,6 +217,7 @@
 - `SkeletonCard` / `SkeletonBadgeRow` / `SkeletonSectionHeader` (`components/ui/skeleton-patterns.tsx`): 로딩 스켈레톤 조각
 - `Switch` (`components/ui/switch.tsx`): 토글 스위치 (`{ checked, onChange, disabled?, "aria-label"? }`, `role="switch"`)
 - `PasswordStrength` (`components/features/signup/`): 비밀번호 강도 표시 (회원가입/비밀번호 변경에서 공유)
+- `NavLink` (`components/ui/nav-link.tsx`): 내부 페이지 이동용 `next/link` 대체. `<a href>`는 모바일에서 블루투스 마우스 호버 시 하단에 주소가 노출되므로, `role="link"` div + `router.push`로 이동 처리 — 내부 네비게이션(카드/리스트 아이템/아이콘 버튼 등)에는 `Link` 대신 반드시 이 컴포넌트 사용. 다운로드용 `<a download>`는 예외
 
 ## Supabase 클라이언트 사용
 

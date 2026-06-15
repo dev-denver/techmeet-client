@@ -1,10 +1,10 @@
 "use client";
 
 import { usePathname, useRouter } from "next/navigation";
-import Link from "next/link";
 import { ArrowLeft, Bell } from "lucide-react";
 import { useScrolled } from "@/hooks/useScrolled";
 import { cn } from "@/lib/utils/cn";
+import { NavLink } from "@/components/ui/nav-link";
 
 const pageTitles: Record<string, string> = {
   "/": "홈",
@@ -78,13 +78,13 @@ export function TopBar() {
         <h1 className="flex-1 text-base font-semibold">{title}</h1>
 
         {!showBackButton && (
-          <Link
+          <NavLink
             href="/notifications"
-            className="flex h-10 w-10 -mr-2.5 items-center justify-center rounded-md hover:bg-accent active:bg-accent/80 transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
+            className="flex h-10 w-10 -mr-2.5 items-center justify-center rounded-md hover:bg-accent active:bg-accent/80 transition-colors"
             aria-label="알림 내역"
           >
             <Bell className="h-5 w-5" />
-          </Link>
+          </NavLink>
         )}
       </div>
     </header>

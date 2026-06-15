@@ -1,7 +1,7 @@
-import Link from "next/link";
 import { FolderOpen } from "lucide-react";
 import { ApplicationCard } from "@/components/features/projects/ApplicationCard";
 import { EmptyState } from "@/components/ui/empty-state";
+import { NavLink } from "@/components/ui/nav-link";
 import { PageHero } from "@/components/ui/page-hero";
 import { StatsGrid } from "@/components/ui/stats-grid";
 import { getApplications } from "@/lib/supabase/queries/applications";
@@ -57,12 +57,12 @@ export default async function ApplicationsPage() {
             title="아직 지원한 프로젝트가 없습니다"
             description="관심 있는 프로젝트에 지원해보세요"
             action={
-              <Link
+              <NavLink
                 href="/projects"
                 className="text-xs text-primary font-medium hover:underline underline-offset-2"
               >
                 프로젝트 보러가기 →
-              </Link>
+              </NavLink>
             }
           />
         )}

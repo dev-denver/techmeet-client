@@ -1,7 +1,7 @@
-import Link from "next/link";
 import { notFound } from "next/navigation";
 import { MapPin, Clock, Users, Calendar, Check, ChevronRight, Sparkles } from "lucide-react";
 import { Button } from "@/components/ui/button";
+import { NavLink } from "@/components/ui/nav-link";
 import { ProjectStatusBadge } from "@/components/features/projects/ProjectStatusBadge";
 import { ApplyButton } from "@/components/features/projects/ApplyButton";
 import { ShareButton } from "@/components/features/projects/ShareButton";
@@ -198,9 +198,9 @@ export default async function ProjectDetailPage({ params }: ProjectDetailPagePro
       {/* CTA - BottomNav 바로 위에 고정 */}
       <div className="fixed bottom-16 left-1/2 -translate-x-1/2 w-full max-w-[600px] z-30 bg-background border-t border-border px-4 py-3">
         {myApplication && !isWithdrawn ? (
-          <Link
+          <NavLink
             href="/projects/applications"
-            className="flex w-full h-12 items-center justify-center gap-2 rounded-md border border-border bg-muted/60 text-sm font-semibold text-foreground transition-colors hover:bg-muted active:bg-muted focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2"
+            className="flex w-full h-12 items-center justify-center gap-2 rounded-md border border-border bg-muted/60 text-sm font-semibold text-foreground transition-colors hover:bg-muted active:bg-muted"
           >
             <Check className="h-4 w-4 text-status-success" />
             지원 완료
@@ -210,13 +210,13 @@ export default async function ProjectDetailPage({ params }: ProjectDetailPagePro
               </span>
             )}
             <ChevronRight className="h-4 w-4 text-muted-foreground shrink-0" />
-          </Link>
+          </NavLink>
         ) : isRecruiting && !deadlinePassed ? (
           <ApplyButton projectId={project.id} />
         ) : myApplication ? (
-          <Link
+          <NavLink
             href="/projects/applications"
-            className="flex w-full h-12 items-center justify-center gap-2 rounded-md border border-border bg-muted/60 text-sm font-semibold text-foreground transition-colors hover:bg-muted active:bg-muted focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2"
+            className="flex w-full h-12 items-center justify-center gap-2 rounded-md border border-border bg-muted/60 text-sm font-semibold text-foreground transition-colors hover:bg-muted active:bg-muted"
           >
             <span>지원을 취소한 프로젝트입니다</span>
             {appConfig && (
@@ -225,7 +225,7 @@ export default async function ProjectDetailPage({ params }: ProjectDetailPagePro
               </span>
             )}
             <ChevronRight className="h-4 w-4 text-muted-foreground shrink-0" />
-          </Link>
+          </NavLink>
         ) : (
           <Button className="w-full h-12 text-base font-semibold" disabled>
             {!isRecruiting ? "모집 종료" : "지원 마감"}

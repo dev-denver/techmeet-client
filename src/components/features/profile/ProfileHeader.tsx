@@ -1,5 +1,5 @@
-import Link from "next/link";
 import { Pencil } from "lucide-react";
+import { NavLink } from "@/components/ui/nav-link";
 import type { FreelancerProfile } from "@/types";
 
 interface ProfileHeaderProps {
@@ -12,13 +12,13 @@ export function ProfileHeader({ profile }: ProfileHeaderProps) {
       <div>
         <div className="flex items-center gap-2">
           <h2 className="text-primary-foreground text-xl font-bold truncate">{profile.name}</h2>
-          <Link
+          <NavLink
             href="/settings/profile"
             className="p-1 text-primary-foreground/50 hover:text-primary-foreground/80 transition-colors rounded shrink-0"
             aria-label="내 정보 수정"
           >
             <Pencil className="h-3.5 w-3.5" />
-          </Link>
+          </NavLink>
         </div>
         <div className="flex flex-wrap items-center gap-2 mt-2">
           {profile.phone && (

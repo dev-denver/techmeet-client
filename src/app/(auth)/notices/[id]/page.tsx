@@ -1,6 +1,6 @@
 import { notFound } from "next/navigation";
-import Link from "next/link";
 import { Bell, CalendarDays, ChevronUp, ChevronDown, LayoutList, Paperclip, Download } from "lucide-react";
+import { NavLink } from "@/components/ui/nav-link";
 import { getNoticeById, getNotices } from "@/lib/supabase/queries/notices";
 import { formatDate } from "@/lib/utils/format";
 
@@ -90,35 +90,38 @@ export default async function NoticeDetailPage({ params }: NoticeDetailPageProps
       {/* 이전 / 다음 / 목록 */}
       <div className="border-t border-b divide-y divide-border">
         {newerNotice && (
-          <Link href={`/notices/${newerNotice.id}`}>
-            <div className="flex items-center gap-3 px-4 py-3.5 hover:bg-muted/50 active:bg-muted transition-colors">
-              <span className="flex items-center gap-1 text-xs text-muted-foreground shrink-0 w-10">
-                <ChevronUp className="h-3.5 w-3.5" />
-                다음
-              </span>
-              <p className="text-sm text-foreground truncate flex-1">{newerNotice.title}</p>
-            </div>
-          </Link>
+          <NavLink
+            href={`/notices/${newerNotice.id}`}
+            className="flex items-center gap-3 px-4 py-3.5 hover:bg-muted/50 active:bg-muted transition-colors"
+          >
+            <span className="flex items-center gap-1 text-xs text-muted-foreground shrink-0 w-10">
+              <ChevronUp className="h-3.5 w-3.5" />
+              다음
+            </span>
+            <p className="text-sm text-foreground truncate flex-1">{newerNotice.title}</p>
+          </NavLink>
         )}
         {olderNotice && (
-          <Link href={`/notices/${olderNotice.id}`}>
-            <div className="flex items-center gap-3 px-4 py-3.5 hover:bg-muted/50 active:bg-muted transition-colors">
-              <span className="flex items-center gap-1 text-xs text-muted-foreground shrink-0 w-10">
-                <ChevronDown className="h-3.5 w-3.5" />
-                이전
-              </span>
-              <p className="text-sm text-foreground truncate flex-1">{olderNotice.title}</p>
-            </div>
-          </Link>
+          <NavLink
+            href={`/notices/${olderNotice.id}`}
+            className="flex items-center gap-3 px-4 py-3.5 hover:bg-muted/50 active:bg-muted transition-colors"
+          >
+            <span className="flex items-center gap-1 text-xs text-muted-foreground shrink-0 w-10">
+              <ChevronDown className="h-3.5 w-3.5" />
+              이전
+            </span>
+            <p className="text-sm text-foreground truncate flex-1">{olderNotice.title}</p>
+          </NavLink>
         )}
       </div>
 
-      <Link href="/notices">
-        <div className="flex items-center justify-center gap-1.5 px-4 py-4 hover:bg-muted/50 active:bg-muted transition-colors">
-          <LayoutList className="h-4 w-4 text-muted-foreground" />
-          <span className="text-sm text-muted-foreground">목록으로</span>
-        </div>
-      </Link>
+      <NavLink
+        href="/notices"
+        className="flex items-center justify-center gap-1.5 px-4 py-4 hover:bg-muted/50 active:bg-muted transition-colors"
+      >
+        <LayoutList className="h-4 w-4 text-muted-foreground" />
+        <span className="text-sm text-muted-foreground">목록으로</span>
+      </NavLink>
     </div>
   );
 }

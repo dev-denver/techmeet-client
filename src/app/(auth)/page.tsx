@@ -1,6 +1,6 @@
-import Link from "next/link";
 import { ChevronRight, Bell, Megaphone, CalendarClock } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
+import { NavLink } from "@/components/ui/nav-link";
 import { StatsGrid } from "@/components/ui/stats-grid";
 import { ProjectCard } from "@/components/features/projects/ProjectCard";
 import { ApplicationCard } from "@/components/features/projects/ApplicationCard";
@@ -89,13 +89,13 @@ export default async function HomePage() {
       <section className="pt-5 pb-4 border-b">
         <div className="flex items-center justify-between px-4 mb-3">
           <h3 className="font-semibold">내 신청 현황</h3>
-          <Link
+          <NavLink
             href="/projects/applications"
             className="text-xs text-muted-foreground flex items-center gap-0.5 hover:text-foreground transition-colors"
           >
             전체보기
             <ChevronRight className="h-3.5 w-3.5" />
-          </Link>
+          </NavLink>
         </div>
         {recentApplications.length > 0 ? (
           <div className="flex gap-3 overflow-x-auto pb-2 scrollbar-none px-4">
@@ -106,12 +106,12 @@ export default async function HomePage() {
         ) : (
           <div className="mx-4 rounded-xl bg-muted/50 border border-dashed border-border px-4 py-5 text-center">
             <p className="text-sm text-muted-foreground">아직 지원한 프로젝트가 없습니다.</p>
-            <Link
+            <NavLink
               href="/projects"
-              className="text-xs text-primary mt-1.5 inline-block hover:underline underline-offset-2 font-medium"
+              className="inline-block text-xs text-primary mt-1.5 hover:underline underline-offset-2 font-medium"
             >
               프로젝트 보러가기 →
-            </Link>
+            </NavLink>
           </div>
         )}
       </section>
@@ -123,13 +123,13 @@ export default async function HomePage() {
       <section className="pt-5 pb-4 border-b">
         <div className="flex items-center justify-between px-4 mb-3">
           <h3 className="font-semibold">모집 중인 프로젝트</h3>
-          <Link
+          <NavLink
             href="/projects"
             className="text-xs text-muted-foreground flex items-center gap-0.5 hover:text-foreground transition-colors"
           >
             전체보기
             <ChevronRight className="h-3.5 w-3.5" />
-          </Link>
+          </NavLink>
         </div>
         {recentProjects.length > 0 ? (
           <div className="space-y-3 px-4">
@@ -153,27 +153,29 @@ export default async function HomePage() {
                 <Megaphone className="h-3.5 w-3.5" />
                 공지사항
               </span>
-              <Link
+              <NavLink
                 href="/notices"
                 className="text-xs text-muted-foreground flex items-center gap-0.5 hover:text-foreground transition-colors"
               >
                 더보기
                 <ChevronRight className="h-3.5 w-3.5" />
-              </Link>
+              </NavLink>
             </div>
             <div className="divide-y divide-border">
               {notices.slice(0, 2).map((notice) => (
-                <Link key={notice.id} href={`/notices/${notice.id}`}>
-                  <div className="flex items-center gap-3 px-4 py-3 hover:bg-muted/60 transition-colors active:bg-muted">
-                    {notice.isImportant && <Bell className="h-3.5 w-3.5 text-muted-foreground shrink-0" />}
-                    <p className="flex-1 text-xs text-foreground leading-snug line-clamp-1">
-                      {notice.title}
-                    </p>
-                    <span className="text-[10px] text-muted-foreground shrink-0">
-                      {formatDate(notice.createdAt)}
-                    </span>
-                  </div>
-                </Link>
+                <NavLink
+                  key={notice.id}
+                  href={`/notices/${notice.id}`}
+                  className="flex items-center gap-3 px-4 py-3 hover:bg-muted/60 transition-colors active:bg-muted"
+                >
+                  {notice.isImportant && <Bell className="h-3.5 w-3.5 text-muted-foreground shrink-0" />}
+                  <p className="flex-1 text-xs text-foreground leading-snug line-clamp-1">
+                    {notice.title}
+                  </p>
+                  <span className="text-[10px] text-muted-foreground shrink-0">
+                    {formatDate(notice.createdAt)}
+                  </span>
+                </NavLink>
               ))}
             </div>
           </div>

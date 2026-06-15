@@ -1,7 +1,7 @@
-import Link from "next/link";
 import { ChevronRight, Shield, Info, UserCog, UserX, KeyRound } from "lucide-react";
 import { NotificationSettings } from "@/components/features/settings/NotificationSettings";
 import { LogoutButton } from "@/components/features/settings/LogoutButton";
+import { NavLink } from "@/components/ui/nav-link";
 import { PageHero } from "@/components/ui/page-hero";
 import { getProfile } from "@/lib/supabase/queries/profile";
 import { ReferrerSection } from "@/components/features/referrer/ReferrerSection";
@@ -33,7 +33,7 @@ function LinkRow({
   danger?: boolean;
 }) {
   return (
-    <Link
+    <NavLink
       href={href}
       className="flex items-center justify-between px-4 py-3.5 hover:bg-muted/50 active:bg-muted transition-colors"
     >
@@ -42,7 +42,7 @@ function LinkRow({
         {label}
       </span>
       <ChevronRight className={`h-4 w-4 ${danger ? "text-destructive/50" : "text-muted-foreground"}`} />
-    </Link>
+    </NavLink>
   );
 }
 
@@ -92,13 +92,13 @@ export default async function SettingsPage() {
         {/* 로그아웃 / 회원탈퇴 */}
         <div className="pt-2 flex items-center justify-between px-1">
           <LogoutButton />
-          <Link
+          <NavLink
             href="/settings/withdraw"
             className="flex items-center gap-1.5 text-xs text-muted-foreground hover:text-destructive transition-colors px-1 py-1"
           >
             <UserX className="h-3.5 w-3.5" />
             회원 탈퇴
-          </Link>
+          </NavLink>
         </div>
       </div>
     </div>
