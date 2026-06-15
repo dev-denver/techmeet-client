@@ -2,12 +2,12 @@
 
 import { MessageSquare, Eye, EyeOff, Loader2 } from "lucide-react";
 import { useState, Suspense } from "react";
-import Link from "next/link";
 import { useRouter, useSearchParams } from "next/navigation";
 import { publicEnv } from "@/lib/config/env";
 import { AccountStatus } from "@/types";
 import { encryptPassword } from "@/lib/crypto/client";
 import { Input } from "@/components/ui/input";
+import { NavLink } from "@/components/ui/nav-link";
 import { LIMITS } from "@/lib/constants/limits";
 import { cn } from "@/lib/utils/cn";
 import { authApi } from "@/lib/api/auth";
@@ -182,13 +182,13 @@ function LoginForm() {
 
         <p className="text-xs text-muted-foreground text-center leading-relaxed">
           로그인 시{" "}
-          <Link href="/terms" className="underline underline-offset-2 hover:text-foreground transition-colors">
+          <NavLink href="/terms" className="inline underline underline-offset-2 hover:text-foreground transition-colors">
             이용약관
-          </Link>{" "}
+          </NavLink>{" "}
           및{" "}
-          <Link href="/privacy" className="underline underline-offset-2 hover:text-foreground transition-colors">
+          <NavLink href="/privacy" className="inline underline underline-offset-2 hover:text-foreground transition-colors">
             개인정보 처리방침
-          </Link>
+          </NavLink>
           에 동의하게 됩니다.
         </p>
       </div>

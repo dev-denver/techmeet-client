@@ -1,9 +1,9 @@
 "use client";
 
 import { useState } from "react";
-import Link from "next/link";
 import { Bell, Loader2, Megaphone } from "lucide-react";
 import { EmptyState } from "@/components/ui/empty-state";
+import { NavLink } from "@/components/ui/nav-link";
 import { noticesApi } from "@/lib/api/notices";
 import { formatDate } from "@/lib/utils/format";
 import type { Notice } from "@/types";
@@ -55,17 +55,19 @@ export function NoticeListClient({ initialNotices, initialTotal }: NoticeListCli
 
       <div className="rounded-xl border border-border divide-y divide-border overflow-hidden">
         {notices.map((notice) => (
-          <Link key={notice.id} href={`/notices/${notice.id}`}>
-            <div className="flex items-center gap-3 px-4 py-3.5 hover:bg-muted/50 active:bg-muted transition-colors">
-              {notice.isImportant && <Bell className="h-3.5 w-3.5 text-orange-600 shrink-0" />}
-              <p className="flex-1 text-sm text-foreground leading-snug line-clamp-1">
-                {notice.title}
-              </p>
-              <span className="text-xs text-muted-foreground shrink-0">
-                {formatDate(notice.createdAt)}
-              </span>
-            </div>
-          </Link>
+          <NavLink
+            key={notice.id}
+            href={`/notices/${notice.id}`}
+            className="flex items-center gap-3 px-4 py-3.5 hover:bg-muted/50 active:bg-muted transition-colors"
+          >
+            {notice.isImportant && <Bell className="h-3.5 w-3.5 text-orange-600 shrink-0" />}
+            <p className="flex-1 text-sm text-foreground leading-snug line-clamp-1">
+              {notice.title}
+            </p>
+            <span className="text-xs text-muted-foreground shrink-0">
+              {formatDate(notice.createdAt)}
+            </span>
+          </NavLink>
         ))}
       </div>
 

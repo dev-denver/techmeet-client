@@ -1,11 +1,11 @@
 "use client";
 
 import { useState, useRef, useEffect } from "react";
-import Link from "next/link";
 import { ClipboardList, FolderOpen, Loader2, Search, X } from "lucide-react";
 import { ProjectFilters } from "./ProjectFilters";
 import { ProjectCard } from "./ProjectCard";
 import { EmptyState } from "@/components/ui/empty-state";
+import { NavLink } from "@/components/ui/nav-link";
 import type { Project, ProjectFilterValue } from "@/types";
 import type { GetProjectsResponse } from "@/types/api";
 
@@ -125,13 +125,13 @@ export function ProjectListClient({ initialProjects, initialTotal, mySkills }: P
           <div className="flex-1 min-w-0">
             <ProjectFilters onFilterChange={handleFilterChange} />
           </div>
-          <Link
+          <NavLink
             href="/projects/applications"
-            className="shrink-0 flex items-center gap-1 px-3 py-2 rounded-full text-sm font-medium bg-muted text-muted-foreground hover:bg-muted/80 transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2"
+            className="shrink-0 flex items-center gap-1 px-3 py-2 rounded-full text-sm font-medium bg-muted text-muted-foreground hover:bg-muted/80 transition-colors"
           >
             <ClipboardList className="h-3.5 w-3.5" />
             내 신청 현황
-          </Link>
+          </NavLink>
         </div>
       </div>
 
