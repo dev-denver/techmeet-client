@@ -30,7 +30,8 @@ interface SignupFormProps {
 export function SignupForm({ email: initialEmail, kakaoId, name, birthDate: initialBirthDate, phone: initialPhone, refParam }: SignupFormProps) {
   const router = useRouter();
 
-  const [email, setEmail] = useState(initialEmail);
+  const [emailLocal, setEmailLocal] = useState(() => initialEmail.split("@")[0] ?? "");
+  const [emailDomain, setEmailDomain] = useState(() => initialEmail.split("@")[1] ?? "");
   const [emailEditable, setEmailEditable] = useState(false);
   const [formName, setFormName] = useState(name);
   const [password, setPassword] = useState("");
@@ -84,6 +85,7 @@ export function SignupForm({ email: initialEmail, kakaoId, name, birthDate: init
 
     let valid = true;
 
+    const email = `${emailLocal}@${emailDomain}`;
     if (!validateEmail(email)) {
       setEmailError("올바른 이메일 형식이 아닙니다");
       valid = false;
@@ -180,17 +182,29 @@ export function SignupForm({ email: initialEmail, kakaoId, name, birthDate: init
         error={emailError}
         hint={emailEditable ? undefined : "카카오 계정 이메일이 자동 입력되었습니다"}
       >
-        <div className="flex gap-2">
+        <div className="flex items-center gap-2">
           <Input
-            type="email"
-            value={email}
+            type="text"
+            value={emailLocal}
             disabled={!emailEditable}
             onChange={(e) => {
-              setEmail(e.target.value);
+              setEmailLocal(e.target.value);
               if (emailError) setEmailError("");
             }}
             maxLength={LIMITS.EMAIL_MAX}
-            className={cn("flex-1", emailError ? "border-red-300" : "")}
+            className={cn("flex-1 min-w-0", emailError ? "border-red-300" : "")}
+          />
+          <span className="shrink-0 text-muted-foreground">@</span>
+          <Input
+            type="text"
+            value={emailDomain}
+            disabled={!emailEditable}
+            onChange={(e) => {
+              setEmailDomain(e.target.value);
+              if (emailError) setEmailError("");
+            }}
+            maxLength={LIMITS.EMAIL_MAX}
+            className={cn("flex-1 min-w-0", emailError ? "border-red-300" : "")}
           />
           {!emailEditable && (
             <button
