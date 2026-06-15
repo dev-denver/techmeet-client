@@ -1,7 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
 import { createServerClient } from "@supabase/ssr";
 import { createClient, type SupabaseClient } from "@supabase/supabase-js";
-import { validatePassword, validatePhone, validateBirthDate, UUID_REGEX } from "@/lib/utils/validation";
+import { validatePassword, validatePhone, validateBirthDate, validateEmail, UUID_REGEX } from "@/lib/utils/validation";
 import { LIMITS } from "@/lib/constants/limits";
 import { type CookieOptions } from "@supabase/ssr";
 import { publicEnv, serverEnv } from "@/lib/config/env";
@@ -33,9 +33,9 @@ async function checkAdminAccount(
 }
 
 export async function POST(request: NextRequest) {
-  // 이메일은 httpOnly 쿠키에서만 읽음 (클라이언트에 노출 안 됨)
-  const email = request.cookies.get("signup_email")?.value;
-  if (!email) {
+  // 카카오 로그인을 거쳤는지 확인 (httpOnly 쿠키, 클라이언트에 노출 안 됨)
+  const cookieEmail = request.cookies.get("signup_email")?.value;
+  if (!cookieEmail) {
     return NextResponse.json(
       { error: "회원가입 세션이 만료되었습니다. 카카오 로그인을 다시 시도해주세요." },
       { status: 400 }
@@ -44,6 +44,7 @@ export async function POST(request: NextRequest) {
 
   let body: {
     encryptedPassword?: unknown;
+    email?: unknown;
     name?: unknown;
     birth_date?: unknown;
     phone?: unknown;
@@ -73,6 +74,13 @@ export async function POST(request: NextRequest) {
         { error: "모든 필드를 올바르게 입력해주세요" },
         { status: 400 }
       );
+    }
+
+    // 이메일: 카카오 계정 이메일을 기본값으로 하되, 사용자가 직접 수정한 이메일이 있으면 사용
+    const email = typeof body.email === "string" && body.email.trim() ? body.email.trim() : cookieEmail;
+
+    if (!validateEmail(email) || email.length > LIMITS.EMAIL_MAX) {
+      return NextResponse.json({ error: "올바른 이메일 형식이 아닙니다" }, { status: 400 });
     }
 
     const trimmedName = name.trim();
