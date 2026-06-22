@@ -6,7 +6,6 @@ import { UserCheck } from "lucide-react";
 import { profileApi } from "@/lib/api/profile";
 import { useSubmit } from "@/hooks/useSubmit";
 import { useToast } from "@/components/ui/toast";
-import { FormField } from "@/components/ui/form-field";
 import { Input } from "@/components/ui/input";
 import { LIMITS } from "@/lib/constants/limits";
 
@@ -48,15 +47,15 @@ export function ReferrerSection({ currentReferrerNote }: Props) {
 
   return (
     <div className="px-4 py-3.5">
-      <FormField label="추천인" optional error={error} hint={`${note.length}/${LIMITS.REFERRER_NOTE_MAX}`}>
-        <div className="flex items-center gap-2">
+      <div className="flex items-center justify-between gap-3">
+        <span className="text-sm text-muted-foreground shrink-0">추천인</span>
+        <div className="flex items-center gap-2 flex-1 max-w-[70%]">
           <Input
             type="text"
             value={note}
             onChange={(e) => setNote(e.target.value.slice(0, LIMITS.REFERRER_NOTE_MAX))}
-            placeholder="예: 테크밋 대표님"
             maxLength={LIMITS.REFERRER_NOTE_MAX}
-            className="flex-1"
+            className="h-9 min-w-0 flex-1 text-sm"
           />
           <button
             type="button"
@@ -67,7 +66,8 @@ export function ReferrerSection({ currentReferrerNote }: Props) {
             {isLoading ? "처리 중..." : "등록"}
           </button>
         </div>
-      </FormField>
+      </div>
+      {error && <p className="text-xs text-destructive mt-1 text-right">{error}</p>}
     </div>
   );
 }
