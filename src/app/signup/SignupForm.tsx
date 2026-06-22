@@ -1,21 +1,18 @@
 "use client";
 
 import { useRouter } from "next/navigation";
-import { useEffect, useState } from "react";
-import { Eye, EyeOff, X } from "lucide-react";
+import { useState } from "react";
+import { Eye, EyeOff } from "lucide-react";
 import { validatePassword, validatePhone, validateBirthDateWithMessage, validateEmail, formatPhone } from "@/lib/utils/validation";
 import { LIMITS } from "@/lib/constants/limits";
-import { ReferrerSearchModal } from "@/components/features/referrer/ReferrerSearchModal";
 import { PolicyModal } from "@/components/features/signup/PolicyModal";
 import { PasswordStrength } from "@/components/features/signup/PasswordStrength";
 import { FormField } from "@/components/ui/form-field";
 import { Input } from "@/components/ui/input";
 import { DateSelectPicker } from "@/components/ui/date-select-picker";
 import { cn } from "@/lib/utils/cn";
-import type { ReferrerSearchResult } from "@/types/api";
 import { encryptPassword } from "@/lib/crypto/client";
 import { authApi } from "@/lib/api/auth";
-import { profileApi } from "@/lib/api/profile";
 import { ApiError } from "@/lib/api/client";
 
 interface SignupFormProps {
@@ -24,10 +21,9 @@ interface SignupFormProps {
   name: string;
   birthDate: string;
   phone: string;
-  refParam: string;
 }
 
-export function SignupForm({ email: initialEmail, kakaoId, name, birthDate: initialBirthDate, phone: initialPhone, refParam }: SignupFormProps) {
+export function SignupForm({ email: initialEmail, kakaoId, name, birthDate: initialBirthDate, phone: initialPhone }: SignupFormProps) {
   const router = useRouter();
 
   const [emailLocal, setEmailLocal] = useState(() => initialEmail.split("@")[0] ?? "");
@@ -49,8 +45,7 @@ export function SignupForm({ email: initialEmail, kakaoId, name, birthDate: init
   const [agreePrivacy, setAgreePrivacy] = useState(false);
   const [agreeAge, setAgreeAge] = useState(false);
   const [agreeMarketing, setAgreeMarketing] = useState(false);
-  const [referrer, setReferrer] = useState<ReferrerSearchResult | null>(null);
-  const [showReferrerModal, setShowReferrerModal] = useState(false);
+  const [referrerNote, setReferrerNote] = useState("");
   const [policyModal, setPolicyModal] = useState<"terms" | "privacy" | null>(null);
 
   const [emailError, setEmailError] = useState("");
@@ -61,18 +56,6 @@ export function SignupForm({ email: initialEmail, kakaoId, name, birthDate: init
   const [phoneError, setPhoneError] = useState("");
   const [serverError, setServerError] = useState("");
   const [isLoading, setIsLoading] = useState(false);
-
-  useEffect(() => {
-    if (!refParam || !/^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i.test(refParam)) return;
-    void (async () => {
-      try {
-        const { data } = await profileApi.lookupReferrer(refParam);
-        setReferrer(data);
-      } catch {
-        /* fallback to manual input */
-      }
-    })();
-  }, [refParam]);
 
   function validatePasswordConfirm(pw: string, confirm: string): string {
     if (!confirm) return "";
@@ -159,7 +142,7 @@ export function SignupForm({ email: initialEmail, kakaoId, name, birthDate: init
         phone,
         kakaoId,
         agree_marketing: agreeMarketing,
-        referrer_id: referrer?.id ?? null,
+        referrer_note: referrerNote.trim() || null,
       });
 
       router.replace("/");
@@ -314,31 +297,14 @@ export function SignupForm({ email: initialEmail, kakaoId, name, birthDate: init
       </FormField>
 
       {/* 추천인 */}
-      <FormField label="추천인" optional>
-        {referrer ? (
-          <div className="flex items-center justify-between rounded-lg border border-zinc-200 bg-zinc-50 px-3 py-2.5 h-11">
-            <div className="flex items-center gap-2 min-w-0">
-              <p className="text-sm font-medium text-zinc-800 truncate">{referrer.name}</p>
-              <p className="text-xs text-zinc-400 shrink-0">{referrer.maskedPhone}</p>
-            </div>
-            <button
-              type="button"
-              onClick={() => setReferrer(null)}
-              className="p-1 rounded-full hover:bg-zinc-200 transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring shrink-0"
-              aria-label="추천인 제거"
-            >
-              <X className="h-4 w-4 text-zinc-500" />
-            </button>
-          </div>
-        ) : (
-          <button
-            type="button"
-            onClick={() => setShowReferrerModal(true)}
-            className="w-full h-11 rounded-lg border border-dashed border-zinc-300 bg-white px-3 text-sm text-zinc-500 hover:border-zinc-400 hover:text-zinc-700 transition-colors text-left"
-          >
-            + 추천인 추가
-          </button>
-        )}
+      <FormField label="추천인" optional hint={`${referrerNote.length}/${LIMITS.REFERRER_NOTE_MAX}`}>
+        <Input
+          type="text"
+          value={referrerNote}
+          onChange={(e) => setReferrerNote(e.target.value.slice(0, LIMITS.REFERRER_NOTE_MAX))}
+          placeholder="예: 테크밋 대표님"
+          maxLength={LIMITS.REFERRER_NOTE_MAX}
+        />
       </FormField>
 
       {/* 약관 동의 */}
@@ -440,16 +406,6 @@ export function SignupForm({ email: initialEmail, kakaoId, name, birthDate: init
       >
         {isLoading ? "처리 중..." : "회원가입 완료"}
       </button>
-
-      {showReferrerModal && (
-        <ReferrerSearchModal
-          onSelect={(selected) => {
-            setReferrer(selected);
-            setShowReferrerModal(false);
-          }}
-          onClose={() => setShowReferrerModal(false)}
-        />
-      )}
 
       <PolicyModal type={policyModal} onClose={() => setPolicyModal(null)} />
     </form>

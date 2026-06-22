@@ -7,15 +7,14 @@ import { cn } from "@/lib/utils/cn";
 
 interface ShareButtonProps {
   projectId: string;
-  userId: string;
   className?: string;
 }
 
-export function ShareButton({ projectId, userId, className }: ShareButtonProps) {
+export function ShareButton({ projectId, className }: ShareButtonProps) {
   const [copied, setCopied] = useState(false);
 
   async function handleShare() {
-    const url = `${window.location.origin}/projects/${projectId}?ref=${userId}`;
+    const url = `${window.location.origin}/projects/${projectId}`;
 
     if (navigator.share) {
       try {

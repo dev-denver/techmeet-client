@@ -45,4 +45,6 @@ export const LIMITS = {
   BANK_NAME_MAX: 50,
   /** 계좌번호 */
   BANK_ACCOUNT_MAX: 30,
+  /** 추천인 메모 */
+  REFERRER_NOTE_MAX: 100,
 } as const;

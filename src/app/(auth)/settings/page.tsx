@@ -65,7 +65,7 @@ export default async function SettingsPage() {
           <SectionLabel>계정</SectionLabel>
           <div className="rounded-xl border bg-card overflow-hidden divide-y divide-border">
             {profile?.phone && <InfoRow label="전화번호" value={profile.phone} />}
-            <ReferrerSection currentReferrerName={profile?.referrerName} />
+            <ReferrerSection currentReferrerNote={profile?.referrerNote} />
             <LinkRow href="/settings/profile" icon={<UserCog className="h-4 w-4" />} label="내 정보 수정" />
             <LinkRow href="/settings/password" icon={<KeyRound className="h-4 w-4" />} label="비밀번호 변경" />
           </div>

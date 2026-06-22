@@ -138,8 +138,7 @@ interface ProfileRow {
   bank_account_image_path: string | null;
   bank_account_image_name: string | null;
   kakao_id: string | null;
-  referrer_id: string | null;
-  referrer: { name: string } | null;
+  referrer_note: string | null;
   created_at: string;
   updated_at: string;
   careers: CareerRow[];
@@ -193,8 +192,7 @@ function mapRowToProfile(row: ProfileRow, profile: Partial<FreelancerProfile> = 
         ? { filePath: row.bank_account_image_path, fileName: row.bank_account_image_name }
         : null,
     kakaoId: row.kakao_id ?? undefined,
-    referrerId: row.referrer_id ?? undefined,
-    referrerName: row.referrer?.name ?? undefined,
+    referrerNote: row.referrer_note ?? undefined,
     createdAt: row.created_at,
     updatedAt: row.updated_at,
   };
@@ -206,11 +204,10 @@ export async function getProfile(): Promise<GetProfileResponse | null> {
   const { data: { user } } = await supabase.auth.getUser();
   if (!user) return null;
 
-  // referrer는 self-join embed로 한 번에 조회 (별도 순차 쿼리 방지)
   const [profileResult, educations, certifications, skillInventories, resumes] = await Promise.all([
     supabase
       .from("profiles")
-      .select("*, careers(*), referrer:referrer_id(name)")
+      .select("*, careers(*)")
       .eq("id", user.id)
       .single(),
     getEducations(),

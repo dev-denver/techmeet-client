@@ -4,7 +4,6 @@ import { NextRequest, NextResponse } from "next/server";
 import { serverEnv, publicEnv } from "@/lib/config/env";
 import { exchangeCodeForToken, getKakaoUserInfo } from "@/lib/kakao/oauth";
 import { AccountStatus } from "@/types";
-import { UUID_REGEX } from "@/lib/utils/validation";
 
 export async function GET(request: NextRequest) {
   const { searchParams } = new URL(request.url);
@@ -50,10 +49,6 @@ export async function GET(request: NextRequest) {
     }
 
     const { kakaoId, email, name, birthDate, phone } = kakaoUser;
-
-    // pending_referral 쿠키 읽기 (공유 링크로 접근한 경우)
-    const pendingReferral = request.cookies.get("pending_referral")?.value ?? null;
-    const isValidRef = !!pendingReferral && UUID_REGEX.test(pendingReferral);
 
     // Admin 클라이언트 생성 (RLS 우회, service_role key 사용)
     const supabaseAdmin = createClient(
@@ -164,8 +159,6 @@ export async function GET(request: NextRequest) {
       }
 
       console.log("[카카오 콜백] Step 5: 성공 → / 리다이렉트");
-      // 기존 유저: pending_referral 쿠키 삭제
-      redirectResponse.cookies.set("pending_referral", "", { maxAge: 0, path: "/" });
       return redirectResponse;
     }
 
@@ -176,9 +169,7 @@ export async function GET(request: NextRequest) {
     signupUrl.searchParams.set("kakao_id", kakaoId);
     if (birthDate) signupUrl.searchParams.set("birth_date", birthDate);
     if (phone) signupUrl.searchParams.set("phone", phone);
-    if (isValidRef) signupUrl.searchParams.set("ref", pendingReferral!);
     const signupResponse = NextResponse.redirect(signupUrl);
-    signupResponse.cookies.set("pending_referral", "", { maxAge: 0, path: "/" });
     signupResponse.cookies.set("signup_email", email, {
       httpOnly: true,
       sameSite: "lax",

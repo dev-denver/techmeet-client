@@ -1,7 +1,8 @@
 import { NextRequest, NextResponse } from "next/server";
 import { createServerClient } from "@/lib/supabase/server";
 import { requireAuth } from "@/lib/api/server";
-import { AccountStatus } from "@/types";
+import { LIMITS } from "@/lib/constants/limits";
+import { validateLength } from "@/lib/utils/validation";
 
 export async function POST(request: NextRequest) {
   const { user, errorResponse } = await requireAuth();
@@ -10,21 +11,22 @@ export async function POST(request: NextRequest) {
   // requireAuth()는 인증 확인만 담당하므로, 이후 profiles 조회·수정에 별도 클라이언트 생성
   const supabase = await createServerClient();
 
-  const body = await request.json() as { referrerId?: unknown };
-  const { referrerId } = body;
+  const body = await request.json() as { referrerNote?: unknown };
+  const note = typeof body.referrerNote === "string" ? body.referrerNote.trim() : "";
 
-  if (typeof referrerId !== "string" || !referrerId) {
-    return NextResponse.json({ error: "추천인 ID가 필요합니다" }, { status: 400 });
+  if (!note) {
+    return NextResponse.json({ error: "추천인을 입력해주세요" }, { status: 400 });
   }
 
-  if (referrerId === user.id) {
-    return NextResponse.json({ error: "본인을 추천인으로 지정할 수 없습니다" }, { status: 400 });
+  const lengthError = validateLength(note, LIMITS.REFERRER_NOTE_MAX, "추천인");
+  if (lengthError) {
+    return NextResponse.json({ error: lengthError }, { status: 400 });
   }
 
   // 이미 추천인이 등록되어 있는지 확인
   const { data: currentProfile, error: fetchError } = await supabase
     .from("profiles")
-    .select("referrer_id")
+    .select("referrer_note")
     .eq("id", user.id)
     .single();
 
@@ -32,29 +34,16 @@ export async function POST(request: NextRequest) {
     return NextResponse.json({ error: "프로필 조회 중 오류가 발생했습니다" }, { status: 500 });
   }
 
-  if (currentProfile?.referrer_id) {
+  if (currentProfile?.referrer_note) {
     return NextResponse.json(
       { error: "이미 추천인이 등록되어 있습니다" },
       { status: 409 }
     );
   }
 
-  // 추천인 존재 여부 확인
-  const { data: referrerProfile, error: referrerError } = await supabase
-    .from("profiles")
-    .select("id")
-    .eq("id", referrerId)
-    .eq("account_status", AccountStatus.Active)
-    .single();
-
-  if (referrerError || !referrerProfile) {
-    return NextResponse.json({ error: "존재하지 않는 추천인입니다" }, { status: 404 });
-  }
-
-  // 추천인 저장
   const { error: updateError } = await supabase
     .from("profiles")
-    .update({ referrer_id: referrerId })
+    .update({ referrer_note: note })
     .eq("id", user.id);
 
   if (updateError) {

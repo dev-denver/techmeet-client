@@ -28,7 +28,7 @@ export interface SignupRequest {
   phone: string;
   kakaoId: string;
   agree_marketing: boolean;
-  referrer_id: string | null;
+  referrer_note: string | null;
 }
 
 export interface LoginRequest {
@@ -134,11 +134,8 @@ export type UploadResumeResponse = ApiSuccessResponse & { resume: ProfileResume 
 export type UploadContractDocumentResponse = ApiSuccessResponse & { document: ContractDocument };
 
 // ── Referrer ──────────────────────────────────────────
-export interface SetReferrerRequest { referrerId: string; }
-export type SetReferrerResponse = ApiSuccessResponse;
-export interface ReferrerSearchResult { id: string; name: string; maskedPhone: string; }
-export type SearchReferrerResponse = { data: ReferrerSearchResult[] };
-export type LookupReferrerResponse = { data: ReferrerSearchResult };
+export interface SetReferrerNoteRequest { referrerNote: string; }
+export type SetReferrerNoteResponse = ApiSuccessResponse;
 
 // ── Notices ───────────────────────────────────────────
 export interface GetNoticesParams {
