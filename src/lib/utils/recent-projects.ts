@@ -76,3 +76,18 @@ export function addRecentProject(project: { id: string; title: string }): void {
     // localStorage 비활성/용량초과 시 무시 (조용히 실패)
   }
 }
+
+/** 더 이상 존재하지 않는(삭제된) 프로젝트를 최근 본 목록에서 제거한다. */
+export function removeRecentProjects(ids: string[]): void {
+  if (typeof window === "undefined" || ids.length === 0) return;
+  try {
+    const idSet = new Set(ids);
+    const existing = getRecentProjects();
+    const next = existing.filter((p) => !idSet.has(p.id));
+    if (next.length === existing.length) return;
+    window.localStorage.setItem(STORAGE_KEY, JSON.stringify(next));
+    window.dispatchEvent(new Event(CHANGE_EVENT));
+  } catch {
+    // localStorage 비활성/용량초과 시 무시 (조용히 실패)
+  }
+}
