@@ -370,7 +370,6 @@ src/
 - [ ] **DB 마이그레이션 수동 적용 필요**: `supabase/migrations/20260614120000_profile-contract-info.sql`
   - `profiles` 테이블에 계약 정보 컬럼 10개 추가 + `contract-documents` storage 버킷/정책 생성
   - 적용 전까지 계약 정보 섹션 저장/파일 업로드 동작 안 함 (Supabase CLI `supabase db push` 또는 대시보드 SQL Editor에서 실행)
-
 ---
 
 ## DB 주요 테이블

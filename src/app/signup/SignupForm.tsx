@@ -302,7 +302,6 @@ export function SignupForm({ email: initialEmail, kakaoId, name, birthDate: init
           type="text"
           value={referrerNote}
           onChange={(e) => setReferrerNote(e.target.value.slice(0, LIMITS.REFERRER_NOTE_MAX))}
-          placeholder="예: 테크밋 대표님"
           maxLength={LIMITS.REFERRER_NOTE_MAX}
         />
       </FormField>
