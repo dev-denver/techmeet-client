@@ -98,7 +98,7 @@ export function CareerForm({
             type="text"
             value={form.role}
             onChange={(e) => onUpdate("role", e.target.value)}
-            placeholder="프론트엔드 개발자"
+            placeholder="분석/설계/개발"
             maxLength={LIMITS.ROLE_MAX}
             className={inputClass(fieldErrors.role)}
           />
