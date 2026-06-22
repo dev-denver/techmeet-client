@@ -8,10 +8,8 @@ import type {
   SaveEducationRequest,
   SaveCertificationRequest,
   SaveSkillInventoryRequest,
-  SearchReferrerResponse,
-  LookupReferrerResponse,
-  SetReferrerRequest,
-  SetReferrerResponse,
+  SetReferrerNoteRequest,
+  SetReferrerNoteResponse,
   UploadResumeResponse,
   UploadContractDocumentResponse,
 } from "@/types";
@@ -86,14 +84,8 @@ export const profileApi = {
   deleteSkillInventory: (id: string) =>
     apiFetch<{ success: true }>(`/api/profile/skill-inventories/${id}`, { method: "DELETE" }),
 
-  searchReferrer: (q: string) =>
-    apiFetch<SearchReferrerResponse>(`/api/profile/referrer/search?q=${encodeURIComponent(q)}`),
-
-  lookupReferrer: (id: string) =>
-    apiFetch<LookupReferrerResponse>(`/api/profile/referrer/lookup?id=${encodeURIComponent(id)}`),
-
-  setReferrer: (data: SetReferrerRequest) =>
-    apiFetch<SetReferrerResponse>("/api/profile/referrer", {
+  setReferrerNote: (data: SetReferrerNoteRequest) =>
+    apiFetch<SetReferrerNoteResponse>("/api/profile/referrer", {
       method: "POST",
       body: JSON.stringify(data),
     }),

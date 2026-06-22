@@ -69,7 +69,6 @@ export default async function ProjectDetailPage({ params }: ProjectDetailPagePro
             {currentUserId && (
               <ShareButton
                 projectId={project.id}
-                userId={currentUserId}
                 className="border-primary-foreground/20 text-primary-foreground/60 hover:bg-primary-foreground/10 hover:text-primary-foreground bg-transparent"
               />
             )}

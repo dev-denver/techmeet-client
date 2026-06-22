@@ -4,7 +4,7 @@ import { Suspense } from "react";
 import { SignupForm } from "./SignupForm";
 
 interface SignupPageProps {
-  searchParams: Promise<{ name?: string; kakao_id?: string; ref?: string; birth_date?: string; phone?: string }>;
+  searchParams: Promise<{ name?: string; kakao_id?: string; birth_date?: string; phone?: string }>;
 }
 
 export default async function SignupPage({ searchParams }: SignupPageProps) {
@@ -34,7 +34,6 @@ export default async function SignupPage({ searchParams }: SignupPageProps) {
             name={params.name ?? ""}
             birthDate={params.birth_date ?? ""}
             phone={params.phone ?? ""}
-            refParam={params.ref ?? ""}
           />
         </Suspense>
       </div>

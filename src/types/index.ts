@@ -38,11 +38,8 @@ export type {
   NotificationSettings,
   GetNotificationSettingsResponse,
   UpdateNotificationSettingsRequest,
-  SetReferrerRequest,
-  SetReferrerResponse,
-  ReferrerSearchResult,
-  SearchReferrerResponse,
-  LookupReferrerResponse,
+  SetReferrerNoteRequest,
+  SetReferrerNoteResponse,
   UploadResumeResponse,
   UploadContractDocumentResponse,
 } from "./api";

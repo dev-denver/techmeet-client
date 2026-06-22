@@ -109,8 +109,7 @@ export interface FreelancerProfile {
   bankAccountNumber: string | null;
   bankAccountImage: ContractDocument | null;
   kakaoId?: string;
-  referrerId?: string;
-  referrerName?: string;
+  referrerNote?: string;
   createdAt: string;
   updatedAt: string;
 }

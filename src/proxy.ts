@@ -10,9 +10,7 @@ import { NextResponse, type NextRequest } from "next/server";
 import { publicEnv } from "@/lib/config/env";
 import { AccountStatus } from "@/types";
 
-const PUBLIC_PATHS = ["/login", "/signup", "/terms", "/privacy", "/api/auth", "/api/profile/referrer/search", "/api/profile/referrer/lookup"];
-
-const UUID_REGEX = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
+const PUBLIC_PATHS = ["/login", "/signup", "/terms", "/privacy", "/api/auth"];
 
 function isPublicPath(pathname: string) {
   return PUBLIC_PATHS.some((p) => pathname.startsWith(p));
@@ -50,21 +48,10 @@ export async function proxy(request: NextRequest) {
 
   // 미인증 사용자가 보호된 페이지 접근 → 로그인으로 리다이렉트
   if (!user && !isPublicPath(pathname)) {
-    const ref = request.nextUrl.searchParams.get("ref");
     const loginUrl = request.nextUrl.clone();
     loginUrl.pathname = "/login";
     loginUrl.search = "";
-    const redirectResponse = NextResponse.redirect(loginUrl);
-
-    if (ref && UUID_REGEX.test(ref)) {
-      redirectResponse.cookies.set("pending_referral", ref, {
-        httpOnly: true,
-        sameSite: "lax",
-        maxAge: 60 * 60 * 24 * 7,
-        path: "/",
-      });
-    }
-    return redirectResponse;
+    return NextResponse.redirect(loginUrl);
   }
 
   // 인증된 사용자 처리

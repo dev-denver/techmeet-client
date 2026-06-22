@@ -1,7 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
 import { createServerClient } from "@supabase/ssr";
 import { createClient, type SupabaseClient } from "@supabase/supabase-js";
-import { validatePassword, validatePhone, validateBirthDate, validateEmail, UUID_REGEX } from "@/lib/utils/validation";
+import { validatePassword, validatePhone, validateBirthDate, validateEmail, validateLength } from "@/lib/utils/validation";
 import { LIMITS } from "@/lib/constants/limits";
 import { type CookieOptions } from "@supabase/ssr";
 import { publicEnv, serverEnv } from "@/lib/config/env";
@@ -49,7 +49,7 @@ export async function POST(request: NextRequest) {
     birth_date?: unknown;
     phone?: unknown;
     kakaoId?: unknown;
-    referrer_id?: unknown;
+    referrer_note?: unknown;
     agree_marketing?: unknown;
   };
 
@@ -61,7 +61,7 @@ export async function POST(request: NextRequest) {
 
   try {
     const { encryptedPassword, name, birth_date, phone, kakaoId } = body;
-    const referrerId = typeof body.referrer_id === "string" && body.referrer_id ? body.referrer_id : null;
+    const referrerNote = typeof body.referrer_note === "string" ? body.referrer_note.trim() : "";
     const agreeMarketing = typeof body.agree_marketing === "boolean" ? body.agree_marketing : false;
 
     if (
@@ -91,8 +91,11 @@ export async function POST(request: NextRequest) {
       );
     }
 
-    if (referrerId && !UUID_REGEX.test(referrerId)) {
-      return NextResponse.json({ error: "올바르지 않은 추천인입니다" }, { status: 400 });
+    if (referrerNote) {
+      const lengthError = validateLength(referrerNote, LIMITS.REFERRER_NOTE_MAX, "추천인");
+      if (lengthError) {
+        return NextResponse.json({ error: lengthError }, { status: 400 });
+      }
     }
 
     let password: string;
@@ -204,7 +207,7 @@ export async function POST(request: NextRequest) {
       notification_marketing: agreeMarketing,
       account_status: AccountStatus.Active,
     };
-    if (referrerId) profileUpsert.referrer_id = referrerId;
+    if (referrerNote) profileUpsert.referrer_note = referrerNote;
 
     const { error: upsertError } = await supabaseAdmin
       .from("profiles")
