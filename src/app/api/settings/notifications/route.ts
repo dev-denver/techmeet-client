@@ -4,7 +4,6 @@ import { requireAuth } from "@/lib/api/server";
 import type { NotificationSettings, UpdateNotificationSettingsRequest } from "@/types";
 
 const defaultSettings: NotificationSettings = {
-  marketing: false,
   privacy_consent: false,
   sms_consent: false,
 };
@@ -20,7 +19,7 @@ export async function GET() {
 
     const { data, error } = await supabase
       .from("profiles")
-      .select("notification_marketing, privacy_consent, sms_consent")
+      .select("privacy_consent, sms_consent")
       .eq("id", user.id)
       .single();
 
@@ -29,13 +28,11 @@ export async function GET() {
     }
 
     const row = data as {
-      notification_marketing: boolean | null;
       privacy_consent: boolean | null;
       sms_consent: boolean | null;
     };
 
     const settings: NotificationSettings = {
-      marketing: row.notification_marketing ?? false,
       privacy_consent: row.privacy_consent ?? false,
       sms_consent: row.sms_consent ?? false,
     };
@@ -56,7 +53,6 @@ export async function PUT(request: NextRequest) {
     const supabase = await createServerClient();
 
     const updateData: Record<string, boolean> = {};
-    if (body.marketing !== undefined) updateData.notification_marketing = body.marketing;
     if (body.privacy_consent !== undefined) updateData.privacy_consent = body.privacy_consent;
     if (body.sms_consent !== undefined) updateData.sms_consent = body.sms_consent;
 
