@@ -58,6 +58,9 @@ export async function getProjects(params?: GetProjectsParams): Promise<GetProjec
       "id, title, description, client_name, project_type, work_type, status, tech_stack, duration_start_date, duration_end_date, deadline, headcount, location, requirements, created_at, updated_at",
       { count: "exact" }
     )
+    // RLS는 인증된 사용자에게 전체 행을 허용하므로, soft delete/노출 여부는 앱 레이어에서 필터링
+    .is("deleted_at", null)
+    .eq("is_visible", true)
     .order("created_at", { ascending: false })
     .range(offset, offset + pageSize - 1);
 
@@ -99,6 +102,8 @@ export async function getProjectById(id: string): Promise<GetProjectByIdResponse
     .from("projects")
     .select("*")
     .eq("id", id)
+    .is("deleted_at", null)
+    .eq("is_visible", true)
     .single();
 
   if (error) {
