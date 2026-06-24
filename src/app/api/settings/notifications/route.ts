@@ -4,9 +4,9 @@ import { requireAuth } from "@/lib/api/server";
 import type { NotificationSettings, UpdateNotificationSettingsRequest } from "@/types";
 
 const defaultSettings: NotificationSettings = {
-  new_project: true,
-  application_update: true,
   marketing: false,
+  privacy_consent: false,
+  sms_consent: false,
 };
 
 export async function GET() {
@@ -20,7 +20,7 @@ export async function GET() {
 
     const { data, error } = await supabase
       .from("profiles")
-      .select("notification_new_project, notification_application_update, notification_marketing")
+      .select("notification_marketing, privacy_consent, sms_consent")
       .eq("id", user.id)
       .single();
 
@@ -29,15 +29,15 @@ export async function GET() {
     }
 
     const row = data as {
-      notification_new_project: boolean | null;
-      notification_application_update: boolean | null;
       notification_marketing: boolean | null;
+      privacy_consent: boolean | null;
+      sms_consent: boolean | null;
     };
 
     const settings: NotificationSettings = {
-      new_project: row.notification_new_project ?? true,
-      application_update: row.notification_application_update ?? true,
       marketing: row.notification_marketing ?? false,
+      privacy_consent: row.privacy_consent ?? false,
+      sms_consent: row.sms_consent ?? false,
     };
 
     return NextResponse.json({ data: settings });
@@ -56,9 +56,27 @@ export async function PUT(request: NextRequest) {
     const supabase = await createServerClient();
 
     const updateData: Record<string, boolean> = {};
-    if (body.new_project !== undefined) updateData.notification_new_project = body.new_project;
-    if (body.application_update !== undefined) updateData.notification_application_update = body.application_update;
     if (body.marketing !== undefined) updateData.notification_marketing = body.marketing;
+    if (body.privacy_consent !== undefined) updateData.privacy_consent = body.privacy_consent;
+    if (body.sms_consent !== undefined) updateData.sms_consent = body.sms_consent;
+
+    // sms 수신 동의는 개인정보 수집 이용 동의가 선행되어야 함
+    if (updateData.privacy_consent === false) {
+      updateData.sms_consent = false;
+    }
+    if (updateData.sms_consent === true && body.privacy_consent === undefined) {
+      const { data: current } = await supabase
+        .from("profiles")
+        .select("privacy_consent")
+        .eq("id", user.id)
+        .single();
+      if (!current?.privacy_consent) {
+        return NextResponse.json(
+          { error: "개인정보 수집 이용 동의가 필요합니다" },
+          { status: 400 }
+        );
+      }
+    }
 
     const { error } = await supabase
       .from("profiles")

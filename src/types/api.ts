@@ -151,9 +151,9 @@ export type GetAlimtalkLogsResponse = PaginatedResponse<AlimtalkLog>;
 
 // ── Settings ──────────────────────────────────────────
 export interface NotificationSettings {
-  new_project: boolean;
-  application_update: boolean;
   marketing: boolean;
+  privacy_consent: boolean;
+  sms_consent: boolean;
 }
 
 export type GetNotificationSettingsResponse = { data: NotificationSettings };
