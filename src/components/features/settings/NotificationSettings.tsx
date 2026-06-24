@@ -8,7 +8,6 @@ import type { NotificationSettings as NotificationSettingsType } from "@/types";
 
 export function NotificationSettings() {
   const [settings, setSettings] = useState<NotificationSettingsType>({
-    marketing: false,
     privacy_consent: false,
     sms_consent: false,
   });
@@ -61,21 +60,6 @@ export function NotificationSettings() {
 
   return (
     <div className="divide-y divide-border">
-      <div className="flex items-center justify-between px-4 py-3.5">
-        <div className="flex-1 pr-4">
-          <p className="text-sm font-medium">마케팅 알림</p>
-          <p className="text-xs text-muted-foreground mt-0.5">
-            테크밋 이벤트 및 공지 알림을 받습니다.
-          </p>
-        </div>
-        <Switch
-          checked={settings.marketing}
-          onChange={(val) => handleChange("marketing", val)}
-          disabled={isSaving}
-          aria-label="마케팅 알림"
-        />
-      </div>
-
       <div className="flex items-center justify-between px-4 py-3.5">
         <div className="flex-1 pr-4">
           <p className="text-sm font-medium">개인정보 수집 이용 동의</p>

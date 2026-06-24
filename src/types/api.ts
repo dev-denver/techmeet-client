@@ -151,7 +151,6 @@ export type GetAlimtalkLogsResponse = PaginatedResponse<AlimtalkLog>;
 
 // ── Settings ──────────────────────────────────────────
 export interface NotificationSettings {
-  marketing: boolean;
   privacy_consent: boolean;
   sms_consent: boolean;
 }
