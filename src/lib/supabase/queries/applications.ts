@@ -16,7 +16,7 @@ interface ApplicationRow {
   expected_rate: number | null;
   applied_at: string;
   updated_at: string;
-  projects: { title: string } | null;
+  projects: { title: string; deleted_at: string | null; is_visible: boolean } | null;
 }
 
 /** 중복 지원(unique 제약 위반) 시 throw — API route에서 409로 매핑 */
@@ -32,6 +32,7 @@ function mapRowToApplication(row: ApplicationRow): Application {
     id: row.id,
     projectId: row.project_id,
     projectTitle: row.projects?.title ?? "",
+    isProjectDeleted: !row.projects || row.projects.deleted_at !== null || !row.projects.is_visible,
     freelancerId: row.freelancer_id,
     status: row.status,
     note: row.note,
@@ -58,7 +59,7 @@ export async function getApplications(): Promise<GetApplicationsResponse> {
 
   const { data, count, error } = await supabase
     .from("applications")
-    .select("*, projects(title)", { count: "exact" })
+    .select("*, projects(title, deleted_at, is_visible)", { count: "exact" })
     .eq("freelancer_id", user.id)
     .order("applied_at", { ascending: false });
 
@@ -91,7 +92,7 @@ export async function getApplicationForProject(
 
   const { data, error } = await supabase
     .from("applications")
-    .select("*, projects(title)")
+    .select("*, projects(title, deleted_at, is_visible)")
     .eq("freelancer_id", user.id)
     .eq("project_id", projectId)
     .maybeSingle();
@@ -129,7 +130,7 @@ export async function createApplication(
         applied_at: new Date().toISOString(),
       })
       .eq("id", existing.id)
-      .select("*, projects(title)")
+      .select("*, projects(title, deleted_at, is_visible)")
       .single();
 
     if (error) throw error;
@@ -144,7 +145,7 @@ export async function createApplication(
       note: payload.note,
       expected_rate: payload.expectedRate,
     })
-    .select("*, projects(title)")
+    .select("*, projects(title, deleted_at, is_visible)")
     .single();
 
   if (error) {
