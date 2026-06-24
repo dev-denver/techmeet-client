@@ -66,6 +66,8 @@ create table if not exists public.profiles (
   notification_new_project         boolean     not null default true,                                     -- 새 프로젝트 알림 수신 여부
   notification_application_update  boolean     not null default true,                                     -- 지원 상태 변경 알림 수신 여부
   notification_marketing           boolean     not null default false,                                    -- 마케팅 알림 수신 여부
+  privacy_consent                  boolean     not null default false,                                    -- 개인정보 수집 이용 동의 여부
+  sms_consent                      boolean     not null default false,                                    -- SMS 수신 동의 여부 (privacy_consent 선행 필요)
   account_status                   text        not null default 'active'                                  -- 계정 상태 (active/withdrawn)
     check (account_status in ('active', 'withdrawn')),
   withdrawn_at                     timestamptz,                                                           -- 탈퇴 일시
