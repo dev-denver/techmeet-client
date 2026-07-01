@@ -14,11 +14,12 @@
 --             7. notices           — 공지사항 (예약 공지 포함) / admin 관리, client 읽기
 --
 --   [CLIENT]  8. applications      — 지원 내역 / client CRUD (projects FK로 인해 SHARED 이후 정의)
+--             9. profile_resumes   — 이력서 파일 / client CRUD (Storage 버킷 연동)
 --
---   [ADMIN]   9. admin_users       — 관리자 계정
---            10. alimtalk_templates — 카카오 알림톡 서식
---            11. alimtalk_logs     — 카카오 알림톡 발송 이력
---            12. admin_audit_logs  — 관리자 감사 로그
+--   [ADMIN]  10. admin_users       — 관리자 계정
+--            11. alimtalk_templates — 카카오 알림톡 서식
+--            12. alimtalk_logs     — 카카오 알림톡 발송 이력
+--            13. admin_audit_logs  — 관리자 감사 로그
 --
 -- 설계 원칙:
 --   - profiles.id = auth.users.id (client 코드 호환)
@@ -288,6 +289,8 @@ create table if not exists public.projects (
     check (work_type in ('remote', 'onsite', 'hybrid')),
   location            text,                                                                 -- 근무 위치
   headcount           integer,                                                              -- 모집 인원
+  business_type       text                                                                  -- 비즈니스 유형 (sm/si)
+    check (business_type in ('sm', 'si')),
   is_visible          boolean     not null default true,                                    -- 노출 여부
   created_by          uuid        references public.profiles(id) on delete set null,        -- 등록 관리자 프로필 ID
   seq_id              bigint      generated always as identity unique,                      -- Supabase Realtime 순서 관리 (자동)
@@ -456,7 +459,7 @@ create trigger admin_users_updated_at
 
 
 -- ------------------------------------------------------------
--- 10. alimtalk_templates (카카오 알림톡 서식)
+-- 11. alimtalk_templates (카카오 알림톡 서식)
 -- ------------------------------------------------------------
 create table if not exists public.alimtalk_templates (
   id           uuid        default gen_random_uuid() primary key,                           -- 고유 식별자
@@ -481,7 +484,7 @@ create trigger alimtalk_templates_updated_at
 
 
 -- ------------------------------------------------------------
--- 11. alimtalk_logs (카카오 알림톡 발송 이력)
+-- 12. alimtalk_logs (카카오 알림톡 발송 이력)
 -- ------------------------------------------------------------
 create table if not exists public.alimtalk_logs (
   id            uuid        default gen_random_uuid() primary key,                          -- 고유 식별자
@@ -515,7 +518,7 @@ alter table public.alimtalk_logs
 
 
 -- ------------------------------------------------------------
--- 12. admin_audit_logs (관리자 감사 로그)
+-- 13. admin_audit_logs (관리자 감사 로그)
 -- ------------------------------------------------------------
 create table if not exists public.admin_audit_logs (
   id          uuid        default gen_random_uuid() primary key,                            -- 고유 식별자

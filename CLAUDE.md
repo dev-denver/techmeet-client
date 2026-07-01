@@ -45,41 +45,85 @@
 /projects                  → 프로젝트 목록
 /projects/[id]             → 프로젝트 상세 + 지원하기
 /projects/applications     → 내 신청 내역 및 상태
-/profile                   → 내 정보 (기본정보, 학력/자격증, 경력사항, 스킬 인벤토리)
+/profile                   → 내 정보 (기본정보, 학력/자격증, 경력사항, 스킬 인벤토리, 이력서)
 /notifications             → 알림 이력 (카카오 알림톡 발송 내역)
-/settings                  → 설정 (알림, 로그아웃)
+/notices                   → 공지사항 목록
+/notices/[id]              → 공지사항 상세
+/settings                  → 설정 (알림, 추천인, 로그아웃)
+/settings/profile          → 내 정보 수정
+/settings/password         → 비밀번호 변경
+/settings/withdraw         → 회원 탈퇴
 /login                     → 카카오 로그인
+/signup                    → 회원가입 (카카오 OAuth 플로우 선행)
+/terms                     → 이용약관 (공개)
+/privacy                   → 개인정보 처리방침 (공개)
 ```
 
 ## 아키텍처
 
 ```
 /src
+  proxy.ts                 → 개발 환경 카카오 OAuth 콜백 프록시
   /app                     → Next.js App Router 페이지 및 레이아웃
     /api                   → API 라우트 (Supabase 연동, 카카오 알림톡)
+      /auth                → login, logout, signup, withdraw, password, public-key, kakao/callback
+      /applications        → 지원 CRUD ([id] 취소)
+      /projects            → 프로젝트 조회 ([id] 상세)
+      /profile             → 프로필 + availability / careers / education / certifications
+                             / skill-inventories / resumes / contract-documents / referrer
+      /notices             → 공지사항 조회
+      /notifications       → 알림톡 이력 조회
+      /settings            → /notifications (알림 설정 GET/PUT)
     /login                 → 로그인 페이지
-    /projects              → 프로젝트 관련 페이지
-    /profile               → 내 정보 페이지 (탭: 기본정보/학력자격증/경력사항/스킬인벤토리)
-    /notifications         → 알림 이력 페이지
-    /settings              → 설정 페이지
+    /signup                → 회원가입 페이지
+    /terms                 → 이용약관
+    /privacy               → 개인정보 처리방침
+    /(auth)                → 인증 필요 페이지 그룹 (TopBar + BottomNavigation 레이아웃)
+      /page.tsx            → 홈
+      /projects            → 목록, [id] 상세, applications 신청 내역
+      /profile             → 프로필 (탭 5개)
+      /notifications       → 알림 이력
+      /notices             → 공지사항 목록, [id] 상세
+      /settings            → 설정, profile 내 정보 수정, password 비밀번호 변경, withdraw 탈퇴
   /components
     /ui                    → shadcn/ui 기반 재사용 UI 컴포넌트
-    /layout                → TopBar, BottomNavigation 등 레이아웃 컴포넌트
-    /features              → 기능별 컴포넌트 (projects/, profile/ 등)
+    /layout                → TopBar, BottomNavigation, PullToRefresh 레이아웃 컴포넌트
+    /features              → 기능별 컴포넌트
+      /projects            → ProjectCard, ProjectListClient, ProjectFilters, ProjectStatusBadge,
+                             ApplicationCard, ApplyButton, ShareButton, RecentProjectsSection,
+                             RecordRecentProject
+      /profile             → ProfileHeader, ProfileCompletionBar, ProfileTabsClient, BasicInfoTab,
+                             ProfileBasicForm, AvailabilityEditSheet, TechStackInput, TechStackSection,
+                             CareerSection, CareerSectionClient, CareerForm, CareerTimelineDot,
+                             ContractDocumentField, KakaoAddressInput
+                             /tabs → EducationTab, SkillTab, ResumeTab, TabShared
+      /notices             → NoticeListClient
+      /referrer            → ReferrerSection
+      /settings            → LogoutButton, NotificationSettings
+      /signup              → SignupForm, PasswordStrength, PolicyModal
   /lib
-    /api                   → 클라이언트 API 호출 함수 (projects, applications, profile, notices, notifications, settings, auth)
-    /constants             → 상태 config 등 상수 정의 (status.ts)
-    /supabase              → Supabase 클라이언트 및 쿼리 함수
-    /kakao                 → 카카오 OAuth, 알림톡 API 유틸
-    /utils                 → 공통 유틸리티 함수
-  /types                   → TypeScript 타입 정의
-  /hooks                   → 커스텀 React 훅
+    /api                   → 클라이언트 API 호출 함수
+                             client.ts (apiFetch, ApiError), server.ts (requireAuth, parsePaginationParams)
+                             index.ts, auth.ts, projects.ts, applications.ts, profile.ts,
+                             notices.ts, notifications.ts, settings.ts
+    /config                → env.ts (환경변수 타입 안전 접근)
+    /constants             → status.ts, limits.ts, contractDocuments.ts, index.ts
+    /crypto                → client.ts (RSA 암호화), rsa.ts (RSA 복호화)
+    /supabase              → client.ts, server.ts (createServerClient, createAdminClient)
+                             /queries → projects.ts, applications.ts, profile.ts, notices.ts,
+                                        notifications.ts, resume.ts
+    /kakao                 → oauth.ts (카카오 OAuth), alimtalk.ts (알림톡 발송)
+    /utils                 → cn.ts, format.ts, validation.ts, skills.ts,
+                             profile-completion.ts, recent-projects.ts
+  /types                   → project.ts, user.ts, application.ts, notice.ts, notification.ts,
+                             api.ts, index.ts
+  /hooks                   → useScrolled.ts, useSubmit.ts
 ```
 
 ## 코드 스타일
 
 - TypeScript strict 모드 사용, `any` 타입 금지
-- default export 대신 named export 사용
+- default export 대신 named export 사용 (page.tsx / layout.tsx 제외)
 - CSS: Tailwind 유틸리티 클래스 사용, 커스텀 CSS 파일 금지
 - 컴포넌트는 `/components/features`에 기능별로 분리
 - Server Component 우선, 클라이언트 상태 필요 시에만 `'use client'` 사용
@@ -98,19 +142,22 @@
 - 상태 색상은 CSS custom properties 기반 (`--status-success`, `--status-info` 등)
 - 입력 길이·범위 제한은 `/lib/constants/limits.ts`의 `LIMITS` 객체에서 중앙 관리
   - 클라이언트 `maxLength`와 서버 검증이 반드시 같은 상수를 사용 (값 하드코딩 금지)
+- 계약 문서 타입 정의는 `/lib/constants/contractDocuments.ts`에서 관리
 - 시맨틱 색상 토큰 사용: 에러는 `text-destructive`/`bg-destructive/10`, 본문은 `text-foreground`, 보조 텍스트는 `text-muted-foreground` (raw `red-*`/`zinc-*` 직접 사용 금지, 카카오 브랜드 `#FEE500` 등 브랜드 색상은 예외)
 
 ## 유틸리티 함수
 
-- `format.ts`: `formatDate`, `formatShortDate`, `formatDeadlineDays`, `getDeadlineDays`, `formatMonthYear`, `maskPhone`
+- `format.ts`: `formatDate`, `formatShortDate`, `formatDeadlineDays`, `getDeadlineDays`, `formatMonthYear`, `maskPhone`, `formatWorkType`
 - `validation.ts`: `validatePassword`, `validatePhone`, `validateEmail`, `formatPhone`, `UUID_REGEX`, `validateLength`, `validateStringArray`
 - `cn.ts`: Tailwind 클래스 병합 (`clsx` + `tailwind-merge`)
 - `skills.ts`: `getMySkills`, `countSkillMatches`, `isSkillMatched`, `getMatchedSkillSet`
+- `profile-completion.ts`: 프로필 완성도 계산 (5탭, 항목별 가중치)
+- `recent-projects.ts`: localStorage 최근 본 프로젝트 CRUD + `useSyncExternalStore` 구독
 
 ## 컴포넌트 네이밍 규칙
 
 - `{도메인}{역할}` 패턴: `ProjectCard`, `ProjectStatusBadge`, `ApplicationCard`
-- features 디렉토리 내 도메인별 분리: `projects/`, `profile/`, `settings/`
+- features 디렉토리 내 도메인별 분리: `projects/`, `profile/`, `settings/`, `notices/`, `referrer/`, `signup/`
 
 ## Enum 패턴
 
@@ -130,6 +177,13 @@
 - query 함수 내부의 auth 체크는 방어적 레이어 (API route 레벨 체크가 우선)
 - enum 값 입력은 API route에서 유효성 검증 후 query 함수에 전달
 - 페이지네이션 파라미터는 `parsePaginationParams(searchParams, { maxPageSize })` 사용
+
+## RSA 암호화 패턴
+
+- 비밀번호는 클라이언트에서 RSA 공개키로 암호화 후 전송, 서버에서 복호화
+- 적용 범위: 로그인 (`/api/auth/login`), 회원가입 (`/api/auth/signup`), 비밀번호 변경 (`/api/auth/password`)
+- 공개키 발급: `GET /api/auth/public-key` → 클라이언트 `lib/crypto/client.ts`의 `encryptPassword()`로 암호화
+- 복호화: 서버 `lib/crypto/rsa.ts`의 `decryptPassword()`
 
 ## 에러 처리 패턴
 
@@ -184,6 +238,16 @@
   });
   ```
 
+## 파일 업로드 패턴 (이력서 / 계약 문서)
+
+- 이력서: `POST /api/profile/resumes` (multipart/form-data), Storage 버킷 `resumes` (private)
+  - 허용 MIME: PDF, DOC, DOCX, HWP / 최대 10MB / 최대 10개
+  - 다운로드: `GET /api/profile/resumes/[id]/download` (서버에서 signed URL 생성 후 리다이렉트)
+- 계약 문서: `POST /api/profile/contract-documents/[type]`, Storage 버킷 `contract-documents` (private)
+  - type: `business_registration` (사업자등록증), `bank_account_image` (계좌 이미지)
+  - 다운로드: `GET /api/profile/contract-documents/[type]/download`
+- Storage 경로: `{auth.uid()}/{filename}` — RLS 정책에서 폴더명으로 본인 여부 검증
+
 ## 수평 스크롤 패턴
 
 - 컨테이너 밖으로 블리드: `-mx-4 px-4` + `overflow-x-auto scrollbar-none`
@@ -201,12 +265,15 @@
 
 - `lib/config/env.ts`에서 getter 기반 lazy validation으로 타입 안전 접근
 - `publicEnv`: 클라이언트/서버 모두 사용 (`NEXT_PUBLIC_` 접두사)
-- `serverEnv`: 서버 전용 (`SUPABASE_SERVICE_ROLE_KEY` 등)
+- `serverEnv`: 서버 전용 (`SUPABASE_SERVICE_ROLE_KEY`, `AUTH_RSA_PUBLIC_KEY`, `AUTH_RSA_PRIVATE_KEY` 등)
 
 ## 공통 컴포넌트
 
 - `TechStackInput` (`components/features/profile/`): 기술 스택 입력 (Enter/추가 버튼, 태그 삭제)
 - `CareerTimelineDot` (`components/features/profile/`): 경력 타임라인 dot + line
+- `ProfileCompletionBar` (`components/features/profile/`): 프로필 완성도 바 + 미완료 항목 CTA 버튼
+- `NoticeListClient` (`components/features/notices/`): 공지사항 목록 더보기 페이지네이션
+- `ShareButton` (`components/features/projects/`): Web Share API + 클립보드 복사 폴백
 - `BottomSheet` (`components/ui/`): 하단 모달 오버레이
 - `ConfirmSheet` (`components/ui/`): 삭제 확인 바텀시트 (`{ open, title, description?, confirmLabel?, destructive?, isLoading?, onConfirm, onClose }`)
 - `ToastProvider` / `useToast` (`components/ui/toast.tsx`): 경량 토스트 (성공/에러 피드백, 의존성 없음)
@@ -218,6 +285,12 @@
 - `Switch` (`components/ui/switch.tsx`): 토글 스위치 (`{ checked, onChange, disabled?, "aria-label"? }`, `role="switch"`)
 - `PasswordStrength` (`components/features/signup/`): 비밀번호 강도 표시 (회원가입/비밀번호 변경에서 공유)
 - `NavLink` (`components/ui/nav-link.tsx`): 내부 페이지 이동용 `next/link` 대체. `<a href>`는 모바일에서 블루투스 마우스 호버 시 하단에 주소가 노출되므로, `role="link"` div + `router.push`로 이동 처리 — 내부 네비게이션(카드/리스트 아이템/아이콘 버튼 등)에는 `Link` 대신 반드시 이 컴포넌트 사용. 다운로드용 `<a download>`는 예외
+- `PullToRefresh` (`components/layout/`): 당겨서 새로고침
+
+## 훅
+
+- `useSubmit` (`hooks/useSubmit.ts`): 폼 제출 공통 — `isLoading`, `error` 상태 관리, `ApiError` 메시지 자동 노출
+- `useScrolled` (`hooks/useScrolled.ts`): `<main>` 엘리먼트의 scrollTop 감지 (임계값 초과 여부 boolean 반환). `window`가 아닌 `<main>` 기준임에 주의
 
 ## Supabase 클라이언트 사용
 
