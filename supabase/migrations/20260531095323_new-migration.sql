@@ -4,28 +4,29 @@
 -- Supabase Dashboard > SQL Editor에서 실행
 --
 -- 테이블 구성:
---   [CLIENT]  1. profiles          — 프리랜서 프로필 (id = auth.users.id) / client CRUD
---             2. careers           — 경력 / client CRUD
---             3. educations        — 학력 / client CRUD
---             4. certifications    — 자격증 / client CRUD
---             5. skill_inventories — 스킬 인벤토리 (프로젝트 경험) / client CRUD
+--   [CLIENT]   1. profiles          — 프리랜서 프로필 (id = auth.users.id) / client CRUD
+--              2. careers           — 경력 / client CRUD
+--              3. educations        — 학력 / client CRUD
+--              4. certifications    — 자격증 / client CRUD
+--              5. skill_inventories — 스킬 인벤토리 (프로젝트 경험) / client CRUD
 --
---   [SHARED]  6. projects          — 프로젝트 / admin 관리, client 읽기
---             7. notices           — 공지사항 (예약 공지 포함) / admin 관리, client 읽기
+--   [SHARED]   6. projects          — 프로젝트 / admin 관리, client 읽기
+--              7. notices           — 공지사항 (예약 공지 포함) / admin 관리, client 읽기
 --
---   [CLIENT]  8. applications      — 지원 내역 / client CRUD (projects FK로 인해 SHARED 이후 정의)
+--   [CLIENT]   8. applications      — 지원 내역 / client CRUD (projects FK로 인해 SHARED 이후 정의)
+--              9. profile_resumes   — 이력서 파일 / client CRUD (Storage 버킷 연동)
 --
---   [ADMIN]   9. admin_users       — 관리자 계정
---            10. alimtalk_templates — 카카오 알림톡 서식
---            11. alimtalk_logs     — 카카오 알림톡 발송 이력
---            12. admin_audit_logs  — 관리자 감사 로그
+--   [ADMIN]   10. admin_users       — 관리자 계정
+--             11. alimtalk_templates — 카카오 알림톡 서식
+--             12. alimtalk_logs     — 카카오 알림톡 발송 이력
+--             13. admin_audit_logs  — 관리자 감사 로그
 --
 -- 설계 원칙:
 --   - profiles.id = auth.users.id (client 코드 호환)
 --   - admin_users는 별도 UUID PK + auth_user_id FK 구조
 --   - RLS: client 앱은 anon key + JWT, admin API는 service_role로 RLS 우회
 --   - [ADMIN] 테이블은 RLS 활성화 + 정책 없음 = service_role 전용
---   - 비즈니스 유효성 검사(날짜 역전·값 범위 등)는 API zod 스키마에서 처리
+--   - 비즈니스 유효성 검사(날짜 역전·값 범위 등)는 API 레이어에서 처리
 --   - seq_id: Supabase Realtime 내부 순서 관리 컬럼 (generated always as identity)
 -- ============================================================
 
@@ -59,9 +60,6 @@ create table if not exists public.profiles (
   phone                            text,                                                                  -- 전화번호
   bio                              text,                                                                  -- 자기소개
   tech_stack                       text[]      not null default array[]::text[],                          -- 기술 스택
-  experience_years                 integer,                                                               -- 경력 연수
-  experience_months                integer     not null default 0                                         -- 경력 개월수 (0~11)
-    check (experience_months >= 0 and experience_months <= 11),
   kakao_id                         text,                                                                  -- 카카오 ID
   availability_status              text                                                                   -- 투입 가능 상태 (available/partial/unavailable)
     check (availability_status in ('available', 'partial', 'unavailable')),
@@ -69,19 +67,27 @@ create table if not exists public.profiles (
   notification_new_project         boolean     not null default true,                                     -- 새 프로젝트 알림 수신 여부
   notification_application_update  boolean     not null default true,                                     -- 지원 상태 변경 알림 수신 여부
   notification_marketing           boolean     not null default false,                                    -- 마케팅 알림 수신 여부
+  privacy_consent                  boolean     not null default false,                                    -- 개인정보 수집 이용 동의 여부
+  sms_consent                      boolean     not null default false,                                    -- SMS 수신 동의 여부 (privacy_consent 선행 필요)
   account_status                   text        not null default 'active'                                  -- 계정 상태 (active/withdrawn)
     check (account_status in ('active', 'withdrawn')),
   withdrawn_at                     timestamptz,                                                           -- 탈퇴 일시
-  referrer_id                      uuid        references public.profiles(id) on delete set null,         -- 추천인 프로필 ID
+  referrer_note                    text,                                                                  -- 추천인 메모 (자유 텍스트, 예: 테크밋 대표님)
   birth_date                       date,                                                                  -- 생년월일
   gender                           text                                                                   -- 성별 (male/female)
     check (gender in ('male', 'female')),
-  joining_date                     date,                                                                  -- 가입일 (커뮤니티 등록 기준)
-  affiliation                      text,                                                                  -- 소속사/소속 회사
-  department                       text,                                                                  -- 부서
-  position_title                   text,                                                                  -- 직함/직위
-  military_service                 text,                                                                  -- 병역 사항
   address                          text,                                                                  -- 주소
+  contract_type                    text                                                                   -- 계약 형태 (사업자/3.3%)
+    check (contract_type in ('business', 'individual')),
+  business_name                    text,                                                                  -- 사업자명
+  business_number                  text,                                                                  -- 사업자 번호 (000-00-00000)
+  business_address                 text,                                                                  -- 사업장 주소
+  business_registration_file_path  text,                                                                  -- 사업자등록증 파일 경로
+  business_registration_file_name  text,                                                                  -- 사업자등록증 원본 파일명
+  bank_name                        text,                                                                  -- 은행명
+  bank_account_number              text,                                                                  -- 계좌번호
+  bank_account_image_path          text,                                                                  -- 계좌 이미지 파일 경로
+  bank_account_image_name          text,                                                                  -- 계좌 이미지 원본 파일명
   seq_id                           bigint      generated always as identity unique,                       -- Supabase Realtime 순서 관리 (자동)
   created_at                       timestamptz not null default now(),                                    -- 생성 일시
   updated_at                       timestamptz not null default now()                                     -- 수정 일시
@@ -268,8 +274,8 @@ create table if not exists public.projects (
   id                  uuid        default gen_random_uuid() primary key,                    -- 고유 식별자
   title               text        not null,                                                 -- 프로젝트명
   description         text        not null default '',                                      -- 프로젝트 설명
-  status              text        not null default 'recruiting'                             -- 진행 상태 (recruiting/in_progress/completed/cancelled)
-    check (status in ('recruiting', 'in_progress', 'completed', 'cancelled')),
+  status              text        not null default 'recruiting'                             -- 진행 상태 (recruiting/completed/cancelled)
+    check (status in ('recruiting', 'completed', 'cancelled')),
   duration_start_date date,                                                                 -- 프로젝트 시작일
   duration_end_date   date,                                                                 -- 프로젝트 종료일
   deadline            date,                                                                 -- 지원 마감일
@@ -283,6 +289,8 @@ create table if not exists public.projects (
     check (work_type in ('remote', 'onsite', 'hybrid')),
   location            text,                                                                 -- 근무 위치
   headcount           integer,                                                              -- 모집 인원
+  business_type       text                                                                  -- 비즈니스 유형 (sm/si)
+    check (business_type in ('sm', 'si')),
   is_visible          boolean     not null default true,                                    -- 노출 여부
   created_by          uuid        references public.profiles(id) on delete set null,        -- 등록 관리자 프로필 ID
   seq_id              bigint      generated always as identity unique,                      -- Supabase Realtime 순서 관리 (자동)
@@ -357,7 +365,7 @@ create table if not exists public.applications (
   freelancer_id        uuid        references public.profiles(id) on delete cascade not null,           -- 지원자 프로필 ID
   status               text        not null default 'pending'                                           -- 지원 상태 (pending/reviewing/interview/accepted/rejected/withdrawn)
     check (status in ('pending', 'reviewing', 'interview', 'accepted', 'rejected', 'withdrawn')),
-  cover_letter         text,                                                                             -- 지원서 내용
+  note                 text,                                                                             -- 참고사항
   expected_rate        numeric,                                                                          -- 희망 단가
   available_start_date date,                                                                             -- 투입 가능일 (admin 전용)
   admin_memo           text,                                                                             -- 관리자 메모 (admin 전용)
@@ -389,12 +397,37 @@ create trigger applications_updated_at
   for each row execute function public.set_updated_at();
 
 
+-- ------------------------------------------------------------
+-- 9. profile_resumes (이력서 파일) [CLIENT]
+-- ------------------------------------------------------------
+create table if not exists public.profile_resumes (
+  id          uuid        default gen_random_uuid() primary key,                            -- 고유 식별자
+  profile_id  uuid        not null references public.profiles(id) on delete cascade,        -- 프로필 ID
+  file_name   text        not null,                                                         -- 원본 파일명
+  file_path   text        not null,                                                         -- Storage 경로
+  file_size   bigint      not null,                                                         -- 파일 크기 (bytes)
+  mime_type   text        not null,                                                         -- MIME 타입
+  created_at  timestamptz not null default now()                                            -- 업로드 일시
+);
+
+alter table public.profile_resumes enable row level security;
+
+create policy "본인 이력서 조회" on public.profile_resumes
+  for select using (profile_id = auth.uid());
+
+create policy "본인 이력서 추가" on public.profile_resumes
+  for insert with check (profile_id = auth.uid());
+
+create policy "본인 이력서 삭제" on public.profile_resumes
+  for delete using (profile_id = auth.uid());
+
+
 -- ============================================================
 -- [ADMIN] 관리자 전용 테이블 (service_role 전용 — RLS 활성화 + 정책 없음)
 -- ============================================================
 
 -- ------------------------------------------------------------
--- 9. admin_users (관리자 계정)
+-- 10. admin_users (관리자 계정)
 -- ------------------------------------------------------------
 -- profiles와 달리 별도 UUID PK + auth_user_id FK 구조 유지
 -- (관리자 계정은 프리랜서 profiles와 완전히 분리)
@@ -424,7 +457,7 @@ create trigger admin_users_updated_at
 
 
 -- ------------------------------------------------------------
--- 10. alimtalk_templates (카카오 알림톡 서식)
+-- 11. alimtalk_templates (카카오 알림톡 서식)
 -- ------------------------------------------------------------
 create table if not exists public.alimtalk_templates (
   id           uuid        default gen_random_uuid() primary key,                           -- 고유 식별자
@@ -449,7 +482,7 @@ create trigger alimtalk_templates_updated_at
 
 
 -- ------------------------------------------------------------
--- 11. alimtalk_logs (카카오 알림톡 발송 이력)
+-- 12. alimtalk_logs (카카오 알림톡 발송 이력)
 -- ------------------------------------------------------------
 create table if not exists public.alimtalk_logs (
   id            uuid        default gen_random_uuid() primary key,                          -- 고유 식별자
@@ -483,7 +516,7 @@ alter table public.alimtalk_logs
 
 
 -- ------------------------------------------------------------
--- 12. admin_audit_logs (관리자 감사 로그)
+-- 13. admin_audit_logs (관리자 감사 로그)
 -- ------------------------------------------------------------
 create table if not exists public.admin_audit_logs (
   id          uuid        default gen_random_uuid() primary key,                            -- 고유 식별자
@@ -513,7 +546,6 @@ create index if not exists idx_profiles_email               on public.profiles(e
 create index if not exists idx_profiles_account_status      on public.profiles(account_status);
 create index if not exists idx_profiles_availability_status on public.profiles(availability_status);
 create index if not exists idx_profiles_kakao_id            on public.profiles(kakao_id);
-create index if not exists idx_profiles_referrer_id         on public.profiles(referrer_id);
 
 -- [CLIENT] careers
 create index if not exists idx_careers_profile_id           on public.careers(profile_id);
@@ -536,6 +568,9 @@ create index if not exists projects_deleted_at_idx          on public.projects(d
 create index if not exists idx_notices_created_at           on public.notices(created_at desc);
 create index if not exists idx_notices_is_published         on public.notices(is_published);
 
+-- [CLIENT] profile_resumes
+create index if not exists idx_profile_resumes_profile_id   on public.profile_resumes(profile_id);
+
 -- [ADMIN] alimtalk_templates
 create index if not exists idx_alimtalk_templates_code         on public.alimtalk_templates(code);
 create index if not exists idx_alimtalk_templates_service_type on public.alimtalk_templates(service_type);
@@ -554,6 +589,57 @@ create index if not exists idx_audit_logs_created_at        on public.admin_audi
 create index if not exists idx_audit_logs_admin_id          on public.admin_audit_logs(admin_id);
 create index if not exists idx_audit_logs_resource          on public.admin_audit_logs(resource);
 create index if not exists idx_audit_logs_action            on public.admin_audit_logs(action);
+
+
+-- ============================================================
+-- Storage 버킷
+-- ============================================================
+
+-- resumes (이력서 파일, 비공개)
+insert into storage.buckets (id, name, public)
+  values ('resumes', 'resumes', false)
+  on conflict do nothing;
+
+create policy "본인 이력서 업로드" on storage.objects
+  for insert with check (
+    bucket_id = 'resumes'
+    and (storage.foldername(name))[1] = auth.uid()::text
+  );
+
+create policy "본인 이력서 다운로드" on storage.objects
+  for select using (
+    bucket_id = 'resumes'
+    and (storage.foldername(name))[1] = auth.uid()::text
+  );
+
+create policy "본인 이력서 삭제" on storage.objects
+  for delete using (
+    bucket_id = 'resumes'
+    and (storage.foldername(name))[1] = auth.uid()::text
+  );
+
+-- contract-documents (사업자등록증, 계좌 이미지 등, 비공개)
+insert into storage.buckets (id, name, public)
+  values ('contract-documents', 'contract-documents', false)
+  on conflict do nothing;
+
+create policy "본인 계약서류 업로드" on storage.objects
+  for insert with check (
+    bucket_id = 'contract-documents'
+    and (storage.foldername(name))[1] = auth.uid()::text
+  );
+
+create policy "본인 계약서류 다운로드" on storage.objects
+  for select using (
+    bucket_id = 'contract-documents'
+    and (storage.foldername(name))[1] = auth.uid()::text
+  );
+
+create policy "본인 계약서류 삭제" on storage.objects
+  for delete using (
+    bucket_id = 'contract-documents'
+    and (storage.foldername(name))[1] = auth.uid()::text
+  );
 
 
 -- ============================================================
