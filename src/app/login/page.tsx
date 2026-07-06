@@ -43,7 +43,7 @@ function LoginForm() {
       `?client_id=${publicEnv.kakaoRestApiKey}` +
       `&redirect_uri=${encodeURIComponent(publicEnv.kakaoRedirectUri)}` +
       `&response_type=code` +
-      `&scope=${encodeURIComponent("name,birthday,birthyear,phone_number,email")}`;
+      `&scope=${encodeURIComponent("name,birthday,birthyear,phone_number,account_email")}`;
     window.location.href = kakaoAuthUrl;
   }
 
