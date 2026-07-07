@@ -6,111 +6,205 @@ export default function PrivacyPage() {
       <BackButton label="개인정보 처리방침" />
       <div className="px-6 py-8 space-y-6 text-sm text-foreground leading-relaxed">
         <p>
-          테크밋(이하 &quot;회사&quot;)은 정보통신망 이용촉진 및 정보보호 등에 관한 법률,
-          개인정보 보호법 등 관련 법령에 따라 이용자의 개인정보를 보호하고
-          이와 관련한 고충을 신속하고 원활하게 처리할 수 있도록 다음과 같이
-          개인정보 처리방침을 수립·공개합니다.
+          &quot;(주)테크밋&quot;은(는) 대한민국 헌법에 보장된 사생활의 비밀과 통신의 비밀보장을
+          위해 &apos;정보통신망 이용촉진 등에 관한 법률&apos;상의 개인정보 보호규정 및
+          정보통신부가 제정한 &apos;개인정보 보호지침&apos;을 준수하고 있습니다. 그러나 일부
+          부도덕한 사람들의 불법행위로 인해 발생할지도 모를 개인 프라이버시에 대한 위협을 막고,
+          회원의 개인정보를 적극적으로 보호하기 위해 다음과 같은 개인정보 보호 정책을 적용하고
+          있습니다. &quot;몰&quot;의 개인정보 보호정책은 모든 페이지에 공개되며 이용자
+          여러분들의 궁금증에 대해 언제나 환영합니다.
         </p>
 
         <section>
-          <h2 className="font-semibold text-base mb-2">제1조 (수집하는 개인정보 항목 및 수집 방법)</h2>
-          <div className="space-y-2">
-            <p className="font-medium">① 수집 항목</p>
-            <ul className="list-disc ml-4 space-y-1">
-              <li><span className="font-medium">필수:</span> 이메일, 이름, 생년월일, 휴대폰 번호, 카카오 계정 ID</li>
-              <li><span className="font-medium">선택:</span> 프로필 사진, 경력사항, 기술스택, 자기소개</li>
-              <li><span className="font-medium">자동 수집:</span> 서비스 이용 기록, 접속 로그, 쿠키</li>
-            </ul>
-            <p className="font-medium mt-2">② 수집 방법</p>
-            <ul className="list-disc ml-4 space-y-1">
-              <li>카카오 소셜 로그인을 통한 동의 후 수집</li>
-              <li>서비스 이용 과정에서 이용자가 직접 입력</li>
-            </ul>
+          <h2 className="font-semibold text-base mb-2">1. 개인정보 수집</h2>
+          <div className="space-y-3">
+            <div>
+              <p className="font-medium">1-1. 개인정보의 수집목적 및 이용</p>
+              <p>
+                &quot;(주)테크밋&quot;은(는) 이용자의 신분확인과 개개인의 특성에 맞춘 보다
+                다양하고 광범위한 맞춤 서비스를 드리기 위해 개인정보를 수집합니다. 이러한
+                목적으로 수집된 개인정보는 구매계약에 따른 빠르고 정확한 배송과 전체적인
+                통계자료 등에 이용되어 회원 개개인의 기호에 맞는 질 높은 서비스를 제공하게
+                됩니다.
+              </p>
+            </div>
+            <div>
+              <p className="font-medium">1-2. 개인정보의 수집범위</p>
+              <p>
+                &quot;(주)테크밋&quot;은(는) 서비스 계약의 성립 및 이행에 필요한 최소한의
+                개인정보만을 수집하며, 기타 종교, 출신지, 범죄기록, 건강상태, 성생활 등 이용자의
+                기본적 인권을 현저하게 침해할 우려가 있는 개인정보는 이용자의 동의가 없는 한
+                수집하지 않습니다.
+              </p>
+            </div>
+            <div>
+              <p className="font-medium">1-3. 이용자의 동의절차와 예외 경우</p>
+              <p>
+                &quot;(주)테크밋&quot;은(는) 이용자의 개인정보를 수집하는 경우 이용자의
+                서명날인, 전자서명, 전자우편, 동의함에 클릭하는 등의 이용자 동의절차를 거칩니다.
+                단, 다음의 경우는 예외로 합니다.
+              </p>
+              <ul className="list-disc ml-4 mt-1 space-y-1">
+                <li>정보통신망이용촉진등에관한법률 또는 기타 다른 법령 등에 특별한 규정이 있는 경우</li>
+                <li>서비스 이용계약의 이행을 위하여 필요한 경우</li>
+                <li>서비스 제공에 따른 요금정산을 위하여 필요한 경우</li>
+              </ul>
+            </div>
+            <div>
+              <p className="font-medium">1-4. 개인정보의 위탁처리</p>
+              <p>
+                &quot;(주)테크밋&quot;이(가) 개인정보 처리를 외부에 위탁하는 경우, 이용자의
+                동의를 받습니다. 그럴 때에도 위탁계약 등을 통해 서비스제공자의 개인정보보호
+                관련 지시엄수, 개인정보에 관한 비밀유지, 제3자 제공의 금지 및 사고시의
+                책임부담 등을 명확히 규정하고 계약내용을 기록으로 보존합니다.
+              </p>
+            </div>
           </div>
         </section>
 
         <section>
-          <h2 className="font-semibold text-base mb-2">제2조 (개인정보의 처리 목적)</h2>
-          <ul className="list-disc ml-4 space-y-1">
-            <li>회원 가입 및 관리, 본인 확인</li>
-            <li>프로젝트 지원 및 매칭 서비스 제공</li>
-            <li>카카오 알림톡을 통한 신규 프로젝트 및 지원 현황 알림 발송</li>
-            <li>서비스 개선 및 맞춤형 서비스 제공</li>
-            <li>법령 의무 이행</li>
-          </ul>
-        </section>
-
-        <section>
-          <h2 className="font-semibold text-base mb-2">제3조 (개인정보의 보유 및 이용 기간)</h2>
-          <p>
-            회사는 법령에 따른 개인정보 보유·이용 기간 또는 정보주체로부터 동의받은 기간 내에서
-            개인정보를 처리·보유합니다.
-          </p>
-          <ul className="list-disc ml-4 mt-2 space-y-1">
-            <li>회원 정보: 회원 탈퇴 후 30일까지 보관 후 파기 (단, 관련 법령에 따라 보존 필요 시 해당 기간까지)</li>
-            <li>서비스 이용 기록: 3개월</li>
-            <li>전자상거래법에 따른 계약 또는 청약철회 기록: 5년</li>
-            <li>소비자 불만 및 분쟁 기록: 3년</li>
-          </ul>
-        </section>
-
-        <section>
-          <h2 className="font-semibold text-base mb-2">제4조 (개인정보의 제3자 제공)</h2>
-          <p>
-            회사는 이용자의 개인정보를 원칙적으로 외부에 제공하지 않습니다.
-            다만, 다음의 경우에는 예외로 합니다.
-          </p>
-          <ul className="list-disc ml-4 mt-2 space-y-1">
-            <li>이용자가 사전에 동의한 경우</li>
-            <li>법령의 규정에 의거하거나, 수사 목적으로 법령에 정해진 절차와 방법에 따라 수사기관의 요구가 있는 경우</li>
-          </ul>
-        </section>
-
-        <section>
-          <h2 className="font-semibold text-base mb-2">제5조 (개인정보 처리 위탁)</h2>
-          <div className="overflow-x-auto -mx-4 px-4">
-            <table className="w-full text-xs border-collapse border border-border mt-2">
-              <thead>
-                <tr className="bg-muted/50">
-                  <th className="border border-border px-3 py-2 text-left">수탁업체</th>
-                  <th className="border border-border px-3 py-2 text-left">위탁 업무</th>
-                </tr>
-              </thead>
-              <tbody>
-                <tr>
-                  <td className="border border-border px-3 py-2">Supabase Inc.</td>
-                  <td className="border border-border px-3 py-2">데이터베이스 및 인증 서비스</td>
-                </tr>
-                <tr>
-                  <td className="border border-border px-3 py-2">카카오(주)</td>
-                  <td className="border border-border px-3 py-2">소셜 로그인, 알림톡 발송</td>
-                </tr>
-              </tbody>
-            </table>
+          <h2 className="font-semibold text-base mb-2">2. 개인정보 보호관리</h2>
+          <div className="space-y-3">
+            <div>
+              <p className="font-medium">2-1. &quot;(주)테크밋&quot;의 개인정보 관리자</p>
+              <ul className="space-y-1">
+                <li>상호 : &quot;(주)테크밋&quot;</li>
+                <li>전화 : 010-8497-5877</li>
+                <li>e-mail : lawzone.corp@gmail.com</li>
+              </ul>
+              <p className="mt-1">
+                &quot;(주)테크밋&quot;은(는) 이용자의 개인정보를 취급을 최소의 인원으로 제한하고
+                있으며, 절대로 전화나 e-mail로 이용자의 비밀번호를 묻지 않습니다.
+              </p>
+            </div>
+            <div>
+              <p className="font-medium">2-2. 개인정보를 제3자에게 제공하는 경우</p>
+              <p>
+                &quot;(주)테크밋&quot;은(는) 이용자의 개인정보를 허락 없이 이용하거나 제3자에게
+                제공하지 않습니다. 다만, 다음의 경우에는 예외로 합니다.
+              </p>
+              <ul className="list-disc ml-4 mt-1 space-y-1">
+                <li>
+                  금융실명거래 및 비밀보장에 관한 법률, 신용정보의 이용 및 보호에 관한 법률,
+                  전기통신사업법, 지방세법, 소비자보호법, 한국은행법, 형사소송법 및 기타
+                  관계법령 등에 특별한 규정이 있는 경우 (이 경우에도 이용자에게 개별적으로
+                  통지하여 동의를 받으며, 각 이용자는 고지 또는 명시한 범위를 초과하여 이용하거나
+                  제3자에게 제공하는 것을 거절할 수 있음도 아울러 통지합니다.)
+                </li>
+                <li>서비스 제공에 따른 요금정산을 위하여 필요한 경우</li>
+                <li>
+                  통계작성, 학술연구 또는 시장조사를 위하여 필요한 경우로서 특정 개인을 식별할
+                  수 없는 형태로 제공하는 경우
+                </li>
+                <li>
+                  업무상 제휴를 한 제휴 파트너나 부가서비스로 정보를 제공하는 정보자에게
+                  이용자의 동의를 얻을 경우
+                </li>
+                <li>
+                  이용 약관을 위배한 사람이나 의도적이든 그렇지 않든 사람들에게 피해를 줄 수 있는
+                  자를 식별하거나 연락을 취해야 할 경우
+                </li>
+                <li>기타 서비스의 질적 향상을 위해 이용자의 허락을 받을 경우</li>
+              </ul>
+            </div>
+            <div>
+              <p className="font-medium">2-3. 개인정보의 보유기간 및 이용기간</p>
+              <p>
+                &quot;(주)테크밋&quot;이(가) 보유하는 이용자의 개인정보는 이용자가 회원가입을
+                신청한 때부터 해지 처리된 때 까지 입니다. 이용기간은 보유기간과 동일하지만,
+                수집목적이 달성된 때에는 그 전이라도 개인정보를 파기합니다. 이는
+                &quot;(주)테크밋&quot;으로부터 적법하게 제공받은 제3자에 대해서도 마찬가지입니다.
+                다만, 다음의 경우는 예외로 합니다.
+              </p>
+              <ul className="list-disc ml-4 mt-1 space-y-1">
+                <li>상법 등 법령의 규정에 의하여 보존할 필요성이 있는 경우</li>
+                <li>보유기간을 이용자에게 미리 알리고 그 보유기간이 지나지 않은 경우</li>
+                <li>개별적으로 이용자의 동의를 받은 경우</li>
+              </ul>
+            </div>
+            <div>
+              <p className="font-medium">2-4. 개인정보 보호대책</p>
+              <p>
+                &quot;(주)테크밋&quot;의 이용자 정보는 사용자 ID와 시스템적으로 암호화된
+                비밀번호로 보호됩니다. 때문에 사용자 정보는 본인만이 직접 관리할 수 있습니다.
+                개인정보에 접근할 수 있는 방법은 오직 회원의 ID 및 비밀번호로 인한 로그인(Log
+                in)에 의한 방법이며, &quot;(주)테크밋&quot;은(는) e-mail이나 전화 등 어떤
+                방법을 통해서도 회원의 비밀번호를 묻는 경우는 없으므로 회원 본인이 보안을
+                위해 비밀번호를 자주 바꾸어주시기 바랍니다. 정보 변경은 반드시 본인 확인
+                과정을 거쳐 본인만이 직접 정보를 편집할 수 있도록 시스템적으로 처리되어
+                있습니다. 비밀번호는 시스템적으로 암호화되어 보관됩니다. 하지만 인터넷을 통한
+                데이터 전송은 100% 안전 하지는 않으므로 게시판이나 메일 주고 받기 등을 통해
+                공개되는 개인 정보에 대해 완벽한 보장을 할 수는 없습니다. 때문에 이용하신
+                후에는 반드시 로그아웃(Log out)을 해 주시고, 컴퓨터를 공유하거나 공공장소에서
+                컴퓨터를 사용하는 경우에는 이용후 반드시 웹 브라우저의 창을 닫아주는 등
+                개인정보 유출을 막기 위해 노력을 기울여 주시기 바랍니다.
+              </p>
+            </div>
+            <div>
+              <p className="font-medium">2-5. 관리대책</p>
+              <p>
+                &quot;(주)테크밋&quot;은(는) 이용자의 개인정보를 보호하기 위하여 관련 직원에게
+                필요한 교육을 실시하고 있으며, 개인정보를 처리하는 시스템의 사용자를 지정하여
+                직무상 알게 된 개인정보를 타인에게 누설하거나 제공하지 않습니다. 또한, 본
+                정책에 명시된 이행사항 및 관련 직원의 준수여부를 감사하기 위하여 적절한 절차를
+                마련하여 운영하고 있으며 감사결과 운영상의 시정 또는 개선을 요구하는 사항이나
+                위반내용이 있는 경우 이를 시정 또는 개선하고 기타 필요한 조치를 취하도록 최선을
+                다하고 있습니다.
+              </p>
+            </div>
           </div>
         </section>
 
         <section>
-          <h2 className="font-semibold text-base mb-2">제6조 (이용자의 권리·의무)</h2>
-          <p>이용자는 언제든지 다음의 권리를 행사할 수 있습니다.</p>
-          <ul className="list-disc ml-4 mt-2 space-y-1">
-            <li>개인정보 열람 요구</li>
-            <li>오류가 있는 경우 정정 요구</li>
-            <li>삭제 요구</li>
-            <li>처리 정지 요구</li>
-          </ul>
+          <h2 className="font-semibold text-base mb-2">3. 이용자관리</h2>
+          <div className="space-y-3">
+            <div>
+              <p className="font-medium">3-1. 개인정보 동의철회</p>
+              <p>
+                이용자는 자신의 개인정보수집에 동의한 후, 나중에라도 이용자 ID와 비밀번호를
+                입력하여 동의를 철회 하실 수 있습니다. 그럴 경우 &quot;(주)테크밋&quot;은(는)
+                본인여부를 확인한 후 원하는 조치를 해드립니다.
+              </p>
+            </div>
+            <div>
+              <p className="font-medium">3-2. 개인정보 열람 및 정정</p>
+              <p>
+                이용자가 자기 개인정보의 열람, 정정을 원할 때는 &quot;(주)테크밋&quot;의
+                홈페이지로 접속해 이용자 ID와 비밀 번호를 입력한 후, 자신의 개인정보 열람 및
+                정정을 요구할 수 있습니다. 이 경우에도 &quot;(주)테크밋&quot;은(는) 정정 조치를
+                취한 후 이용자에게 통보해 드립니다.
+              </p>
+            </div>
+            <div>
+              <p className="font-medium">3-3. 불만처리</p>
+              <p>
+                &quot;(주)테크밋&quot;의 서비스 이용과 관련해 개인정보 등에 대한 이용자 불만은
+                언제든 친절히 해결해 드립니다. 불만에 대한 내용은 다음 메일 주소로 보내주시기
+                바랍니다.
+              </p>
+              <p className="mt-1">회원 불만 접수 인터넷 메일 주소 : lawzone.corp@gmail.com</p>
+            </div>
+            <div>
+              <p className="font-medium">3-4. 분쟁조정</p>
+              <p>
+                &quot;(주)테크밋&quot;의 이용자는 개인정보에 관한 분쟁이 있는 경우 신속하고
+                효과적인 분쟁해결을 위하여 한국 정보보호센터 내의 개인정보분쟁조정위원회에 그
+                처리를 의뢰할 수 있습니다.
+              </p>
+              <ul className="list-disc ml-4 mt-1 space-y-1">
+                <li>개인정보침해신고센터 URL: www.cyberprivacy.or.kr</li>
+                <li>PC통신: go eprivacy</li>
+                <li>개인정보침해신고센터 전화: 02-1336</li>
+              </ul>
+            </div>
+          </div>
         </section>
 
-        <section>
-          <h2 className="font-semibold text-base mb-2">제7조 (개인정보 보호책임자)</h2>
-          <ul className="space-y-1">
-            <li>담당자: 테크밋 운영팀</li>
-            <li>이메일: privacy@techmeet.io</li>
-          </ul>
-        </section>
-
-        <p className="text-xs text-muted-foreground pt-4 border-t">
-          공고일: 2025년 1월 1일 &nbsp;|&nbsp; 시행일: 2025년 1월 1일
+        <p>
+          본 개인정보 보호정책은 정부의 관련법률 및 지침의 변경과 &quot;(주)테크밋&quot;의
+          정책변화에 따라 수시로 변경될 수 있습니다. 변경된 사항은 정기적으로 방문하셔서
+          내용을 확인해 주십시오. 만약 변경사항에 의문이 있으실 때엔 언제든
+          개인정보관리자(lawzone.corp@gmail.com)에게 문의해 주십시오.
         </p>
       </div>
     </div>
