@@ -127,9 +127,9 @@ export function KakaoAddressInput({ value, onChange }: KakaoAddressInputProps) {
         )}
       </div>
 
-      {/* 카카오 주소 검색 전체화면 오버레이 */}
+      {/* 카카오 주소 검색 오버레이 - 앱 프레임과 동일한 최대 폭으로 고정 */}
       {isOpen && (
-        <div className="fixed inset-0 z-[70] flex flex-col bg-background">
+        <div className="fixed inset-0 left-1/2 -translate-x-1/2 w-full max-w-[600px] z-[70] flex flex-col bg-background">
           <div className="flex items-center justify-between px-4 h-14 border-b border-border shrink-0">
             <h3 className="text-base font-semibold">주소 검색</h3>
             <button
