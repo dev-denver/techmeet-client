@@ -44,7 +44,7 @@ export function SignupForm({ email: initialEmail, kakaoId, name, birthDate: init
   const [agreeTerms, setAgreeTerms] = useState(false);
   const [agreePrivacy, setAgreePrivacy] = useState(false);
   const [agreeAge, setAgreeAge] = useState(false);
-  const [agreeMarketing, setAgreeMarketing] = useState(false);
+  const [agreeSms, setAgreeSms] = useState(false);
   const [referrerNote, setReferrerNote] = useState("");
   const [policyModal, setPolicyModal] = useState<"terms" | "privacy" | null>(null);
 
@@ -141,7 +141,7 @@ export function SignupForm({ email: initialEmail, kakaoId, name, birthDate: init
         birth_date: birthDate,
         phone,
         kakaoId,
-        agree_marketing: agreeMarketing,
+        agree_sms: agreeSms,
         referrer_note: referrerNote.trim() || null,
       });
 
@@ -313,12 +313,12 @@ export function SignupForm({ email: initialEmail, kakaoId, name, birthDate: init
         <label className="flex items-center gap-3 cursor-pointer p-3 bg-zinc-50 rounded-lg">
           <input
             type="checkbox"
-            checked={agreeAge && agreeTerms && agreePrivacy && agreeMarketing}
+            checked={agreeAge && agreeTerms && agreePrivacy && agreeSms}
             onChange={(e) => {
               setAgreeAge(e.target.checked);
               setAgreeTerms(e.target.checked);
               setAgreePrivacy(e.target.checked);
-              setAgreeMarketing(e.target.checked);
+              setAgreeSms(e.target.checked);
             }}
             className="h-4 w-4 rounded border-zinc-300 accent-zinc-900"
           />
@@ -381,12 +381,12 @@ export function SignupForm({ email: initialEmail, kakaoId, name, birthDate: init
           <label className="flex items-center gap-3 cursor-pointer">
             <input
               type="checkbox"
-              checked={agreeMarketing}
-              onChange={(e) => setAgreeMarketing(e.target.checked)}
+              checked={agreeSms}
+              onChange={(e) => setAgreeSms(e.target.checked)}
               className="h-4 w-4 rounded border-zinc-300 accent-zinc-900"
             />
             <span className="text-sm text-zinc-700">
-              <span className="text-zinc-400 mr-0.5">[선택]</span>마케팅 정보 수신에 동의합니다
+              <span className="text-zinc-400 mr-0.5">[선택]</span>SMS 수신에 동의합니다
             </span>
           </label>
         </div>

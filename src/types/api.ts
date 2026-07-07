@@ -27,7 +27,7 @@ export interface SignupRequest {
   birth_date: string;
   phone: string;
   kakaoId: string;
-  agree_marketing: boolean;
+  agree_sms: boolean;
   referrer_note: string | null;
 }
 

@@ -50,7 +50,7 @@ export async function POST(request: NextRequest) {
     phone?: unknown;
     kakaoId?: unknown;
     referrer_note?: unknown;
-    agree_marketing?: unknown;
+    agree_sms?: unknown;
   };
 
   try {
@@ -62,7 +62,7 @@ export async function POST(request: NextRequest) {
   try {
     const { encryptedPassword, name, birth_date, phone, kakaoId } = body;
     const referrerNote = typeof body.referrer_note === "string" ? body.referrer_note.trim() : "";
-    const agreeMarketing = typeof body.agree_marketing === "boolean" ? body.agree_marketing : false;
+    const agreeSms = typeof body.agree_sms === "boolean" ? body.agree_sms : false;
 
     if (
       typeof encryptedPassword !== "string" ||
@@ -204,7 +204,8 @@ export async function POST(request: NextRequest) {
       phone,
       birth_date,
       kakao_id: typeof kakaoId === "string" && kakaoId ? kakaoId : null,
-      notification_marketing: agreeMarketing,
+      privacy_consent: true,
+      sms_consent: agreeSms,
       account_status: AccountStatus.Active,
     };
     if (referrerNote) profileUpsert.referrer_note = referrerNote;
