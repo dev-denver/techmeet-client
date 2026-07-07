@@ -221,6 +221,7 @@ export function ProfileBasicForm({ initial, onSuccess, onCancel }: ProfileBasicF
           <option value="">선택 안함</option>
           <option value={ContractType.Business}>{CONTRACT_TYPE_CONFIG[ContractType.Business].label}</option>
           <option value={ContractType.Individual}>{CONTRACT_TYPE_CONFIG[ContractType.Individual].label}</option>
+          <option value={ContractType.Employee}>{CONTRACT_TYPE_CONFIG[ContractType.Employee].label}</option>
         </select>
       </FormField>
 

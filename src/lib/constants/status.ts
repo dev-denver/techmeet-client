@@ -93,4 +93,8 @@ export const CONTRACT_TYPE_CONFIG: Record<ContractType, StatusConfig> = {
     label: "3.3%",
     className: "bg-primary/10 text-primary border-primary/20",
   },
+  [ContractType.Employee]: {
+    label: "정규직",
+    className: "bg-primary/10 text-primary border-primary/20",
+  },
 };

@@ -20,6 +20,7 @@ export type Gender = typeof Gender[keyof typeof Gender];
 export const ContractType = {
   Business: "business",
   Individual: "individual",
+  Employee: "employee",
 } as const;
 export type ContractType = typeof ContractType[keyof typeof ContractType];
 
