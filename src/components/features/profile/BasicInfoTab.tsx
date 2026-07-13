@@ -66,7 +66,7 @@ export function BasicInfoTab({ profile, availStatus, availFromDate, onSaveAvaila
             </div>
             <FieldRow label="휴대폰번호" value={profile.phone} />
             <FieldRow label="이메일" value={profile.email} />
-            <FieldRow label="주소" value={profile.address} />
+            <FieldRow label="주소" value={[profile.address, profile.addressDetail].filter(Boolean).join(" ") || null} />
           </div>
         </CardWrap>
       </div>
@@ -90,7 +90,7 @@ export function BasicInfoTab({ profile, availStatus, availFromDate, onSaveAvaila
               <>
                 <FieldRow label="사업자명" value={profile.businessName} />
                 <FieldRow label="사업자 번호" value={profile.businessNumber} />
-                <FieldRow label="사업장 주소" value={profile.businessAddress} />
+                <FieldRow label="사업장 주소" value={[profile.businessAddress, profile.businessAddressDetail].filter(Boolean).join(" ") || null} />
                 <ContractDocumentRow label="사업자등록증" type="business-registration" document={profile.businessRegistrationFile} />
               </>
             )}

@@ -127,10 +127,12 @@ interface ProfileRow {
   birth_date: string | null;
   gender: Gender | null;
   address: string | null;
+  address_detail: string | null;
   contract_type: ContractType | null;
   business_name: string | null;
   business_number: string | null;
   business_address: string | null;
+  business_address_detail: string | null;
   business_registration_file_path: string | null;
   business_registration_file_name: string | null;
   bank_name: string | null;
@@ -177,10 +179,12 @@ function mapRowToProfile(row: ProfileRow, profile: Partial<FreelancerProfile> = 
     birthDate: row.birth_date,
     gender: row.gender,
     address: row.address,
+    addressDetail: row.address_detail,
     contractType: row.contract_type,
     businessName: row.business_name,
     businessNumber: row.business_number,
     businessAddress: row.business_address,
+    businessAddressDetail: row.business_address_detail,
     businessRegistrationFile:
       row.business_registration_file_path && row.business_registration_file_name
         ? { filePath: row.business_registration_file_path, fileName: row.business_registration_file_name }
@@ -245,10 +249,12 @@ export async function updateProfile(payload: UpdateProfileRequest): Promise<void
   if ("birthDate" in payload) updateData.birth_date = (payload as Record<string, unknown>).birthDate;
   if ("gender" in payload) updateData.gender = (payload as Record<string, unknown>).gender;
   if ("address" in payload) updateData.address = (payload as Record<string, unknown>).address;
+  if ("addressDetail" in payload) updateData.address_detail = (payload as Record<string, unknown>).addressDetail;
   if ("contractType" in payload) updateData.contract_type = (payload as Record<string, unknown>).contractType;
   if ("businessName" in payload) updateData.business_name = (payload as Record<string, unknown>).businessName;
   if ("businessNumber" in payload) updateData.business_number = (payload as Record<string, unknown>).businessNumber;
   if ("businessAddress" in payload) updateData.business_address = (payload as Record<string, unknown>).businessAddress;
+  if ("businessAddressDetail" in payload) updateData.business_address_detail = (payload as Record<string, unknown>).businessAddressDetail;
   if ("bankName" in payload) updateData.bank_name = (payload as Record<string, unknown>).bankName;
   if ("bankAccountNumber" in payload) updateData.bank_account_number = (payload as Record<string, unknown>).bankAccountNumber;
 

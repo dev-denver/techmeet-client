@@ -100,11 +100,13 @@ export interface FreelancerProfile {
   birthDate: string | null;
   gender: Gender | null;
   address: string | null;
+  addressDetail: string | null;
   availableFromDate: string | null;
   contractType: ContractType | null;
   businessName: string | null;
   businessNumber: string | null;
   businessAddress: string | null;
+  businessAddressDetail: string | null;
   businessRegistrationFile: ContractDocument | null;
   bankName: string | null;
   bankAccountNumber: string | null;

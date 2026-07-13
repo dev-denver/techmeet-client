@@ -39,24 +39,15 @@ async function loadScript(): Promise<void> {
 }
 
 interface KakaoAddressInputProps {
-  value: string;
-  onChange: (address: string) => void;
+  base: string;
+  detail: string;
+  onBaseChange: (address: string) => void;
+  onDetailChange: (detail: string) => void;
 }
 
-export function KakaoAddressInput({ value, onChange }: KakaoAddressInputProps) {
-  const [base, setBase] = useState("");
-  const [detail, setDetail] = useState("");
+export function KakaoAddressInput({ base, detail, onBaseChange, onDetailChange }: KakaoAddressInputProps) {
   const [isOpen, setIsOpen] = useState(false);
   const embedRef = useRef<HTMLDivElement>(null);
-  const initialized = useRef(false);
-
-  // 최초 1회 - 외부 value(fetch 완료 후)로 base 동기화
-  useEffect(() => {
-    if (!initialized.current && value) {
-      setBase(value);
-      initialized.current = true;
-    }
-  }, [value]);
 
   // 카카오 검색창 열릴 때 스크립트 로드 & embed
   useEffect(() => {
@@ -69,9 +60,8 @@ export function KakaoAddressInput({ value, onChange }: KakaoAddressInputProps) {
         new window.daum.Postcode({
           oncomplete: (data) => {
             const selected = data.roadAddress || data.address;
-            setBase(selected);
-            setDetail("");
-            onChange(selected);
+            onBaseChange(selected);
+            onDetailChange("");
             setIsOpen(false);
           },
           onclose: () => setIsOpen(false),
@@ -84,13 +74,7 @@ export function KakaoAddressInput({ value, onChange }: KakaoAddressInputProps) {
     // cleanup: isOpen이 false로 바뀌거나 컴포넌트가 언마운트될 때
     // stale 플래그로 비동기 콜백이 이미 해제된 DOM에 접근하지 않도록 방어
     return () => { stale = true; };
-  }, [isOpen, onChange]);
-
-  function handleDetailChange(e: React.ChangeEvent<HTMLInputElement>) {
-    const v = e.target.value;
-    setDetail(v);
-    onChange(v.trim() ? `${base} ${v.trim()}` : base);
-  }
+  }, [isOpen, onBaseChange, onDetailChange]);
 
   return (
     <>
@@ -120,7 +104,7 @@ export function KakaoAddressInput({ value, onChange }: KakaoAddressInputProps) {
           <input
             type="text"
             value={detail}
-            onChange={handleDetailChange}
+            onChange={(e) => onDetailChange(e.target.value)}
             placeholder="상세 주소 입력 (동/호수 등, 선택)"
             className="w-full h-11 px-3 rounded-lg border border-input text-sm text-foreground placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-ring focus-visible:ring-2 focus-visible:ring-ring bg-background"
           />
