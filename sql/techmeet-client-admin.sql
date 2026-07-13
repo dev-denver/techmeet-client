@@ -73,12 +73,14 @@ create table if not exists public.profiles (
   birth_date                       date,                                                                  -- 생년월일
   gender                           text                                                                   -- 성별 (male/female)
     check (gender in ('male', 'female')),
-  address                          text,                                                                  -- 주소
+  address                          text,                                                                  -- 주소 (도로명주소, 상세주소 제외)
+  address_detail                   text,                                                                  -- 상세주소 (동/호수 등)
   contract_type                    text                                                                   -- 계약 형태 (business/individual=3.3%/employee=정규직)
     check (contract_type in ('business', 'individual', 'employee')),
   business_name                    text,                                                                  -- 사업자명
   business_number                  text,                                                                  -- 사업자 번호 (000-00-00000)
-  business_address                 text,                                                                  -- 사업장 주소
+  business_address                 text,                                                                  -- 사업장 주소 (도로명주소, 상세주소 제외)
+  business_address_detail          text,                                                                  -- 사업장 상세주소 (동/호수 등)
   business_registration_file_path  text,                                                                  -- 사업자등록증 파일 경로
   business_registration_file_name  text,                                                                  -- 사업자등록증 원본 파일명
   bank_name                        text,                                                                  -- 은행명

@@ -45,8 +45,10 @@ export async function PUT(request: NextRequest) {
     const lengthChecks: Array<[string | null | undefined, number, string]> = [
       [body.bio, LIMITS.BIO_MAX, "자기소개"],
       [body.address, LIMITS.ADDRESS_MAX, "주소"],
+      [body.addressDetail, LIMITS.ADDRESS_DETAIL_MAX, "상세 주소"],
       [body.businessName, LIMITS.BUSINESS_NAME_MAX, "사업자명"],
       [body.businessAddress, LIMITS.BUSINESS_ADDRESS_MAX, "사업장 주소"],
+      [body.businessAddressDetail, LIMITS.BUSINESS_ADDRESS_DETAIL_MAX, "사업장 상세 주소"],
       [body.bankName, LIMITS.BANK_NAME_MAX, "은행"],
       [body.bankAccountNumber, LIMITS.BANK_ACCOUNT_MAX, "계좌번호"],
     ];

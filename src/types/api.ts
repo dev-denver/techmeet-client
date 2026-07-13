@@ -73,10 +73,12 @@ export interface UpdateProfileRequest {
   birthDate?: string | null;
   gender?: "male" | "female" | null;
   address?: string | null;
+  addressDetail?: string | null;
   contractType?: ContractType | null;
   businessName?: string | null;
   businessNumber?: string | null;
   businessAddress?: string | null;
+  businessAddressDetail?: string | null;
   bankName?: string | null;
   bankAccountNumber?: string | null;
 }

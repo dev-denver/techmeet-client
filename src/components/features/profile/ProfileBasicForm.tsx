@@ -57,6 +57,7 @@ export function ProfileBasicForm({ initial, onSuccess, onCancel }: ProfileBasicF
   // 연락처 및 주소
   const [phone, setPhone] = useState(initial.phone ?? "");
   const [address, setAddress] = useState(initial.address ?? "");
+  const [addressDetail, setAddressDetail] = useState(initial.addressDetail ?? "");
 
   // 기술/소개
   const [techStack, setTechStack] = useState<string[]>(initial.techStack);
@@ -67,6 +68,7 @@ export function ProfileBasicForm({ initial, onSuccess, onCancel }: ProfileBasicF
   const [businessName, setBusinessName] = useState(initial.businessName ?? "");
   const [businessNumber, setBusinessNumber] = useState(initial.businessNumber ?? "");
   const [businessAddress, setBusinessAddress] = useState(initial.businessAddress ?? "");
+  const [businessAddressDetail, setBusinessAddressDetail] = useState(initial.businessAddressDetail ?? "");
   const [bankName, setBankName] = useState(initial.bankName ?? "");
   const [bankAccountNumber, setBankAccountNumber] = useState(initial.bankAccountNumber ?? "");
 
@@ -118,13 +120,14 @@ export function ProfileBasicForm({ initial, onSuccess, onCancel }: ProfileBasicF
         gender: gender || null,
         phone,
         address: address || null,
+        addressDetail: addressDetail || null,
         techStack,
         bio,
         contractType: contractType || null,
         bankName: bankName || null,
         bankAccountNumber: bankAccountNumber || null,
         ...(contractType === ContractType.Business
-          ? { businessName, businessNumber, businessAddress }
+          ? { businessName, businessNumber, businessAddress, businessAddressDetail: businessAddressDetail || null }
           : {}),
       });
       setSaveSuccess(true);
@@ -189,7 +192,7 @@ export function ProfileBasicForm({ initial, onSuccess, onCancel }: ProfileBasicF
       </FormField>
 
       <FormField label="주소" optional>
-        <KakaoAddressInput value={address} onChange={setAddress} />
+        <KakaoAddressInput base={address} detail={addressDetail} onBaseChange={setAddress} onDetailChange={setAddressDetail} />
       </FormField>
 
       {/* 기술 / 소개 */}
@@ -261,8 +264,10 @@ export function ProfileBasicForm({ initial, onSuccess, onCancel }: ProfileBasicF
 
           <FormField label="사업장 주소" required error={businessAddressError}>
             <KakaoAddressInput
-              value={businessAddress}
-              onChange={(v) => { setBusinessAddress(v); if (businessAddressError) setBusinessAddressError(v.trim() ? "" : "사업장 주소를 입력해주세요"); }}
+              base={businessAddress}
+              detail={businessAddressDetail}
+              onBaseChange={(v) => { setBusinessAddress(v); if (businessAddressError) setBusinessAddressError(v.trim() ? "" : "사업장 주소를 입력해주세요"); }}
+              onDetailChange={setBusinessAddressDetail}
             />
           </FormField>
 

@@ -19,6 +19,8 @@ export const LIMITS = {
   CERT_NAME_MAX: 100,
   /** 주소 */
   ADDRESS_MAX: 200,
+  /** 상세주소 */
+  ADDRESS_DETAIL_MAX: 100,
   /** 자기소개 */
   BIO_MAX: 500,
   /** 경력 설명 */
@@ -41,6 +43,8 @@ export const LIMITS = {
   BUSINESS_NAME_MAX: 100,
   /** 사업장 주소 */
   BUSINESS_ADDRESS_MAX: 200,
+  /** 사업장 상세주소 */
+  BUSINESS_ADDRESS_DETAIL_MAX: 100,
   /** 은행명 */
   BANK_NAME_MAX: 50,
   /** 계좌번호 */
