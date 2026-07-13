@@ -9,7 +9,7 @@ export default function AuthLayout({
   children: React.ReactNode;
 }) {
   return (
-    <div className="relative mx-auto max-w-[600px] min-h-screen bg-background shadow-[0_0_0_1px_rgba(0,0,0,0.06)] md:shadow-xl">
+    <div className="relative mx-auto max-w-[600px] min-h-screen bg-background border border-border">
       <ToastProvider>
         <TopBar />
         <PullToRefresh />

@@ -60,8 +60,8 @@ export function TopBar() {
   return (
     <header
       className={cn(
-        "fixed top-0 left-1/2 -translate-x-1/2 w-full max-w-[600px] h-14 bg-background z-50 flex items-center px-4 transition-shadow",
-        scrolled ? "shadow-sm" : "border-b border-transparent"
+        "fixed top-0 left-1/2 -translate-x-1/2 w-full max-w-[600px] h-14 bg-background z-50 flex items-center px-4 transition-colors border-b",
+        scrolled ? "border-border" : "border-transparent"
       )}
     >
       <div className="flex items-center w-full gap-3">
