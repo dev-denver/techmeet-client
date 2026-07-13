@@ -75,7 +75,7 @@ export function NoticeListClient({ initialNotices, initialTotal }: NoticeListCli
         <button
           onClick={handleLoadMore}
           disabled={isLoading}
-          className="w-full mt-1 py-3 text-sm font-medium text-muted-foreground border border-border rounded-xl hover:bg-muted/50 active:bg-muted transition-colors disabled:opacity-50 flex items-center justify-center gap-2"
+          className="w-full mt-1 py-3 text-sm font-normal text-muted-foreground border border-border rounded-md hover:bg-muted/50 active:bg-muted transition-colors disabled:opacity-50 flex items-center justify-center gap-2"
         >
           {isLoading ? (
             <><Loader2 className="h-4 w-4 animate-spin" />불러오는 중...</>

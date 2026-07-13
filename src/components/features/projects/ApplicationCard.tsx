@@ -81,7 +81,7 @@ export function ApplicationCard({
     return (
       <NavLink
         href={`/projects/${application.projectId}`}
-        className="block rounded-xl bg-card border border-border hover:border-muted-foreground/40 hover:shadow-sm transition-all min-w-[180px] max-w-[200px] p-3.5 space-y-2.5"
+        className="block rounded-xl bg-card border border-border hover:border-muted-foreground/40 transition-colors min-w-[180px] max-w-[200px] p-3.5 space-y-2.5"
       >
         {content}
       </NavLink>
@@ -173,7 +173,7 @@ export function ApplicationCard({
   if (application.isProjectDeleted) {
     return (
       <div className="relative">
-        <div className={`rounded-xl border-l-4 border border-l-0 bg-card shadow-sm overflow-hidden opacity-60 ${accent}`}>
+        <div className={`rounded-xl border-l-4 border border-l-0 bg-card overflow-hidden opacity-60 ${accent}`}>
           {content}
         </div>
       </div>
@@ -184,7 +184,7 @@ export function ApplicationCard({
     <div className="relative">
       <NavLink
         href={`/projects/${application.projectId}`}
-        className={`block rounded-xl border-l-4 border border-l-0 bg-card shadow-sm hover:shadow-md hover:-translate-y-0.5 transition-all overflow-hidden ${accent}`}
+        className={`block rounded-xl border-l-4 border border-l-0 bg-card overflow-hidden ${accent}`}
       >
         {content}
       </NavLink>
