@@ -32,7 +32,7 @@ export function ProjectCard({ project, mySkills }: ProjectCardProps) {
     <NavLink
       href={`/projects/${project.id}`}
       className={cn(
-        "block rounded-xl border bg-card shadow-sm hover:shadow-md hover:-translate-y-0.5 transition-all overflow-hidden",
+        "block rounded-xl border bg-card hover:border-muted-foreground/40 transition-colors overflow-hidden",
         isExpired && "opacity-60"
       )}
     >

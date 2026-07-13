@@ -34,7 +34,7 @@ export default async function NoticeDetailPage({ params }: NoticeDetailPageProps
       {/* 헤더 */}
       <div className="px-4 pt-6 pb-5 border-b">
         {notice.isImportant && (
-          <span className="inline-flex items-center gap-1 text-xs font-semibold text-orange-600 bg-orange-50 px-2.5 py-1 rounded-full border border-orange-200 mb-3">
+          <span className="inline-flex items-center gap-1 text-xs font-semibold text-status-warning bg-status-warning/10 px-2.5 py-1 rounded-full border border-status-warning/20 mb-3">
             <Bell className="h-3 w-3" />
             중요 공지
           </span>

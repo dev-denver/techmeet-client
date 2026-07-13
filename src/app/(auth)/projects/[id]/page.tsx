@@ -2,6 +2,7 @@ import { notFound } from "next/navigation";
 import { MapPin, Clock, Users, Calendar, Check, ChevronRight, Sparkles } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { NavLink } from "@/components/ui/nav-link";
+import { PageHero } from "@/components/ui/page-hero";
 import { ProjectStatusBadge } from "@/components/features/projects/ProjectStatusBadge";
 import { ApplyButton } from "@/components/features/projects/ApplyButton";
 import { ShareButton } from "@/components/features/projects/ShareButton";
@@ -51,7 +52,7 @@ export default async function ProjectDetailPage({ params }: ProjectDetailPagePro
       <RecordRecentProject id={project.id} title={project.title} />
 
       {/* 히어로 */}
-      <div className="bg-primary px-5 pt-6 pb-5">
+      <PageHero>
         <div className="flex items-center justify-between gap-2 mb-3">
           <ProjectStatusBadge status={project.status} />
           <div className="flex items-center gap-2">
@@ -107,7 +108,7 @@ export default async function ProjectDetailPage({ params }: ProjectDetailPagePro
             </span>
           )}
         </div>
-      </div>
+      </PageHero>
 
       {/* 기술 스택 */}
       {project.techStack.length > 0 && (
@@ -170,7 +171,7 @@ export default async function ProjectDetailPage({ params }: ProjectDetailPagePro
 
       {/* 마감일 */}
       {project.deadline && (
-        <div className="px-5 py-4 border-b bg-muted/30">
+        <div className="px-4 py-5 border-b bg-muted/30">
           <div className="flex items-center justify-between">
             <div>
               <p className="text-[10px] text-muted-foreground font-medium mb-0.5">지원 마감일</p>

@@ -60,7 +60,7 @@ export function NoticeListClient({ initialNotices, initialTotal }: NoticeListCli
             href={`/notices/${notice.id}`}
             className="flex items-center gap-3 px-4 py-3.5 hover:bg-muted/50 active:bg-muted transition-colors"
           >
-            {notice.isImportant && <Bell className="h-3.5 w-3.5 text-orange-600 shrink-0" />}
+            {notice.isImportant && <Bell className="h-3.5 w-3.5 text-status-warning shrink-0" />}
             <p className="flex-1 text-sm text-foreground leading-snug line-clamp-1">
               {notice.title}
             </p>
@@ -75,7 +75,7 @@ export function NoticeListClient({ initialNotices, initialTotal }: NoticeListCli
         <button
           onClick={handleLoadMore}
           disabled={isLoading}
-          className="w-full mt-1 py-3 text-sm font-medium text-muted-foreground border border-border rounded-xl hover:bg-muted/50 active:bg-muted transition-colors disabled:opacity-50 flex items-center justify-center gap-2"
+          className="w-full mt-1 py-3 text-sm font-normal text-muted-foreground border border-border rounded-md hover:bg-muted/50 active:bg-muted transition-colors disabled:opacity-50 flex items-center justify-center gap-2"
         >
           {isLoading ? (
             <><Loader2 className="h-4 w-4 animate-spin" />불러오는 중...</>

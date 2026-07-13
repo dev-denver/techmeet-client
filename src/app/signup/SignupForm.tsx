@@ -175,7 +175,7 @@ export function SignupForm({ email: initialEmail, kakaoId, name, birthDate: init
               if (emailError) setEmailError("");
             }}
             maxLength={LIMITS.EMAIL_MAX}
-            className={cn("flex-1 min-w-0", emailError ? "border-red-300" : "")}
+            className={cn("flex-1 min-w-0", emailError ? "border-destructive/50" : "")}
           />
           <span className="shrink-0 text-muted-foreground">@</span>
           <Input
@@ -187,13 +187,13 @@ export function SignupForm({ email: initialEmail, kakaoId, name, birthDate: init
               if (emailError) setEmailError("");
             }}
             maxLength={LIMITS.EMAIL_MAX}
-            className={cn("flex-1 min-w-0", emailError ? "border-red-300" : "")}
+            className={cn("flex-1 min-w-0", emailError ? "border-destructive/50" : "")}
           />
           {!emailEditable && (
             <button
               type="button"
               onClick={() => setEmailEditable(true)}
-              className="shrink-0 h-11 px-3 rounded-lg border border-zinc-300 text-sm text-zinc-600 hover:bg-zinc-50 transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2"
+              className="shrink-0 h-11 px-3 rounded-lg border border-input text-sm text-muted-foreground hover:bg-muted transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2"
             >
               수정
             </button>
@@ -210,7 +210,7 @@ export function SignupForm({ email: initialEmail, kakaoId, name, birthDate: init
             setFormName(e.target.value);
             if (nameError) setNameError(e.target.value.trim() ? "" : "이름을 입력해주세요");
           }}
-          className={nameError ? "border-red-300" : ""}
+          className={nameError ? "border-destructive/50" : ""}
         />
       </FormField>
 
@@ -233,12 +233,12 @@ export function SignupForm({ email: initialEmail, kakaoId, name, birthDate: init
               }
             }}
             placeholder="영문 소문자·숫자·특수문자 포함 8자 이상"
-            className={cn("pr-10", passwordError ? "border-red-300" : "")}
+            className={cn("pr-10", passwordError ? "border-destructive/50" : "")}
           />
           <button
             type="button"
             onClick={() => setShowPassword((v) => !v)}
-            className="absolute right-3 top-1/2 -translate-y-1/2 text-zinc-400 hover:text-zinc-600"
+            className="absolute right-3 top-1/2 -translate-y-1/2 text-muted-foreground hover:text-foreground"
             tabIndex={-1}
           >
             {showPassword ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
@@ -258,12 +258,12 @@ export function SignupForm({ email: initialEmail, kakaoId, name, birthDate: init
               setPasswordConfirmError(validatePasswordConfirm(password, e.target.value));
             }}
             placeholder="비밀번호를 다시 입력해주세요"
-            className={cn("pr-10", passwordConfirmError ? "border-red-300" : "")}
+            className={cn("pr-10", passwordConfirmError ? "border-destructive/50" : "")}
           />
           <button
             type="button"
             onClick={() => setShowPasswordConfirm((v) => !v)}
-            className="absolute right-3 top-1/2 -translate-y-1/2 text-zinc-400 hover:text-zinc-600"
+            className="absolute right-3 top-1/2 -translate-y-1/2 text-muted-foreground hover:text-foreground"
             tabIndex={-1}
           >
             {showPasswordConfirm ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
@@ -292,7 +292,7 @@ export function SignupForm({ email: initialEmail, kakaoId, name, birthDate: init
           }}
           placeholder="010-0000-0000"
           maxLength={13}
-          className={phoneError ? "border-red-300" : ""}
+          className={phoneError ? "border-destructive/50" : ""}
         />
       </FormField>
 
@@ -308,9 +308,9 @@ export function SignupForm({ email: initialEmail, kakaoId, name, birthDate: init
 
       {/* 약관 동의 */}
       <div className="space-y-3 pt-1">
-        <p className="text-sm font-medium text-zinc-700">약관 동의</p>
+        <p className="text-sm font-medium text-foreground">약관 동의</p>
 
-        <label className="flex items-center gap-3 cursor-pointer p-3 bg-zinc-50 rounded-lg">
+        <label className="flex items-center gap-3 cursor-pointer p-3 bg-muted rounded-lg">
           <input
             type="checkbox"
             checked={agreeAge && agreeTerms && agreePrivacy && agreeSms}
@@ -320,9 +320,9 @@ export function SignupForm({ email: initialEmail, kakaoId, name, birthDate: init
               setAgreePrivacy(e.target.checked);
               setAgreeSms(e.target.checked);
             }}
-            className="h-4 w-4 rounded border-zinc-300 accent-zinc-900"
+            className="h-4 w-4 rounded border-input accent-primary"
           />
-          <span className="text-sm font-semibold text-zinc-800">전체 동의</span>
+          <span className="text-sm font-semibold text-foreground">전체 동의</span>
         </label>
 
         <div className="space-y-2.5 pl-1">
@@ -331,10 +331,10 @@ export function SignupForm({ email: initialEmail, kakaoId, name, birthDate: init
               type="checkbox"
               checked={agreeAge}
               onChange={(e) => setAgreeAge(e.target.checked)}
-              className="h-4 w-4 rounded border-zinc-300 accent-zinc-900"
+              className="h-4 w-4 rounded border-input accent-primary"
             />
-            <span className="text-sm text-zinc-700">
-              <span className="text-red-500 mr-0.5">[필수]</span>만 14세 이상입니다
+            <span className="text-sm text-foreground">
+              <span className="text-destructive mr-0.5">[필수]</span>만 14세 이상입니다
             </span>
           </label>
 
@@ -343,14 +343,14 @@ export function SignupForm({ email: initialEmail, kakaoId, name, birthDate: init
               type="checkbox"
               checked={agreeTerms}
               onChange={(e) => setAgreeTerms(e.target.checked)}
-              className="h-4 w-4 rounded border-zinc-300 accent-zinc-900"
+              className="h-4 w-4 rounded border-input accent-primary"
             />
-            <span className="text-sm text-zinc-700">
-              <span className="text-red-500 mr-0.5">[필수]</span>
+            <span className="text-sm text-foreground">
+              <span className="text-destructive mr-0.5">[필수]</span>
               <button
                 type="button"
                 onClick={() => setPolicyModal("terms")}
-                className="underline underline-offset-2 hover:text-zinc-900"
+                className="underline underline-offset-2 hover:text-foreground"
               >
                 이용약관
               </button>
@@ -363,14 +363,14 @@ export function SignupForm({ email: initialEmail, kakaoId, name, birthDate: init
               type="checkbox"
               checked={agreePrivacy}
               onChange={(e) => setAgreePrivacy(e.target.checked)}
-              className="h-4 w-4 rounded border-zinc-300 accent-zinc-900"
+              className="h-4 w-4 rounded border-input accent-primary"
             />
-            <span className="text-sm text-zinc-700">
-              <span className="text-red-500 mr-0.5">[필수]</span>
+            <span className="text-sm text-foreground">
+              <span className="text-destructive mr-0.5">[필수]</span>
               <button
                 type="button"
                 onClick={() => setPolicyModal("privacy")}
-                className="underline underline-offset-2 hover:text-zinc-900"
+                className="underline underline-offset-2 hover:text-foreground"
               >
                 개인정보 처리방침
               </button>
@@ -383,17 +383,17 @@ export function SignupForm({ email: initialEmail, kakaoId, name, birthDate: init
               type="checkbox"
               checked={agreeSms}
               onChange={(e) => setAgreeSms(e.target.checked)}
-              className="h-4 w-4 rounded border-zinc-300 accent-zinc-900"
+              className="h-4 w-4 rounded border-input accent-primary"
             />
-            <span className="text-sm text-zinc-700">
-              <span className="text-zinc-400 mr-0.5">[선택]</span>SMS 수신에 동의합니다
+            <span className="text-sm text-foreground">
+              <span className="text-muted-foreground mr-0.5">[선택]</span>SMS 수신에 동의합니다
             </span>
           </label>
         </div>
       </div>
 
       {serverError && (
-        <p className="text-sm text-red-500 bg-red-50 rounded-lg px-4 py-3 text-center">
+        <p className="text-sm text-destructive bg-destructive/10 rounded-lg px-4 py-3 text-center">
           {serverError}
         </p>
       )}
@@ -401,7 +401,7 @@ export function SignupForm({ email: initialEmail, kakaoId, name, birthDate: init
       <button
         type="submit"
         disabled={isLoading}
-        className="mt-1 w-full rounded-xl bg-zinc-900 py-3.5 text-[15px] font-semibold text-white transition-opacity hover:opacity-90 active:opacity-80 disabled:opacity-50"
+        className="mt-1 w-full rounded-xl bg-primary py-3.5 text-[15px] font-semibold text-primary-foreground transition-opacity hover:opacity-90 active:opacity-80 disabled:opacity-50"
       >
         {isLoading ? "처리 중..." : "회원가입 완료"}
       </button>

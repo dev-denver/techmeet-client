@@ -127,7 +127,7 @@ export function ProjectListClient({ initialProjects, initialTotal, mySkills }: P
           </div>
           <NavLink
             href="/projects/applications"
-            className="shrink-0 flex items-center gap-1 px-3 py-2 rounded-full text-sm font-medium bg-muted text-muted-foreground hover:bg-muted/80 transition-colors"
+            className="shrink-0 inline-flex items-center h-[30px] px-3 rounded-full text-xs font-medium bg-muted text-muted-foreground hover:bg-muted/80 transition-colors gap-1"
           >
             <ClipboardList className="h-3.5 w-3.5" />
             내 신청 현황
@@ -173,7 +173,7 @@ export function ProjectListClient({ initialProjects, initialTotal, mySkills }: P
               <button
                 onClick={handleLoadMore}
                 disabled={isLoading}
-                className="w-full mt-1 py-3 text-sm font-medium text-muted-foreground border border-border rounded-xl hover:bg-muted/50 active:bg-muted transition-colors disabled:opacity-50 flex items-center justify-center gap-2"
+                className="w-full mt-1 py-3 text-sm font-normal text-muted-foreground border border-border rounded-md hover:bg-muted/50 active:bg-muted transition-colors disabled:opacity-50 flex items-center justify-center gap-2"
               >
                 {isLoading ? (
                   <><Loader2 className="h-4 w-4 animate-spin" />불러오는 중...</>

@@ -123,10 +123,10 @@ export function ProfileTabsClient({ profile }: ProfileTabsClientProps) {
               key={key}
               onClick={() => selectTab(key)}
               aria-current={tab === key ? "true" : undefined}
-              className={`flex-1 min-w-fit py-3 px-3 text-xs font-medium whitespace-nowrap transition-colors border-b-2 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-inset ${
+              className={`flex-1 min-w-fit py-3 px-3 text-xs whitespace-nowrap transition-colors border-b-2 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-inset ${
                 tab === key
-                  ? "text-foreground border-foreground"
-                  : "text-muted-foreground border-transparent hover:text-foreground/70"
+                  ? "text-foreground font-semibold border-foreground"
+                  : "text-muted-foreground font-normal border-transparent hover:text-foreground/70"
               }`}
             >
               {label}

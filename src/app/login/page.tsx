@@ -75,7 +75,7 @@ function LoginForm() {
 
   return (
     <div className="flex min-h-screen items-center justify-center bg-page-bg">
-      <div className="w-full max-w-[600px] min-h-screen bg-background shadow-[0_0_0_1px_rgba(0,0,0,0.06)] md:shadow-xl flex flex-col items-center justify-between px-6 py-16">
+      <div className="w-full max-w-[600px] min-h-screen bg-background border border-border flex flex-col items-center justify-between px-6 py-16">
         <div className="flex-1 flex flex-col items-center justify-center w-full gap-8">
           {/* 로고 */}
           <div className="flex flex-col items-center gap-3">
@@ -183,11 +183,11 @@ function LoginForm() {
 
         <p className="text-xs text-muted-foreground text-center leading-relaxed">
           로그인 시{" "}
-          <NavLink href="/terms" className="inline underline underline-offset-2 hover:text-foreground transition-colors">
+          <NavLink as="span" href="/terms" className="inline underline underline-offset-2 hover:text-foreground transition-colors">
             이용약관
           </NavLink>{" "}
           및{" "}
-          <NavLink href="/privacy" className="inline underline underline-offset-2 hover:text-foreground transition-colors">
+          <NavLink as="span" href="/privacy" className="inline underline underline-offset-2 hover:text-foreground transition-colors">
             개인정보 처리방침
           </NavLink>
           에 동의하게 됩니다.

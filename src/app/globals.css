@@ -27,7 +27,7 @@
   --color-status-danger: var(--status-danger);
   --color-status-neutral: var(--status-neutral);
   --color-status-purple: var(--status-purple);
-  --font-sans: var(--font-geist-sans);
+  --font-sans: var(--font-pretendard);
   --font-mono: var(--font-geist-mono);
   --radius-sm: calc(var(--radius) - 4px);
   --radius-md: calc(var(--radius) - 2px);
