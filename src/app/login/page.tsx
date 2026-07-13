@@ -183,11 +183,11 @@ function LoginForm() {
 
         <p className="text-xs text-muted-foreground text-center leading-relaxed">
           로그인 시{" "}
-          <NavLink href="/terms" className="inline underline underline-offset-2 hover:text-foreground transition-colors">
+          <NavLink as="span" href="/terms" className="inline underline underline-offset-2 hover:text-foreground transition-colors">
             이용약관
           </NavLink>{" "}
           및{" "}
-          <NavLink href="/privacy" className="inline underline underline-offset-2 hover:text-foreground transition-colors">
+          <NavLink as="span" href="/privacy" className="inline underline underline-offset-2 hover:text-foreground transition-colors">
             개인정보 처리방침
           </NavLink>
           에 동의하게 됩니다.

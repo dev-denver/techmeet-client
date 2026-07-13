@@ -5,12 +5,14 @@ import { useRouter } from "next/navigation";
 import { cn } from "@/lib/utils/cn";
 
 interface NavLinkProps extends Omit<
-  React.HTMLAttributes<HTMLDivElement>,
+  React.HTMLAttributes<HTMLElement>,
   "onClick" | "onKeyDown" | "role" | "tabIndex"
 > {
   href: string;
   /** 마운트 시 router.prefetch 수행 (기본 true) */
   prefetch?: boolean;
+  /** 렌더링할 태그 (기본 "div"). <p> 등 phrasing content 내부의 인라인 텍스트 링크는 "span" 사용 — div는 p의 자식으로 올 수 없어 하이드레이션 에러가 발생한다 */
+  as?: "div" | "span";
 }
 
 /**
@@ -23,6 +25,7 @@ export function NavLink({
   className,
   children,
   prefetch = true,
+  as: Tag = "div",
   ...rest
 }: NavLinkProps) {
   const router = useRouter();
@@ -32,7 +35,7 @@ export function NavLink({
   }, [router, href, prefetch]);
 
   return (
-    <div
+    <Tag
       role="link"
       tabIndex={0}
       onClick={() => router.push(href)}
@@ -49,6 +52,6 @@ export function NavLink({
       {...rest}
     >
       {children}
-    </div>
+    </Tag>
   );
 }
