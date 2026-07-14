@@ -219,7 +219,7 @@ export function SkillTab({ skills }: { skills: SkillInventory[] }) {
 
   return (
     <div>
-      <SectionHeader title="스킬 인벤토리" onAdd={() => setForm({ open: true })} />
+      <SectionHeader title="프로젝트" onAdd={() => setForm({ open: true })} />
       <div className="space-y-2.5">
         {skills.map((skill) => (
           <SkillCard
