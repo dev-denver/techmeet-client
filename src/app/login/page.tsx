@@ -84,19 +84,17 @@ function LoginForm() {
             </div>
             <div className="text-center">
               <h1 className="text-2xl font-bold tracking-tight">TechMeet</h1>
-              <p className="text-sm text-muted-foreground mt-1">테크밋 회원 전용</p>
+              <p className="text-sm text-muted-foreground mt-1">테크밋</p>
             </div>
           </div>
 
           {/* 설명 */}
           <div className="text-center space-y-1.5">
             <p className="text-lg font-medium text-foreground">
-              프리랜서 개발자를 위한
-              <br />
-              전용 프로젝트 플랫폼
+              프리랜서 개발자를 위한 플랫폼
             </p>
             <p className="text-sm text-muted-foreground">
-              테크밋 소속 프리랜서 회원만 이용 가능합니다.
+              테크밋과 함께하는 프리랜서 개발자를 위한 프로젝트 플랫폼입니다.
             </p>
           </div>
 
