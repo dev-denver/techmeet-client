@@ -38,7 +38,7 @@ export function getProfileCompletion(profile: FreelancerProfile): ProfileComplet
       { key: "certification", label: "자격증", tab: "education", done: profile.certifications.length > 0 },
     ],
     [{ key: "career", label: "경력사항", tab: "career", done: profile.careers.length > 0 }],
-    [{ key: "skill", label: "스킬 인벤토리", tab: "skill", done: profile.skillInventories.length > 0 }],
+    [{ key: "skill", label: "프로젝트", tab: "skill", done: profile.skillInventories.length > 0 }],
     [{ key: "resume", label: "이력서", tab: "resume", done: profile.resumes.length > 0 }],
   ];
 

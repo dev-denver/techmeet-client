@@ -4,7 +4,7 @@ import { useState } from "react";
 import type { ContractDocument, FreelancerProfile } from "@/types";
 import { AvailabilityStatus, ContractType } from "@/types";
 import { AvailabilityEditSheet } from "./AvailabilityEditSheet";
-import { CardWrap, FieldRow, SectionHeader } from "./tabs/TabShared";
+import { CardWrap, FieldRow, SectionHeader, Tag } from "./tabs/TabShared";
 import { Pencil } from "lucide-react";
 import { cn } from "@/lib/utils/cn";
 import { AVAILABILITY_STATUS_CONFIG, CONTRACT_TYPE_CONFIG } from "@/lib/constants/status";
@@ -67,6 +67,24 @@ export function BasicInfoTab({ profile, availStatus, availFromDate, onSaveAvaila
             <FieldRow label="휴대폰번호" value={profile.phone} />
             <FieldRow label="이메일" value={profile.email} />
             <FieldRow label="주소" value={[profile.address, profile.addressDetail].filter(Boolean).join(" ") || null} />
+          </div>
+        </CardWrap>
+      </div>
+
+      {/* 기술 스택 */}
+      <div>
+        <SectionHeader title="기술 스택" />
+        <CardWrap>
+          <div className="p-4">
+            {profile.techStack.length > 0 ? (
+              <div className="flex flex-wrap gap-1.5">
+                {profile.techStack.map((tech) => (
+                  <Tag key={tech}>{tech}</Tag>
+                ))}
+              </div>
+            ) : (
+              <p className="text-sm text-muted-foreground">등록된 기술 스택이 없습니다.</p>
+            )}
           </div>
         </CardWrap>
       </div>
