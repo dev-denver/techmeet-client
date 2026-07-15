@@ -1,30 +1,24 @@
 import axios from "axios";
+import { HttpsProxyAgent } from "https-proxy-agent";
 import { Sendon, SmsMessageType } from "@alipeople/sendon-sdk-typescript";
 import { serverEnv } from "@/lib/config/env";
 
 // 센드온은 발신 IP 화이트리스트를 요구해 고정 IP 프록시(AWS Squid)를 거쳐야 한다.
 // 표준 HTTPS_PROXY 환경변수를 쓰면 빌드 단계 네트워크 요청까지 프록시를 타므로,
 // 전용 SENDON_PROXY_URL로 분리하고 이 모듈이 실제로 쓰이는 시점(런타임)에만 적용한다.
+//
+// axios의 내장 proxy 옵션(proxy.auth)은 HTTPS 대상을 프록시로 터널링할 때 보내는
+// 최초 CONNECT 요청에 Proxy-Authorization 헤더를 싣지 못하는 알려진 한계가 있어
+// (Squid 로그에 TCP_DENIED/407로 확인됨), https-proxy-agent로 직접 에이전트를
+// 구성해 axios의 내장 proxy 처리를 끄고 이 에이전트로 대체한다.
 let proxyConfigured = false;
 function configureSendonProxy() {
   if (proxyConfigured) return;
   proxyConfigured = true;
   const proxyUrl = serverEnv.sendonProxyUrl;
   if (!proxyUrl) return;
-  const url = new URL(proxyUrl);
-  axios.defaults.proxy = {
-    protocol: url.protocol.replace(":", ""),
-    host: url.hostname,
-    port: Number(url.port) || 80,
-    ...(url.username
-      ? {
-          auth: {
-            username: decodeURIComponent(url.username),
-            password: decodeURIComponent(url.password),
-          },
-        }
-      : {}),
-  };
+  axios.defaults.proxy = false;
+  axios.defaults.httpsAgent = new HttpsProxyAgent(proxyUrl);
 }
 
 export type SmsSendResult = {
