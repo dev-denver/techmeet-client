@@ -12,12 +12,12 @@ colors:
   hairline: "oklch(0.92 0.004 286.32)"
   paper-white-ink: "oklch(0.985 0 0)"
   alert-red: "oklch(0.577 0.245 27.325)"
-  status-success: "oklch(0.55 0.17 145)"
-  status-info: "oklch(0.55 0.15 250)"
-  status-warning: "oklch(0.75 0.15 80)"
-  status-danger: "oklch(0.55 0.2 27)"
+  status-success: "oklch(0.5 0.135 150)"
+  status-info: "oklch(0.48 0.125 252)"
+  status-warning: "oklch(0.56 0.15 72)"
+  status-danger: "oklch(0.5 0.17 24)"
   status-neutral: "oklch(0.55 0.01 286)"
-  status-purple: "oklch(0.55 0.17 300)"
+  status-purple: "oklch(0.5 0.13 300)"
 typography:
   title:
     fontFamily: "Pretendard Variable, -apple-system, sans-serif"
@@ -112,12 +112,13 @@ TechMeet client는 아무 정보나 쌓아 올린 게시판이 아니라, 테크
 - **Hairline** (`oklch(0.92 0.004 286.32)`): border/input 기본선.
 
 ### Semantic (Status)
-- **Verified Green** (`oklch(0.55 0.17 145)`, `status-success`): 매칭 성공, 승인.
-- **Info Blue** (`oklch(0.55 0.15 250)`, `status-info`): 안내성 정보.
-- **Pending Amber** (`oklch(0.75 0.15 80)`, `status-warning`): 대기/검토 중.
-- **Alert Red** (`oklch(0.55 0.2 27)`, `status-danger` / `oklch(0.577 0.245 27.325)` destructive): 마감 임박, 반려, 파괴적 액션.
+저채도 무채색 파운데이션 위에서 도드라져 보이도록, 상태 색은 기존 원색에 가까운 채도(chroma 0.17~0.2) 대신 톤을 낮춘 깊은 색(chroma 0.125~0.17, lightness 0.48~0.56)으로 통일했다. "검증된 것만 노출한다"는 절제된 톤에 맞춰 캔디 컬러가 아닌 잉크에 가까운 톤으로 상태를 전달하되, 흰 배경 대비 4.5:1 이상을 확보해 배지 텍스트·솔리드 버튼(흰 텍스트) 양쪽에서 모두 안전하다.
+- **Verified Green** (`oklch(0.5 0.135 150)`, `status-success`): 매칭 성공, 승인, 투입 가능.
+- **Info Blue** (`oklch(0.48 0.125 252)`, `status-info`): 안내성 정보, 투입 가능 예정.
+- **Pending Amber** (`oklch(0.56 0.15 72)`, `status-warning`): 대기/검토 중. 기존 `oklch(0.75 0.15 80)`는 흰 배경 대비 2.26:1로 WCAG AA(4.5:1)를 충족하지 못해 조정.
+- **Alert Red** (`oklch(0.5 0.17 24)`, `status-danger` / `oklch(0.577 0.245 27.325)` destructive): 마감 임박, 반려, 파괴적 액션, 투입 불가.
 - **Neutral Status** (`oklch(0.55 0.01 286)`, `status-neutral`): 중립 상태.
-- **Highlight Purple** (`oklch(0.55 0.17 300)`, `status-purple`): 기타 강조 상태.
+- **Highlight Purple** (`oklch(0.5 0.13 300)`, `status-purple`): 기타 강조 상태.
 
 ### Named Rules
 **The One Voice Rule.** 채도 있는 색은 오직 `--status-*` 시맨틱 토큰을 통해서만 등장한다. 장식 목적의 임의 색상 사용은 금지.
