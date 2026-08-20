@@ -10,13 +10,26 @@ import { NextResponse, type NextRequest } from "next/server";
 import { publicEnv } from "@/lib/config/env";
 import { AccountStatus } from "@/types";
 
-const PUBLIC_PATHS = ["/login", "/signup", "/terms", "/privacy", "/api/auth"];
+// 인증 여부와 무관하게 항상 그대로 통과시키는 경로 — Supabase 세션 검증 자체가 불필요
+const NO_AUTH_PATHS = ["/terms", "/privacy", "/api/auth"];
+// "이미 로그인된 사용자면 홈으로" 리다이렉트만 필요한 경로 — 보호된 데이터 접근이 아니므로
+// 네트워크 재검증(getUser) 없이 쿠키 로컬 디코드(getSession)로 충분
+const AUTH_REDIRECT_PATHS = ["/login", "/signup"];
 
 function isPublicPath(pathname: string) {
-  return PUBLIC_PATHS.some((p) => pathname.startsWith(p));
+  return (
+    NO_AUTH_PATHS.some((p) => pathname.startsWith(p)) ||
+    AUTH_REDIRECT_PATHS.includes(pathname)
+  );
 }
 
 export async function proxy(request: NextRequest) {
+  const { pathname } = request.nextUrl;
+
+  if (NO_AUTH_PATHS.some((p) => pathname.startsWith(p))) {
+    return NextResponse.next();
+  }
+
   let supabaseResponse = NextResponse.next({ request });
 
   const supabase = createServerClient(
@@ -40,11 +53,25 @@ export async function proxy(request: NextRequest) {
     }
   );
 
+  // 로그인/회원가입 페이지: 실제 데이터 접근을 게이트하지 않으므로 네트워크 재검증 없이
+  // 쿠키에 있는 세션만으로 "이미 로그인됨" 여부를 판단
+  if (AUTH_REDIRECT_PATHS.includes(pathname)) {
+    const {
+      data: { session },
+    } = await supabase.auth.getSession();
+
+    if (session) {
+      const url = request.nextUrl.clone();
+      url.pathname = "/";
+      return NextResponse.redirect(url);
+    }
+
+    return supabaseResponse;
+  }
+
   const {
     data: { user },
   } = await supabase.auth.getUser();
-
-  const { pathname } = request.nextUrl;
 
   // 미인증 사용자가 보호된 페이지 접근 → 로그인으로 리다이렉트
   if (!user && !isPublicPath(pathname)) {
@@ -71,13 +98,6 @@ export async function proxy(request: NextRequest) {
         url.searchParams.set("error", AccountStatus.Withdrawn);
         return NextResponse.redirect(url);
       }
-    }
-
-    // 로그인/회원가입 페이지 접근 → 홈으로 리다이렉트
-    if (pathname === "/login" || pathname === "/signup") {
-      const url = request.nextUrl.clone();
-      url.pathname = "/";
-      return NextResponse.redirect(url);
     }
   }
 
