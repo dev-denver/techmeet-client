@@ -8,6 +8,15 @@
         "value": "#fee500",
         "createdAt": "2026-08-19T21:28:16.954Z",
         "reason": "CLAUDE.md: 카카오 브랜드 색상은 One Voice Rule의 명시적 예외"
+      },
+      {
+        "rule": "design-system-color",
+        "value": "#a1a1aa",
+        "files": [
+          "src/app/opengraph-image.tsx"
+        ],
+        "createdAt": "2026-08-20T06:31:35.052Z",
+        "reason": "next/og ImageResponse (Satori) requires literal inline style values, cannot consume Tailwind/DESIGN.md tokens"
       }
     ]
   }
