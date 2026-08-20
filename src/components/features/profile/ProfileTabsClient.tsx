@@ -4,7 +4,7 @@ import { useState } from "react";
 import { useRouter } from "next/navigation";
 import type { FreelancerProfile } from "@/types";
 import { AvailabilityStatus } from "@/types";
-import { AVAILABILITY_TOGGLE_CONFIG } from "@/lib/constants";
+import { AVAILABILITY_TOGGLE_CONFIG, PROFILE_TABS, type ProfileTab } from "@/lib/constants";
 import { BasicInfoTab } from "./BasicInfoTab";
 import { EducationTab } from "./tabs/EducationTab";
 import { SkillTab } from "./tabs/SkillTab";
@@ -18,29 +18,19 @@ import { profileApi } from "@/lib/api/profile";
 import { Pencil } from "lucide-react";
 import { getProfileCompletion } from "@/lib/utils/profile-completion";
 
-type Tab = "basic" | "education" | "career" | "skill" | "resume";
-
-export const PROFILE_TABS: { key: Tab; label: string }[] = [
-  { key: "basic", label: "기본정보" },
-  { key: "education", label: "학력/자격증" },
-  { key: "career", label: "경력사항" },
-  { key: "skill", label: "프로젝트" },
-  { key: "resume", label: "이력서" },
-];
-
 function CareerTab({ profile }: { profile: FreelancerProfile }) {
   return <CareerSectionClient careers={profile.careers} />;
 }
 
 interface ProfileTabsClientProps {
   profile: FreelancerProfile;
-  initialTab?: Tab;
+  initialTab?: ProfileTab;
 }
 
 export function ProfileTabsClient({ profile, initialTab }: ProfileTabsClientProps) {
   const router = useRouter();
   const { showToast } = useToast();
-  const [tab, setTab] = useState<Tab>(initialTab ?? "basic");
+  const [tab, setTab] = useState<ProfileTab>(initialTab ?? "basic");
   const [editingBasic, setEditingBasic] = useState(false);
   const [availStatus, setAvailStatus] = useState<AvailabilityStatus>(
     profile.availabilityStatus ?? AvailabilityStatus.Unavailable
@@ -62,7 +52,7 @@ export function ProfileTabsClient({ profile, initialTab }: ProfileTabsClientProp
     }
   }
 
-  function selectTab(next: Tab) {
+  function selectTab(next: ProfileTab) {
     setTab(next);
   }
 
