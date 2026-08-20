@@ -1,326 +1,143 @@
-> **읽는 순서: 이 파일(CLAUDE.md) → project.md**
-> 이 파일은 변경이 거의 없는 개발 규칙·아키텍처 기준입니다.
-> 비즈니스 요건·기능 구성·완료 현황은 `project.md`를 확인하세요.
+# AI 개발 작업 지침
 
-# 프로젝트: techmeet-client
+LLM이 코드를 작성할 때 자주 발생하는 실수를 줄이기 위한 행동 지침입니다.
+필요에 따라 프로젝트별 규칙과 함께 적용하세요.
 
-테크밋 소속 프리랜서 개발자를 위한 **프리랜서 전용 웹앱**입니다.
-관리자 기능은 별도 레포지토리에서 관리됩니다.
+> **트레이드오프:** 이 가이드는 작업 속도보다 신중함을 우선합니다. 단순한 작업에서는 상황에 맞게 판단하세요.
 
-## 프로젝트 목적
+---
 
-- 프리랜서 개발자가 테크밋에서 등록한 개발 프로젝트를 조회하고 지원할 수 있습니다
-- 프리랜서가 자신의 경력, 기술 스택, 현재 투입 상태를 직접 관리합니다
-- 카카오 알림톡을 통해 신규 프로젝트 등록 시 자동 알림을 받습니다
-- techmeet-admin과 동일한 Supabase DB 공유 (스키마: `sql/techmeet-client-admin.sql`)
+## 1. 코드를 작성하기 전에 먼저 생각하기
 
-## 기술 스택
+**추측하지 말고, 혼란을 숨기지 말며, 트레이드오프를 명확하게 설명하세요.**
 
-| 항목      | 기술                        |
-| --------- | --------------------------- |
-| Framework | Next.js 16 (App Router)     |
-| Language  | TypeScript 5 (strict mode)  |
-| Styling   | Tailwind CSS v4 + shadcn/ui |
-| Database  | Supabase (PostgreSQL)       |
-| Auth      | 카카오 OAuth (소셜 로그인)  |
-| 알림      | 카카오 비즈니스 알림톡 API  |
+구현을 시작하기 전에 다음을 수행하세요.
 
-## 명령어
+- 자신의 가정을 명확하게 설명합니다. 확신이 없다면 질문합니다.
+- 여러 해석이 가능한 경우, 하나를 임의로 선택하지 말고 가능한 해석들을 제시합니다.
+- 더 단순한 접근 방식이 있다면 먼저 제안합니다. 필요하다면 현재 접근 방식에 대해 반대 의견도 제시합니다.
+- 요구사항이 불명확하다면 구현을 멈춥니다. 무엇이 모호한지 설명하고 질문합니다.
 
-- `npm run dev`: 개발 서버 시작 (포트 3000)
-- `npm run build`: 프로덕션 빌드
-- `npm run lint`: ESLint 검사
+---
 
-## UI/UX 방향
+## 2. 항상 단순함을 우선하기
 
-- **모바일 앱형 웹**: 데스크탑에서 접속해도 모바일 폭(`max-w-[600px]`)으로 중앙 정렬
-- 웹/앱 링크 동일 화면 제공 (반응형 X, 고정 모바일 폭)
-- **상단 바**: 페이지 타이틀 + 뒤로가기 버튼, 스크롤 시 햄버거 메뉴 표시
-- **하단 네비게이션 바**: 홈 / 프로젝트 관리 / 내 정보 / 설정
+**문제를 해결하는 데 필요한 최소한의 코드만 작성합니다. 추측해서 기능을 추가하지 않습니다.**
 
-## 페이지 구조
+다음 사항을 지킵니다.
 
-```
-/                          → 홈 (최근 프로젝트, 내 신청 현황, 공지)
-/projects                  → 프로젝트 목록
-/projects/[id]             → 프로젝트 상세 + 지원하기
-/projects/applications     → 내 신청 내역 및 상태
-/profile                   → 내 정보 (기본정보, 학력/자격증, 경력사항, 스킬 인벤토리, 이력서)
-/notifications             → 알림 이력 (카카오 알림톡 발송 내역)
-/notices                   → 공지사항 목록
-/notices/[id]              → 공지사항 상세
-/settings                  → 설정 (알림, 추천인, 로그아웃)
-/settings/profile          → 내 정보 수정
-/settings/password         → 비밀번호 변경
-/settings/withdraw         → 회원 탈퇴
-/login                     → 카카오 로그인
-/signup                    → 회원가입 (카카오 OAuth 플로우 선행)
-/terms                     → 이용약관 (공개)
-/privacy                   → 개인정보 처리방침 (공개)
-```
+- 요청받지 않은 기능은 추가하지 않습니다.
+- 한 번만 사용하는 코드를 위해 추상화를 만들지 않습니다.
+- 요청받지 않은 유연성이나 설정 가능성을 미리 추가하지 않습니다.
+- 실제로 발생할 수 없는 상황을 위한 예외 처리를 작성하지 않습니다.
+- 200줄로 작성했지만 50줄로 해결할 수 있다면 다시 단순하게 작성합니다.
 
-## 아키텍처
+항상 스스로에게 질문합니다.
 
-```
-/src
-  proxy.ts                 → 개발 환경 카카오 OAuth 콜백 프록시
-  /app                     → Next.js App Router 페이지 및 레이아웃
-    /api                   → API 라우트 (Supabase 연동, 카카오 알림톡)
-      /auth                → login, logout, signup, withdraw, password, public-key, kakao/callback
-      /applications        → 지원 CRUD ([id] 취소)
-      /projects            → 프로젝트 조회 ([id] 상세)
-      /profile             → 프로필 + availability / careers / education / certifications
-                             / skill-inventories / resumes / contract-documents / referrer
-      /notices             → 공지사항 조회
-      /notifications       → 알림톡 이력 조회
-      /settings            → /notifications (알림 설정 GET/PUT)
-    /login                 → 로그인 페이지
-    /signup                → 회원가입 페이지
-    /terms                 → 이용약관
-    /privacy               → 개인정보 처리방침
-    /(auth)                → 인증 필요 페이지 그룹 (TopBar + BottomNavigation 레이아웃)
-      /page.tsx            → 홈
-      /projects            → 목록, [id] 상세, applications 신청 내역
-      /profile             → 프로필 (탭 5개)
-      /notifications       → 알림 이력
-      /notices             → 공지사항 목록, [id] 상세
-      /settings            → 설정, profile 내 정보 수정, password 비밀번호 변경, withdraw 탈퇴
-  /components
-    /ui                    → shadcn/ui 기반 재사용 UI 컴포넌트
-    /layout                → TopBar, BottomNavigation, PullToRefresh 레이아웃 컴포넌트
-    /features              → 기능별 컴포넌트
-      /projects            → ProjectCard, ProjectListClient, ProjectFilters, ProjectStatusBadge,
-                             ApplicationCard, ApplyButton, ShareButton, RecentProjectsSection,
-                             RecordRecentProject
-      /profile             → ProfileHeader, ProfileCompletionBar, ProfileTabsClient, BasicInfoTab,
-                             ProfileBasicForm, AvailabilityEditSheet, TechStackInput, TechStackSection,
-                             CareerSection, CareerSectionClient, CareerForm, CareerTimelineDot,
-                             ContractDocumentField, KakaoAddressInput
-                             /tabs → EducationTab, SkillTab, ResumeTab, TabShared
-      /notices             → NoticeListClient
-      /referrer            → ReferrerSection
-      /settings            → LogoutButton, NotificationSettings
-      /signup              → SignupForm, PasswordStrength, PolicyModal
-  /lib
-    /api                   → 클라이언트 API 호출 함수
-                             client.ts (apiFetch, ApiError), server.ts (requireAuth, parsePaginationParams)
-                             index.ts, auth.ts, projects.ts, applications.ts, profile.ts,
-                             notices.ts, notifications.ts, settings.ts
-    /config                → env.ts (환경변수 타입 안전 접근)
-    /constants             → status.ts, limits.ts, contractDocuments.ts, index.ts
-    /crypto                → client.ts (RSA 암호화), rsa.ts (RSA 복호화)
-    /supabase              → client.ts, server.ts (createServerClient, createAdminClient)
-                             /queries → projects.ts, applications.ts, profile.ts, notices.ts,
-                                        notifications.ts, resume.ts
-    /kakao                 → oauth.ts (카카오 OAuth), alimtalk.ts (알림톡 발송)
-    /utils                 → cn.ts, format.ts, validation.ts, skills.ts,
-                             profile-completion.ts, recent-projects.ts
-  /types                   → project.ts, user.ts, application.ts, notice.ts, notification.ts,
-                             api.ts, index.ts
-  /hooks                   → useScrolled.ts, useSubmit.ts
+> "이 코드를 보고 시니어 엔지니어가 과도하게 복잡하다고 말하지 않을까?"
+
+그렇다면 더 단순하게 만듭니다.
+
+---
+
+## 3. 필요한 부분만 정확하게 수정하기
+
+**반드시 수정해야 하는 부분만 변경합니다. 자신이 만든 문제만 정리합니다.**
+
+기존 코드를 수정할 때는 다음을 지킵니다.
+
+- 요청과 관련 없는 코드, 주석, 포맷을 개선하지 않습니다.
+- 문제가 없는 코드를 리팩터링하지 않습니다.
+- 자신의 스타일보다 기존 프로젝트의 스타일을 따릅니다.
+- 관련 없는 불필요한 코드가 보이더라도 삭제하지 않고 별도로 언급만 합니다.
+
+자신의 변경으로 인해 더 이상 사용되지 않는 코드가 생겼다면 다음만 정리합니다.
+
+- 자신의 변경으로 인해 사용되지 않게 된 import, 변수, 함수는 제거합니다.
+- 기존부터 존재하던 사용되지 않는 코드는 요청받지 않는 이상 삭제하지 않습니다.
+
+항상 다음 기준을 만족해야 합니다.
+
+> 변경한 모든 코드 라인은 사용자의 요청과 직접적으로 연결되어야 합니다.
+
+---
+
+## 4. 목표를 기준으로 작업하기
+
+**성공 기준을 먼저 정의하고, 검증될 때까지 반복합니다.**
+
+작업을 수행 가능한 목표로 변환합니다.
+
+예시:
+
+- "유효성 검사를 추가해 주세요."
+  → "잘못된 입력에 대한 테스트를 먼저 작성하고, 해당 테스트가 통과하도록 구현합니다."
+
+- "버그를 수정해 주세요."
+  → "버그를 재현하는 테스트를 먼저 작성한 뒤, 테스트가 통과하도록 수정합니다."
+
+- "X를 리팩터링해 주세요."
+  → "리팩터링 전후 모두 테스트가 동일하게 통과하는지 확인합니다."
+
+여러 단계의 작업이라면 간단한 계획을 먼저 제시합니다.
+
+```text
+1. [작업] → 검증: [확인 방법]
+2. [작업] → 검증: [확인 방법]
+3. [작업] → 검증: [확인 방법]
 ```
 
-## 코드 스타일
+명확한 성공 기준이 있으면 스스로 검증하며 작업을 진행할 수 있습니다.
 
-- TypeScript strict 모드 사용, `any` 타입 금지
-- default export 대신 named export 사용 (page.tsx / layout.tsx 제외)
-- CSS: Tailwind 유틸리티 클래스 사용, 커스텀 CSS 파일 금지
-- 컴포넌트는 `/components/features`에 기능별로 분리
-- Server Component 우선, 클라이언트 상태 필요 시에만 `'use client'` 사용
+반대로 "동작하게 만들어라"처럼 모호한 목표는 계속해서 추가 확인이 필요하게 됩니다.
 
-## 모바일 레이아웃 구현 규칙
+---
 
-- 최상위 레이아웃에서 `max-w-[600px] mx-auto` 적용
-- 상단 TopBar, 하단 BottomNavigation은 모든 인증된 페이지에 고정
-- 콘텐츠 영역은 상단/하단 바 높이만큼 padding 확보
+## 5. 모든 개발 단위는 브랜치에서 진행하기
 
-## 상수 및 설정 관리
+**`main`에서 직접 작업하지 않습니다. 기능/이슈 단위 작업을 시작하기 전에 반드시 브랜치를 먼저 만듭니다.**
 
-- 상태 표시 config는 `/lib/constants/status.ts`에서 중앙 관리
-  - `PROJECT_STATUS_CONFIG`, `APPLICATION_STATUS_CONFIG`, `AVAILABILITY_STATUS_CONFIG`
-  - 컴포넌트에서 로컬 statusConfig 정의 금지, 반드시 import 사용
-- 상태 색상은 CSS custom properties 기반 (`--status-success`, `--status-info` 등)
-- 입력 길이·범위 제한은 `/lib/constants/limits.ts`의 `LIMITS` 객체에서 중앙 관리
-  - 클라이언트 `maxLength`와 서버 검증이 반드시 같은 상수를 사용 (값 하드코딩 금지)
-- 계약 문서 타입 정의는 `/lib/constants/contractDocuments.ts`에서 관리
-- 시맨틱 색상 토큰 사용: 에러는 `text-destructive`/`bg-destructive/10`, 본문은 `text-foreground`, 보조 텍스트는 `text-muted-foreground` (raw `red-*`/`zinc-*` 직접 사용 금지, 카카오 브랜드 `#FEE500` 등 브랜드 색상은 예외)
+- 코드, 문서(`docs/`, `README.md` 등) 변경을 막론하고 의미 있는 작업 단위라면 브랜치를 분기합니다.
+- 브랜치 분기 전에는 코드/문서 수정을 시작하지 않습니다. 현재 `main`에 있고 새 작업 단위를 시작하는
+  상황이라면, 먼저 `docs/DEVELOPMENT.md`의 브랜치 네이밍 규칙(`type/설명`)에 따라 브랜치를 만들고
+  작업을 진행합니다.
+- 이미 `main`에서 커밋되지 않은 변경이 발생했다면, 알아서 커밋하지 말고 사용자에게 알려 브랜치
+  분기 여부를 확인합니다.
 
-## 유틸리티 함수
+브랜치 이름 규칙, 커밋 메시지 형식 등 구체적인 컨벤션은 `docs/DEVELOPMENT.md`의 "Git 브랜치 전략"
+참고.
 
-- `format.ts`: `formatDate`, `formatShortDate`, `formatDeadlineDays`, `getDeadlineDays`, `formatMonthYear`, `maskPhone`, `formatWorkType`
-- `validation.ts`: `validatePassword`, `validatePhone`, `validateEmail`, `formatPhone`, `UUID_REGEX`, `validateLength`, `validateStringArray`
-- `cn.ts`: Tailwind 클래스 병합 (`clsx` + `tailwind-merge`)
-- `skills.ts`: `getMySkills`, `countSkillMatches`, `isSkillMatched`, `getMatchedSkillSet`
-- `profile-completion.ts`: 프로필 완성도 계산 (5탭, 항목별 가중치)
-- `recent-projects.ts`: localStorage 최근 본 프로젝트 CRUD + `useSyncExternalStore` 구독
+---
 
-## 컴포넌트 네이밍 규칙
+## 6. 프로젝트 문서 참고하고 최신 상태 유지하기
 
-- `{도메인}{역할}` 패턴: `ProjectCard`, `ProjectStatusBadge`, `ApplicationCard`
-- features 디렉토리 내 도메인별 분리: `projects/`, `profile/`, `settings/`, `notices/`, `referrer/`, `signup/`
+**프로젝트 고유 규칙과 도메인 지식은 다음 문서를 기준으로 삼습니다.**
 
-## Enum 패턴
+- `docs/PROJECT.md`: 도메인 지식 (기능 레퍼런스, 비즈니스 로직, API 엔드포인트, DB 테이블)
+- `docs/ARCHITECTURE.md`: 기술 스택, 디렉토리 구조, 계층별 설계 원칙
+- `docs/DEVELOPMENT.md`: 코딩 컨벤션, 네이밍, 구현 패턴, Git 브랜치 전략
+- `docs/adr/`: 트레이드오프가 있는 설계 결정 기록 (필요할 때 참고)
 
-- `as const` 객체 + `typeof` 타입 추출 방식 사용
-- 예시: `AvailabilityStatus`, `AccountStatus`, `ProjectStatus`, `ApplicationStatus`
-- 패턴: `export const Foo = { A: "a", B: "b" } as const;` → `export type Foo = typeof Foo[keyof typeof Foo];`
-- API route에서 enum 값 검증 시 `new Set(Object.values(Enum))` 활용
+- 작업을 시작하기 전에 위 문서를 참고해 도메인 지식과 프로젝트 규칙을 확인합니다.
+- 작업 중 새로운 도메인 지식이나 규칙을 알게 되면 해당 문서에 반영해 최신 상태로 유지합니다.
 
-## API Route 보안 패턴
+### ADR 자동 기록
 
-- 모든 인증 필요 API route는 `requireAuth()` (`lib/api/server.ts`) 사용
-  ```ts
-  const { user, errorResponse } = await requireAuth();
-  if (errorResponse) return errorResponse;
-  ```
-- `requireAuth()`는 내부적으로 Supabase 클라이언트를 생성하므로, 이후 DB 작업에 별도 `createServerClient()`가 필요한 경우 추가 생성 허용 (소수)
-- query 함수 내부의 auth 체크는 방어적 레이어 (API route 레벨 체크가 우선)
-- enum 값 입력은 API route에서 유효성 검증 후 query 함수에 전달
-- 페이지네이션 파라미터는 `parsePaginationParams(searchParams, { maxPageSize })` 사용
+다음 상황이 발생하면 별도 요청 없이 `docs/adr/README.md`의 템플릿과 번호 규칙(`000N-제목.md`)에 따라
+`docs/adr/`에 ADR을 추가합니다.
 
-## RSA 암호화 패턴
+- 정책이 명시되어 있지 않아 여러 대안 중 하나를 선택하는 트레이드오프 결정을 내렸을 때
+- 왜 이렇게 구현했는지 설명이 필요한, 직관적이지 않은 선택을 했을 때
 
-- 비밀번호는 클라이언트에서 RSA 공개키로 암호화 후 전송, 서버에서 복호화
-- 적용 범위: 로그인 (`/api/auth/login`), 회원가입 (`/api/auth/signup`), 비밀번호 변경 (`/api/auth/password`)
-- 공개키 발급: `GET /api/auth/public-key` → 클라이언트 `lib/crypto/client.ts`의 `encryptPassword()`로 암호화
-- 복호화: 서버 `lib/crypto/rsa.ts`의 `decryptPassword()`
+ADR을 추가한 뒤에는 어떤 결정을 기록했는지 간단히 알리고, `docs/adr/README.md` 목차에
+새 문서를 추가합니다.
 
-## 에러 처리 패턴
+---
 
-- 날짜 유틸: 내부 `parseDate` 헬퍼가 잘못된 날짜 시 Error throw
-- API 라우트: try-catch + NextResponse.json({ error }) 형태, 미인증 → 401, 잘못된 입력 → 400
-- 클라이언트 폼: useState로 error 메시지 관리, 제출 시 검증
-- 클라이언트 데이터 로드 실패: loadError state + 에러 메시지 UI 표시
+## 이 가이드가 잘 적용되고 있다면
 
-## 폼 검증 패턴
+다음과 같은 결과가 나타나야 합니다.
 
-- 클라이언트: 제출 전 `validation.ts` 함수로 검증 → 에러 메시지 표시
-- 서버: API 라우트에서 동일 검증 재실행 (이중 검증)
-- 공통 검증 함수: `validatePhone`, `validateBirthDate`, `validatePassword`, `validateEmail` (`validation.ts`)
-- 날짜 역전 검사: `startDate < endDate` 비교 (문자열 비교로 동작, ISO 8601 형식 전제)
-- 길이 제한 규칙: 이름 50자, 회사명·직무·학교명·프로젝트명 100자, 자기소개 500자
-
-## 글자 수 카운터 패턴
-
-- `FormField`의 `hint` prop에 `` `${value.length}/최대자수` `` 전달
-- 입력 필드에 `maxLength` 속성 함께 적용 (하드 제한)
-- Textarea는 `onChange`에서 `.slice(0, 최대자수)` 적용
-
-## 에러 바운더리 패턴
-
-- `src/app/(auth)/error.tsx` — (auth) 그룹 글로벌 폴백 (AlertCircle 아이콘 + 재시도 버튼)
-- Server Component에서 throw 발생 시 자동으로 error.tsx 표시
-- 개별 섹션 실패가 전체 페이지를 중단시키지 않아야 할 때는 `Promise.allSettled` 사용
-
-## BottomSheet 패턴
-
-- 하단에서 올라오는 모달 → `src/components/ui/bottom-sheet.tsx` 사용
-- Props: `{ open, onClose, header?, footer?, children }`
-- 너비는 항상 `max-w-[600px]`로 앱 프레임과 동일 (모바일에서는 100vw로 자동 축소)
-- 배경 오버레이(`inset-0`)와 패널(`max-h-[85vh]`, `items-end`)이 화면 전체를 덮어 BottomNavigation도 함께 가려짐 (열려있는 동안 BottomNavigation 비표시)
-- 내부 컨텐츠는 children으로 전달, 패딩/레이아웃은 children 내부에서 처리
-- 삭제 등 파괴적 작업 확인은 `window.confirm()` 대신 `ConfirmSheet` (`components/ui/confirm-sheet.tsx`) 사용
-
-## 폼 제출 패턴 (useSubmit + \*Api + Toast)
-
-- 클라이언트 폼 제출은 `useSubmit()` 훅 (`src/hooks/useSubmit.ts`) 사용 — 로딩/에러/try-catch 공통화
-- API 호출은 반드시 `lib/api/`의 `*Api` 객체 사용 (`profileApi`, `applicationsApi` 등) — raw `fetch("/api/...")` 금지
-- 저장/삭제 성공 피드백은 `useToast()` (`components/ui/toast.tsx`)의 `showToast("저장되었습니다")` 사용
-  - `ToastProvider`는 `(auth)/layout.tsx`에 마운트되어 있음 ((auth) 그룹 안에서만 사용 가능)
-- 예시:
-  ```ts
-  const { isLoading, error, submit } = useSubmit();
-  await submit(() => profileApi.deleteCareer(id), {
-    onSuccess: () => {
-      showToast("삭제되었습니다");
-      router.refresh();
-    },
-  });
-  ```
-
-## 파일 업로드 패턴 (이력서 / 계약 문서)
-
-- 이력서: `POST /api/profile/resumes` (multipart/form-data), Storage 버킷 `resumes` (private)
-  - 허용 MIME: PDF, DOC, DOCX, HWP / 최대 10MB / 최대 10개
-  - 다운로드: `GET /api/profile/resumes/[id]/download` (서버에서 signed URL 생성 후 리다이렉트)
-- 계약 문서: `POST /api/profile/contract-documents/[type]`, Storage 버킷 `contract-documents` (private)
-  - type: `business_registration` (사업자등록증), `bank_account_image` (계좌 이미지)
-  - 다운로드: `GET /api/profile/contract-documents/[type]/download`
-- Storage 경로: `{auth.uid()}/{filename}` — RLS 정책에서 폴더명으로 본인 여부 검증
-
-## 수평 스크롤 패턴
-
-- 컨테이너 밖으로 블리드: `-mx-4 px-4` + `overflow-x-auto scrollbar-none`
-- 카드 리스트 등에서 모바일 폭을 넘어 스크롤 가능한 UI에 사용
-
-## 접근성 규칙
-
-- 커스텀 인터랙티브 요소에 `focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2` 필수
-- 토글 버튼에 `role="switch"` + `aria-checked` 적용
-- `aria-label` 필요 시 한국어로 작성
-- 네비게이션 활성 항목에 `aria-current="page"` 적용 (BottomNavigation)
-- 로딩 중인 제출 버튼에 `aria-busy={isLoading || undefined}` 적용 (SaveButton)
-
-## 환경변수 관리
-
-- `lib/config/env.ts`에서 getter 기반 lazy validation으로 타입 안전 접근
-- `publicEnv`: 클라이언트/서버 모두 사용 (`NEXT_PUBLIC_` 접두사)
-- `serverEnv`: 서버 전용 (`SUPABASE_SERVICE_ROLE_KEY`, `AUTH_RSA_PUBLIC_KEY`, `AUTH_RSA_PRIVATE_KEY` 등)
-
-## 공통 컴포넌트
-
-- `TechStackInput` (`components/features/profile/`): 기술 스택 입력 (Enter/추가 버튼, 태그 삭제)
-- `CareerTimelineDot` (`components/features/profile/`): 경력 타임라인 dot + line
-- `ProfileCompletionBar` (`components/features/profile/`): 프로필 완성도 바 + 미완료 항목 CTA 버튼
-- `NoticeListClient` (`components/features/notices/`): 공지사항 목록 더보기 페이지네이션
-- `ShareButton` (`components/features/projects/`): Web Share API + 클립보드 복사 폴백
-- `BottomSheet` (`components/ui/`): 하단 모달 오버레이
-- `ConfirmSheet` (`components/ui/`): 삭제 확인 바텀시트 (`{ open, title, description?, confirmLabel?, destructive?, isLoading?, onConfirm, onClose }`)
-- `ToastProvider` / `useToast` (`components/ui/toast.tsx`): 경량 토스트 (성공/에러 피드백, 의존성 없음)
-- `EmptyState` (`components/ui/`): 데이터 없을 때 빈 상태 표시 (icon, title, description, action, iconShape, iconSize)
-- `ErrorMessage` (`components/ui/`): 폼 서버 오류 메시지 (size="xs"|"sm", children이 falsy면 렌더링 안 함)
-- `PageHero` (`components/ui/`): 상단 다크 헤더 배경 래퍼 (`bg-primary px-5 pt-6 pb-5`, className으로 pb 오버라이드)
-- `StatsGrid` (`components/ui/`): 통계 그리드 (stats 배열, valueSize, labelSize)
-- `SkeletonCard` / `SkeletonBadgeRow` / `SkeletonSectionHeader` (`components/ui/skeleton-patterns.tsx`): 로딩 스켈레톤 조각
-- `Switch` (`components/ui/switch.tsx`): 토글 스위치 (`{ checked, onChange, disabled?, "aria-label"? }`, `role="switch"`)
-- `PasswordStrength` (`components/features/signup/`): 비밀번호 강도 표시 (회원가입/비밀번호 변경에서 공유)
-- `NavLink` (`components/ui/nav-link.tsx`): 내부 페이지 이동용 `next/link` 대체. `<a href>`는 모바일에서 블루투스 마우스 호버 시 하단에 주소가 노출되므로, `role="link"` + `router.push`로 이동 처리 — 내부 네비게이션(카드/리스트 아이템/아이콘 버튼 등)에는 `Link` 대신 반드시 이 컴포넌트 사용. 다운로드용 `<a download>`는 예외. 기본 태그는 `div`(`as="div"`)이며, `<p>` 등 phrasing content 내부의 인라인 텍스트 링크는 `as="span"` 필수 (div는 p의 자식으로 올 수 없어 하이드레이션 에러 발생)
-- `PullToRefresh` (`components/layout/`): 당겨서 새로고침
-
-## 훅
-
-- `useSubmit` (`hooks/useSubmit.ts`): 폼 제출 공통 — `isLoading`, `error` 상태 관리, `ApiError` 메시지 자동 노출
-- `useScrolled` (`hooks/useScrolled.ts`): `<main>` 엘리먼트의 scrollTop 감지 (임계값 초과 여부 boolean 반환). `window`가 아닌 `<main>` 기준임에 주의
-
-## Supabase 클라이언트 사용
-
-| 상황                                          | 클라이언트                                          |
-| --------------------------------------------- | --------------------------------------------------- |
-| Client Component                              | `createClient()` from `@/lib/supabase/client`       |
-| Server Component / API Route (인증 세션 필요) | `createServerClient()` from `@/lib/supabase/server` |
-| API Route (RLS bypass — 추천인 검색 등)       | `createAdminClient()` from `@/lib/supabase/server`  |
-
-> `createAdminClient()`는 service_role 키를 사용해 RLS를 우회합니다. 반드시 서버 사이드에서만 호출해야 합니다.
-
-## 중요 사항
-
-- `.env` 파일은 절대 커밋하지 마세요
-- Supabase 클라이언트는 `/lib/supabase`에서만 초기화
-- 카카오 알림톡 API 키는 환경변수로만 관리
-- 인증이 필요한 페이지는 Supabase Auth 미들웨어로 보호
-
-## 작업 모드 설정
-
-### Accept Edits On 모드
-
-사용자가 **"accept edits on"** 을 입력하면 아래 규칙을 즉시 적용한다.
-
-- Claude가 작업 중 확인이 필요한 모든 질문(파일 수정, DB 마이그레이션, 패키지 설치, API 변경 등)에 대해 **자동으로 yes로 간주하고 즉시 실행**한다.
-- 중간에 "진행할까요?", "확인해주세요", "어떻게 할까요?" 등의 질문 없이 계획한 모든 단계를 연속으로 수행한다.
-- 작업 완료 후 변경 사항을 한 번에 요약해서 보고한다.
-
-### Accept Edits Off 모드
-
-사용자가 **"accept edits off"** 를 입력하면 기본 동작으로 복귀한다.
-
-- 파괴적 작업(DB 마이그레이션, 파일 대량 수정 등)은 실행 전 확인을 요청한다.
+- 불필요한 코드 변경(diff)이 줄어든다.
+- 과도한 설계로 인해 다시 작성하는 일이 줄어든다.
+- 구현을 시작하기 전에 필요한 질문을 먼저 하게 된다.
