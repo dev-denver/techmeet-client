@@ -43,3 +43,7 @@ next-env.d.ts
 
 # editor
 .vscode/
+
+# impeccable (local-only)
+.impeccable/config.local.json
+.impeccable/hook.cache.json
