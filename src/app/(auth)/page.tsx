@@ -6,7 +6,6 @@ import { NavLink } from "@/components/ui/nav-link";
 import { StatsGrid } from "@/components/ui/stats-grid";
 import { ProjectCard } from "@/components/features/projects/ProjectCard";
 import { ApplicationCard } from "@/components/features/projects/ApplicationCard";
-import { RecentProjectsSection } from "@/components/features/projects/RecentProjectsSection";
 import { HomeProfileCompletionPrompt } from "@/components/features/profile/HomeProfileCompletionPrompt";
 import { getProfile } from "@/lib/supabase/queries/profile";
 import { getApplications } from "@/lib/supabase/queries/applications";
@@ -145,9 +144,6 @@ export default async function HomePage() {
           </div>
         )}
       </section>
-
-      {/* 최근 본 프로젝트 (localStorage 기반, 항목 없으면 미표시) */}
-      <RecentProjectsSection />
 
       {/* 모집 중인 프로젝트 */}
       <section className="pt-5 pb-4 border-b">
