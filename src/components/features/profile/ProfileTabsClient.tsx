@@ -20,7 +20,7 @@ import { getProfileCompletion } from "@/lib/utils/profile-completion";
 
 type Tab = "basic" | "education" | "career" | "skill" | "resume";
 
-const TABS: { key: Tab; label: string }[] = [
+export const PROFILE_TABS: { key: Tab; label: string }[] = [
   { key: "basic", label: "기본정보" },
   { key: "education", label: "학력/자격증" },
   { key: "career", label: "경력사항" },
@@ -34,12 +34,13 @@ function CareerTab({ profile }: { profile: FreelancerProfile }) {
 
 interface ProfileTabsClientProps {
   profile: FreelancerProfile;
+  initialTab?: Tab;
 }
 
-export function ProfileTabsClient({ profile }: ProfileTabsClientProps) {
+export function ProfileTabsClient({ profile, initialTab }: ProfileTabsClientProps) {
   const router = useRouter();
   const { showToast } = useToast();
-  const [tab, setTab] = useState<Tab>("basic");
+  const [tab, setTab] = useState<Tab>(initialTab ?? "basic");
   const [editingBasic, setEditingBasic] = useState(false);
   const [availStatus, setAvailStatus] = useState<AvailabilityStatus>(
     profile.availabilityStatus ?? AvailabilityStatus.Unavailable
@@ -61,10 +62,8 @@ export function ProfileTabsClient({ profile }: ProfileTabsClientProps) {
     }
   }
 
-  // 탭 전환 시 인라인 편집 모드 해제 (편집 중 다른 탭으로 이동하면 편집 취소)
   function selectTab(next: Tab) {
     setTab(next);
-    setEditingBasic(false);
   }
 
   const availConfig = AVAILABILITY_TOGGLE_CONFIG[availStatus];
@@ -117,12 +116,15 @@ export function ProfileTabsClient({ profile }: ProfileTabsClientProps) {
 
       {/* 탭 네비게이션 */}
       <div className="sticky top-0 z-40 bg-background border-b border-border">
-        <div className="flex overflow-x-auto scrollbar-none">
-          {TABS.map(({ key, label }) => (
+        <div role="tablist" aria-label="내 정보 탭" className="flex overflow-x-auto scrollbar-none">
+          {PROFILE_TABS.map(({ key, label }) => (
             <button
               key={key}
+              id={`profile-tab-${key}`}
+              role="tab"
+              aria-selected={tab === key}
+              aria-controls={`profile-tabpanel-${key}`}
               onClick={() => selectTab(key)}
-              aria-current={tab === key ? "true" : undefined}
               className={`flex-1 min-w-fit py-3 px-3 text-xs whitespace-nowrap transition-colors border-b-2 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-inset ${
                 tab === key
                   ? "text-foreground font-semibold border-foreground"
@@ -135,10 +137,10 @@ export function ProfileTabsClient({ profile }: ProfileTabsClientProps) {
         </div>
       </div>
 
-      {/* 탭 콘텐츠 */}
+      {/* 탭 콘텐츠 — 다른 탭으로 이동해도 편집 중인 상태가 사라지지 않도록 언마운트 대신 hidden으로 전환 */}
       <div className="px-4 pt-5 pb-8">
-        {tab === "basic" && (
-          editingBasic ? (
+        <div id="profile-tabpanel-basic" role="tabpanel" aria-labelledby="profile-tab-basic" hidden={tab !== "basic"}>
+          {editingBasic ? (
             <ProfileBasicForm
               initial={profile}
               onSuccess={() => { setEditingBasic(false); router.refresh(); }}
@@ -151,14 +153,20 @@ export function ProfileTabsClient({ profile }: ProfileTabsClientProps) {
               availFromDate={availFromDate}
               onSaveAvailability={handleSaveAvailability}
             />
-          )
-        )}
-        {tab === "education" && (
+          )}
+        </div>
+        <div id="profile-tabpanel-education" role="tabpanel" aria-labelledby="profile-tab-education" hidden={tab !== "education"}>
           <EducationTab educations={profile.educations} certifications={profile.certifications} />
-        )}
-        {tab === "career" && <CareerTab profile={profile} />}
-        {tab === "skill" && <SkillTab skills={profile.skillInventories} />}
-        {tab === "resume" && <ResumeTab resumes={profile.resumes} />}
+        </div>
+        <div id="profile-tabpanel-career" role="tabpanel" aria-labelledby="profile-tab-career" hidden={tab !== "career"}>
+          <CareerTab profile={profile} />
+        </div>
+        <div id="profile-tabpanel-skill" role="tabpanel" aria-labelledby="profile-tab-skill" hidden={tab !== "skill"}>
+          <SkillTab skills={profile.skillInventories} />
+        </div>
+        <div id="profile-tabpanel-resume" role="tabpanel" aria-labelledby="profile-tab-resume" hidden={tab !== "resume"}>
+          <ResumeTab resumes={profile.resumes} />
+        </div>
       </div>
     </div>
   );

@@ -1,0 +1,14 @@
+{
+  "detector": {
+    "ignoreRules": [],
+    "ignoreFiles": [],
+    "ignoreValues": [
+      {
+        "rule": "design-system-color",
+        "value": "#fee500",
+        "createdAt": "2026-08-19T21:28:16.954Z",
+        "reason": "CLAUDE.md: 카카오 브랜드 색상은 One Voice Rule의 명시적 예외"
+      }
+    ]
+  }
+}

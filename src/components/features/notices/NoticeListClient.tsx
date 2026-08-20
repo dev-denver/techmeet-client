@@ -60,7 +60,13 @@ export function NoticeListClient({ initialNotices, initialTotal }: NoticeListCli
             href={`/notices/${notice.id}`}
             className="flex items-center gap-3 px-4 py-3.5 hover:bg-muted/50 active:bg-muted transition-colors"
           >
-            {notice.isImportant && <Bell className="h-3.5 w-3.5 text-status-warning shrink-0" />}
+            {notice.isImportant && (
+              <Bell
+                role="img"
+                aria-label="중요 공지"
+                className="h-3.5 w-3.5 text-status-warning shrink-0"
+              />
+            )}
             <p className="flex-1 text-sm text-foreground leading-snug line-clamp-1">
               {notice.title}
             </p>

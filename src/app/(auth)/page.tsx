@@ -1,16 +1,20 @@
+import { Suspense } from "react";
 import { ChevronRight, Bell, Megaphone, CalendarClock } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
+import { WelcomeToast } from "@/components/features/home/WelcomeToast";
 import { NavLink } from "@/components/ui/nav-link";
 import { StatsGrid } from "@/components/ui/stats-grid";
 import { ProjectCard } from "@/components/features/projects/ProjectCard";
 import { ApplicationCard } from "@/components/features/projects/ApplicationCard";
 import { RecentProjectsSection } from "@/components/features/projects/RecentProjectsSection";
+import { HomeProfileCompletionPrompt } from "@/components/features/profile/HomeProfileCompletionPrompt";
 import { getProfile } from "@/lib/supabase/queries/profile";
 import { getApplications } from "@/lib/supabase/queries/applications";
 import { getProjects } from "@/lib/supabase/queries/projects";
 import { getNotices } from "@/lib/supabase/queries/notices";
 import { formatDate, formatShortDate } from "@/lib/utils/format";
 import { getMySkills } from "@/lib/utils/skills";
+import { getProfileCompletion } from "@/lib/utils/profile-completion";
 import { AVAILABILITY_STATUS_CONFIG } from "@/lib/constants";
 import { ApplicationStatus, AvailabilityStatus, ProjectStatus } from "@/types";
 
@@ -24,6 +28,10 @@ export default async function HomePage() {
   ]);
 
   const profile = profileResult.status === "fulfilled" ? profileResult.value?.data : null;
+  const profileFailed = profileResult.status === "rejected";
+  const applicationsFailed = applicationsResult.status === "rejected";
+  const projectsFailed = projectsResult.status === "rejected";
+  const noticesFailed = noticesResult.status === "rejected";
   const allApplications = applicationsResult.status === "fulfilled" ? applicationsResult.value.data : [];
   const recentApplications = allApplications.slice(0, 3);
   const recentProjects = projectsResult.status === "fulfilled" ? projectsResult.value.data.slice(0, 3) : [];
@@ -33,6 +41,7 @@ export default async function HomePage() {
     ? AVAILABILITY_STATUS_CONFIG[profile.availabilityStatus]
     : null;
   const mySkills = profile ? getMySkills(profile) : [];
+  const completion = profile ? getProfileCompletion(profile) : null;
 
   const reviewingCount = allApplications.filter(
     (a) => a.status === ApplicationStatus.Pending || a.status === ApplicationStatus.Reviewing
@@ -46,13 +55,17 @@ export default async function HomePage() {
 
   return (
     <div>
+      <Suspense fallback={null}>
+        <WelcomeToast />
+      </Suspense>
+
       {/* 히어로 배너 */}
       <section className="px-5 pt-4 pb-3 bg-primary">
         <div className="flex items-center justify-between">
           <div>
             <p className="text-primary-foreground/50 text-xs font-medium tracking-wide">안녕하세요</p>
             <h2 className="text-primary-foreground text-base font-bold leading-tight mt-0.5">
-              {profile ? `${profile.name}님` : "로그인 후 이용해주세요"}
+              {profile ? `${profile.name}님` : profileFailed ? "정보를 불러오지 못했습니다" : "로그인 후 이용해주세요"}
             </h2>
           </div>
           {availConfig && (
@@ -77,13 +90,20 @@ export default async function HomePage() {
           valueSize="lg"
           labelSize="10px"
           stats={[
-            { label: "전체", value: allApplications.length },
-            { label: "검토 중", value: reviewingCount },
-            { label: "면접", value: interviewCount },
-            { label: "합격", value: acceptedCount },
+            { label: "전체", value: applicationsFailed ? "–" : allApplications.length },
+            { label: "검토 중", value: applicationsFailed ? "–" : reviewingCount },
+            { label: "면접", value: applicationsFailed ? "–" : interviewCount },
+            { label: "합격", value: applicationsFailed ? "–" : acceptedCount },
           ]}
         />
       </section>
+
+      {/* 프로필 완성도 넛지 (미완성일 때만) */}
+      {completion && completion.percent < 100 && (
+        <section className="px-4 pt-4">
+          <HomeProfileCompletionPrompt percent={completion.percent} missing={completion.missing} />
+        </section>
+      )}
 
       {/* 내 신청 현황 */}
       <section className="pt-5 pb-4 border-b">
@@ -98,10 +118,20 @@ export default async function HomePage() {
           </NavLink>
         </div>
         {recentApplications.length > 0 ? (
-          <div className="flex gap-3 overflow-x-auto pb-2 scrollbar-none px-4">
+          <div className="flex gap-3 overflow-x-auto pb-2 scrollbar-none px-4 [mask-image:linear-gradient(to_right,black_calc(100%-28px),transparent)] [-webkit-mask-image:linear-gradient(to_right,black_calc(100%-28px),transparent)]">
             {recentApplications.map((app) => (
               <ApplicationCard key={app.id} application={app} compact />
             ))}
+          </div>
+        ) : applicationsFailed ? (
+          <div className="mx-4 rounded-xl bg-muted/50 border border-dashed border-border px-4 py-5 text-center">
+            <p className="text-sm text-muted-foreground">신청 현황을 불러오지 못했습니다.</p>
+            <NavLink
+              href="/"
+              className="inline-block text-xs text-primary mt-1.5 hover:underline underline-offset-2 font-medium"
+            >
+              다시 시도
+            </NavLink>
           </div>
         ) : (
           <div className="mx-4 rounded-xl bg-muted/50 border border-dashed border-border px-4 py-5 text-center">
@@ -121,21 +151,34 @@ export default async function HomePage() {
 
       {/* 모집 중인 프로젝트 */}
       <section className="pt-5 pb-4 border-b">
-        <div className="flex items-center justify-between px-4 mb-3">
-          <h3 className="font-semibold">모집 중인 프로젝트</h3>
-          <NavLink
-            href="/projects"
-            className="text-xs text-muted-foreground flex items-center gap-0.5 hover:text-foreground transition-colors"
-          >
-            전체보기
-            <ChevronRight className="h-3.5 w-3.5" />
-          </NavLink>
+        <div className="px-4 mb-3">
+          <div className="flex items-center justify-between">
+            <h3 className="font-semibold">모집 중인 프로젝트</h3>
+            <NavLink
+              href="/projects"
+              className="text-xs text-muted-foreground flex items-center gap-0.5 hover:text-foreground transition-colors"
+            >
+              전체보기
+              <ChevronRight className="h-3.5 w-3.5" />
+            </NavLink>
+          </div>
+          <p className="text-xs text-muted-foreground mt-0.5">테크밋이 직접 검증한 프로젝트만 올라옵니다</p>
         </div>
         {recentProjects.length > 0 ? (
           <div className="space-y-3 px-4">
             {recentProjects.map((project) => (
               <ProjectCard key={project.id} project={project} mySkills={mySkills} />
             ))}
+          </div>
+        ) : projectsFailed ? (
+          <div className="mx-4 rounded-xl bg-muted/50 border border-dashed border-border px-4 py-5 text-center">
+            <p className="text-sm text-muted-foreground">프로젝트를 불러오지 못했습니다.</p>
+            <NavLink
+              href="/"
+              className="inline-block text-xs text-primary mt-1.5 hover:underline underline-offset-2 font-medium"
+            >
+              다시 시도
+            </NavLink>
           </div>
         ) : (
           <div className="mx-4 rounded-xl bg-muted/50 border border-dashed border-border px-4 py-5 text-center">
@@ -145,7 +188,19 @@ export default async function HomePage() {
       </section>
 
       {/* 공지사항 */}
-      {notices.length > 0 && (
+      {noticesFailed ? (
+        <section className="pt-4 pb-6 px-4">
+          <div className="rounded-xl bg-muted/50 border border-dashed border-border px-4 py-5 text-center">
+            <p className="text-sm text-muted-foreground">공지사항을 불러오지 못했습니다.</p>
+            <NavLink
+              href="/"
+              className="inline-block text-xs text-primary mt-1.5 hover:underline underline-offset-2 font-medium"
+            >
+              다시 시도
+            </NavLink>
+          </div>
+        </section>
+      ) : notices.length > 0 && (
         <section className="pt-4 pb-6 px-4">
           <div className="rounded-xl border border-border bg-muted/40 overflow-hidden">
             <div className="flex items-center justify-between px-4 py-3 border-b border-border">

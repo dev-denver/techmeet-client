@@ -1,10 +1,16 @@
 import { Card, CardContent } from "@/components/ui/card";
-import { ProfileTabsClient } from "@/components/features/profile/ProfileTabsClient";
+import { ProfileTabsClient, PROFILE_TABS } from "@/components/features/profile/ProfileTabsClient";
 import { getProfile } from "@/lib/supabase/queries/profile";
 
-export default async function ProfilePage() {
+interface ProfilePageProps {
+  searchParams: Promise<{ tab?: string }>;
+}
+
+export default async function ProfilePage({ searchParams }: ProfilePageProps) {
   const result = await getProfile();
   const profile = result?.data;
+  const { tab } = await searchParams;
+  const initialTab = PROFILE_TABS.some((t) => t.key === tab) ? (tab as (typeof PROFILE_TABS)[number]["key"]) : undefined;
 
   if (!profile) {
     return (
@@ -18,5 +24,5 @@ export default async function ProfilePage() {
     );
   }
 
-  return <ProfileTabsClient profile={profile} />;
+  return <ProfileTabsClient profile={profile} initialTab={initialTab} />;
 }

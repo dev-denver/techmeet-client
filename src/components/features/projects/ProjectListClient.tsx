@@ -1,11 +1,13 @@
 "use client";
 
 import { useState, useRef, useEffect } from "react";
-import { ClipboardList, FolderOpen, Loader2, Search, X } from "lucide-react";
+import { ClipboardList, FolderOpen, Loader2, Search, Sparkles, X } from "lucide-react";
 import { ProjectFilters } from "./ProjectFilters";
 import { ProjectCard } from "./ProjectCard";
 import { EmptyState } from "@/components/ui/empty-state";
 import { NavLink } from "@/components/ui/nav-link";
+import { cn } from "@/lib/utils/cn";
+import { countSkillMatches } from "@/lib/utils/skills";
 import type { Project, ProjectFilterValue } from "@/types";
 import type { GetProjectsResponse } from "@/types/api";
 
@@ -26,6 +28,7 @@ export function ProjectListClient({ initialProjects, initialTotal, mySkills }: P
   const [total, setTotal]       = useState(initialTotal);
   const [isLoading, setIsLoading] = useState(false);
   const [loadError, setLoadError] = useState("");
+  const [sortByMatch, setSortByMatch] = useState(false);
   const searchRef = useRef<HTMLInputElement>(null);
   const debounceRef = useRef<ReturnType<typeof setTimeout> | null>(null);
   // 요청 순번 — 디바운스 검색과 더보기가 겹칠 때 늦게 도착한 이전 응답이 최신 상태를 덮어쓰지 않도록 함
@@ -37,6 +40,13 @@ export function ProjectListClient({ initialProjects, initialTotal, mySkills }: P
   }, []);
 
   const hasMore = projects.length < total;
+  const hasMySkills = !!mySkills && mySkills.length > 0;
+  const displayedProjects =
+    hasMySkills && sortByMatch
+      ? [...projects].sort(
+          (a, b) => countSkillMatches(b.techStack, mySkills!) - countSkillMatches(a.techStack, mySkills!)
+        )
+      : projects;
 
   async function fetchProjects(
     status: ProjectFilterValue,
@@ -143,13 +153,29 @@ export function ProjectListClient({ initialProjects, initialTotal, mySkills }: P
           </p>
         )}
 
-        {/* 총 개수 */}
-        {!isLoading && (
+        {/* 총 개수 + 매칭순 정렬 */}
+        <div className="flex items-center gap-2">
           <p className="text-xs text-muted-foreground">
             총 <span className="font-semibold text-foreground">{total}</span>개 프로젝트
             {search && <span className="ml-1 text-muted-foreground">— &ldquo;{search}&rdquo; 검색 결과</span>}
           </p>
-        )}
+          {hasMySkills && projects.length > 0 && (
+            <button
+              type="button"
+              onClick={() => setSortByMatch((v) => !v)}
+              aria-pressed={sortByMatch}
+              className={cn(
+                "ml-auto shrink-0 inline-flex items-center gap-1 h-[26px] px-2.5 rounded-full text-xs font-medium transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2",
+                sortByMatch
+                  ? "bg-status-success/15 text-status-success"
+                  : "bg-muted text-muted-foreground hover:bg-muted/80"
+              )}
+            >
+              <Sparkles className="h-3 w-3" />
+              매칭순
+            </button>
+          )}
+        </div>
 
         {isLoading && projects.length === 0 ? (
           <div className="flex justify-center py-20">
@@ -164,8 +190,8 @@ export function ProjectListClient({ initialProjects, initialTotal, mySkills }: P
           />
         ) : (
           <>
-            <div className="space-y-4">
-              {projects.map((project) => (
+            <div className={cn("space-y-4 transition-opacity", isLoading && "opacity-50")}>
+              {displayedProjects.map((project) => (
                 <ProjectCard key={project.id} project={project} mySkills={mySkills} />
               ))}
             </div>

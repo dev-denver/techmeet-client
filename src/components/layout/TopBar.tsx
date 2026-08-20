@@ -1,7 +1,7 @@
 "use client";
 
 import { usePathname, useRouter } from "next/navigation";
-import { ArrowLeft, Bell } from "lucide-react";
+import { ArrowLeft, History } from "lucide-react";
 import { useScrolled } from "@/hooks/useScrolled";
 import { cn } from "@/lib/utils/cn";
 import { NavLink } from "@/components/ui/nav-link";
@@ -83,7 +83,7 @@ export function TopBar() {
             className="flex h-10 w-10 -mr-2.5 items-center justify-center rounded-md hover:bg-accent active:bg-accent/80 transition-colors"
             aria-label="알림 내역"
           >
-            <Bell className="h-5 w-5" />
+            <History className="h-5 w-5" />
           </NavLink>
         )}
       </div>

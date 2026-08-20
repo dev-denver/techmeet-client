@@ -2,10 +2,10 @@
 
 import { Button } from "@/components/ui/button";
 import { FormField } from "@/components/ui/form-field";
-import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { MonthYearPicker } from "@/components/ui/month-year-picker";
 import { ErrorMessage } from "@/components/ui/error-message";
+import { TechStackInput } from "./TechStackInput";
 import { cn } from "@/lib/utils/cn";
 import { LIMITS } from "@/lib/constants/limits";
 import type { Career } from "@/types";
@@ -17,7 +17,7 @@ export interface CareerFormState {
   endDate: string;
   isCurrent: boolean;
   description: string;
-  techStackInput: string;
+  techStack: string[];
 }
 
 export interface CareerFieldErrors {
@@ -35,7 +35,7 @@ export const EMPTY_FORM: CareerFormState = {
   endDate: "",
   isCurrent: false,
   description: "",
-  techStackInput: "",
+  techStack: [],
 };
 
 export function careerToForm(career: Career): CareerFormState {
@@ -46,7 +46,7 @@ export function careerToForm(career: Career): CareerFormState {
     endDate: career.endDate ?? "",
     isCurrent: career.isCurrent,
     description: career.description,
-    techStackInput: career.techStack.join(", "),
+    techStack: career.techStack,
   };
 }
 
@@ -56,7 +56,8 @@ interface CareerFormProps {
   serverError: string;
   isSubmitting: boolean;
   isEdit: boolean;
-  onUpdate: (field: keyof CareerFormState, value: string | boolean) => void;
+  onUpdate: (field: keyof Omit<CareerFormState, "techStack">, value: string | boolean) => void;
+  onTechStackChange: (value: string[]) => void;
   onSubmit: (e: React.FormEvent) => void;
   onCancel: () => void;
 }
@@ -69,6 +70,7 @@ export function CareerForm({
   isSubmitting,
   isEdit,
   onUpdate,
+  onTechStackChange,
   onSubmit,
   onCancel,
 }: CareerFormProps) {
@@ -149,13 +151,8 @@ export function CareerForm({
         />
       </FormField>
 
-      <FormField label="기술 스택" optional hint="쉼표(,)로 구분하여 입력">
-        <Input
-          type="text"
-          value={form.techStackInput}
-          onChange={(e) => onUpdate("techStackInput", e.target.value)}
-          placeholder="React, TypeScript, Node.js"
-        />
+      <FormField label="기술 스택" optional>
+        <TechStackInput value={form.techStack} onChange={onTechStackChange} />
       </FormField>
 
       <ErrorMessage>{serverError}</ErrorMessage>

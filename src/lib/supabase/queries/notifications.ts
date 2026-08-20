@@ -23,10 +23,7 @@ export async function getAlimtalkLogs(page = 1, pageSize = 20): Promise<GetAlimt
     .order("created_at", { ascending: false })
     .range(from, to);
 
-  if (error) {
-    console.warn("[getAlimtalkLogs]", error);
-    return { data: [], total: 0, page, pageSize };
-  }
+  if (error) throw error;
 
   return {
     data: (data as AlimtalkLogRow[]).map((row): AlimtalkLog => ({

@@ -142,7 +142,7 @@ export function BasicInfoTab({ profile, availStatus, availFromDate, onSaveAvaila
             </span>
           </button>
         </CardWrap>
-        <p className="text-[11px] text-muted-foreground mt-2 px-1">
+        <p className="text-[10px] text-muted-foreground mt-2 px-1">
           * 투입 상태는 담당 매니저에게 공유됩니다.
         </p>
       </div>

@@ -145,7 +145,7 @@ export function SignupForm({ email: initialEmail, kakaoId, name, birthDate: init
         referrer_note: referrerNote.trim() || null,
       });
 
-      router.replace("/");
+      router.replace("/?welcome=1");
     } catch (err) {
       console.error("[회원가입] 클라이언트 오류:", err);
       setServerError(
@@ -160,6 +160,7 @@ export function SignupForm({ email: initialEmail, kakaoId, name, birthDate: init
     <form onSubmit={handleSubmit} className="flex flex-col gap-5">
       {/* 이메일 */}
       <FormField
+        id="signup-email"
         label="이메일"
         required
         error={emailError}
@@ -175,6 +176,8 @@ export function SignupForm({ email: initialEmail, kakaoId, name, birthDate: init
               if (emailError) setEmailError("");
             }}
             maxLength={LIMITS.EMAIL_MAX}
+            aria-invalid={!!emailError}
+            aria-describedby={emailError ? "signup-email-message" : undefined}
             className={cn("flex-1 min-w-0", emailError ? "border-destructive/50" : "")}
           />
           <span className="shrink-0 text-muted-foreground">@</span>
@@ -187,6 +190,8 @@ export function SignupForm({ email: initialEmail, kakaoId, name, birthDate: init
               if (emailError) setEmailError("");
             }}
             maxLength={LIMITS.EMAIL_MAX}
+            aria-invalid={!!emailError}
+            aria-describedby={emailError ? "signup-email-message" : undefined}
             className={cn("flex-1 min-w-0", emailError ? "border-destructive/50" : "")}
           />
           {!emailEditable && (
@@ -202,7 +207,7 @@ export function SignupForm({ email: initialEmail, kakaoId, name, birthDate: init
       </FormField>
 
       {/* 이름 */}
-      <FormField label="이름" required error={nameError}>
+      <FormField id="signup-name" label="이름" required error={nameError}>
         <Input
           type="text"
           value={formName}
@@ -210,12 +215,14 @@ export function SignupForm({ email: initialEmail, kakaoId, name, birthDate: init
             setFormName(e.target.value);
             if (nameError) setNameError(e.target.value.trim() ? "" : "이름을 입력해주세요");
           }}
+          aria-invalid={!!nameError}
+          aria-describedby={nameError ? "signup-name-message" : undefined}
           className={nameError ? "border-destructive/50" : ""}
         />
       </FormField>
 
       {/* 비밀번호 */}
-      <FormField label="비밀번호" required error={passwordError}>
+      <FormField id="signup-password" label="비밀번호" required error={passwordError}>
         <div className="relative">
           <Input
             type={showPassword ? "text" : "password"}
@@ -233,6 +240,9 @@ export function SignupForm({ email: initialEmail, kakaoId, name, birthDate: init
               }
             }}
             placeholder="영문 소문자·숫자·특수문자 포함 8자 이상"
+            autoComplete="new-password"
+            aria-invalid={!!passwordError}
+            aria-describedby={passwordError ? "signup-password-message" : undefined}
             className={cn("pr-10", passwordError ? "border-destructive/50" : "")}
           />
           <button
@@ -248,7 +258,7 @@ export function SignupForm({ email: initialEmail, kakaoId, name, birthDate: init
       </FormField>
 
       {/* 비밀번호 확인 */}
-      <FormField label="비밀번호 확인" required error={passwordConfirmError}>
+      <FormField id="signup-password-confirm" label="비밀번호 확인" required error={passwordConfirmError}>
         <div className="relative">
           <Input
             type={showPasswordConfirm ? "text" : "password"}
@@ -258,6 +268,9 @@ export function SignupForm({ email: initialEmail, kakaoId, name, birthDate: init
               setPasswordConfirmError(validatePasswordConfirm(password, e.target.value));
             }}
             placeholder="비밀번호를 다시 입력해주세요"
+            autoComplete="new-password"
+            aria-invalid={!!passwordConfirmError}
+            aria-describedby={passwordConfirmError ? "signup-password-confirm-message" : undefined}
             className={cn("pr-10", passwordConfirmError ? "border-destructive/50" : "")}
           />
           <button
@@ -282,7 +295,7 @@ export function SignupForm({ email: initialEmail, kakaoId, name, birthDate: init
       </FormField>
 
       {/* 휴대폰 번호 */}
-      <FormField label="휴대폰 번호" required error={phoneError}>
+      <FormField id="signup-phone" label="휴대폰 번호" required error={phoneError}>
         <Input
           type="tel"
           value={phone}
@@ -292,6 +305,8 @@ export function SignupForm({ email: initialEmail, kakaoId, name, birthDate: init
           }}
           placeholder="010-0000-0000"
           maxLength={13}
+          aria-invalid={!!phoneError}
+          aria-describedby={phoneError ? "signup-phone-message" : undefined}
           className={phoneError ? "border-destructive/50" : ""}
         />
       </FormField>
@@ -313,7 +328,7 @@ export function SignupForm({ email: initialEmail, kakaoId, name, birthDate: init
         <label className="flex items-center gap-3 cursor-pointer p-3 bg-muted rounded-lg">
           <input
             type="checkbox"
-            checked={agreeAge && agreeTerms && agreePrivacy && agreeSms}
+            checked={agreeAge && agreeTerms && agreePrivacy}
             onChange={(e) => {
               setAgreeAge(e.target.checked);
               setAgreeTerms(e.target.checked);
@@ -401,7 +416,8 @@ export function SignupForm({ email: initialEmail, kakaoId, name, birthDate: init
       <button
         type="submit"
         disabled={isLoading}
-        className="mt-1 w-full rounded-xl bg-primary py-3.5 text-[15px] font-semibold text-primary-foreground transition-opacity hover:opacity-90 active:opacity-80 disabled:opacity-50"
+        aria-busy={isLoading || undefined}
+        className="mt-1 w-full rounded-xl bg-primary py-3.5 text-base font-semibold text-primary-foreground transition-opacity hover:opacity-90 active:opacity-80 disabled:opacity-50"
       >
         {isLoading ? "처리 중..." : "회원가입 완료"}
       </button>

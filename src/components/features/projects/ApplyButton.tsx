@@ -62,6 +62,8 @@ export function ApplyButton({ projectId }: ApplyButtonProps) {
       {
         onSuccess: () => {
           setOpen(false);
+          setNote("");
+          setExpectedRate("");
           router.push("/projects/applications");
         },
       }
@@ -69,8 +71,6 @@ export function ApplyButton({ projectId }: ApplyButtonProps) {
   }
 
   function handleOpen() {
-    setNote("");
-    setExpectedRate("");
     setNoteError("");
     setRateError("");
     setServerError("");

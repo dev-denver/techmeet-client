@@ -1,9 +1,11 @@
 import { NextRequest, NextResponse } from "next/server";
 import { requireAuth } from "@/lib/api/server";
+import { createServerClient } from "@/lib/supabase/server";
 import { getApplications, createApplication, DuplicateApplicationError } from "@/lib/supabase/queries/applications";
 import { getProjectById } from "@/lib/supabase/queries/projects";
 import { getDeadlineDays } from "@/lib/utils/format";
 import { UUID_REGEX } from "@/lib/utils/validation";
+import { notifyAdminOfNewApplication } from "@/lib/sms/sendon";
 import { ProjectStatus } from "@/types";
 import type { CreateApplicationRequest } from "@/types";
 
@@ -17,7 +19,7 @@ export async function GET() {
 }
 
 export async function POST(request: NextRequest) {
-  const { errorResponse } = await requireAuth();
+  const { user, errorResponse } = await requireAuth();
   if (errorResponse) return errorResponse;
 
   try {
@@ -64,6 +66,24 @@ export async function POST(request: NextRequest) {
     }
 
     const result = await createApplication({ projectId, note: trimmedNote, expectedRate });
+
+    // 관리자 SMS 알림 — 발송 실패가 지원 자체를 막지 않도록 별도로 흡수한다.
+    try {
+      const supabase = await createServerClient();
+      const { data: profile } = await supabase
+        .from("profiles")
+        .select("name")
+        .eq("id", user.id)
+        .maybeSingle();
+      await notifyAdminOfNewApplication({
+        applicantName: profile?.name ?? "지원자",
+        projectTitle: result.data.projectTitle,
+        expectedRate,
+      });
+    } catch (smsError) {
+      console.error("[지원 알림 SMS 실패]", smsError);
+    }
+
     return NextResponse.json(result, { status: 201 });
   } catch (err) {
     if (err instanceof DuplicateApplicationError) {

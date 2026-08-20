@@ -21,7 +21,11 @@ export function useSubmit() {
 
   async function submit<T>(
     fn: () => Promise<T>,
-    opts?: { onSuccess?: (result: T) => void }
+    opts?: {
+      onSuccess?: (result: T) => void;
+      /** 지정 시 에러 메시지를 공통 error state 대신 이 콜백으로만 전달 (필드별 에러 라우팅용) */
+      onError?: (message: string) => void;
+    }
   ): Promise<boolean> {
     setError("");
     setIsLoading(true);
@@ -30,7 +34,12 @@ export function useSubmit() {
       opts?.onSuccess?.(result);
       return true;
     } catch (err) {
-      setError(err instanceof ApiError ? err.message : "네트워크 오류가 발생했습니다");
+      const message = err instanceof ApiError ? err.message : "네트워크 오류가 발생했습니다";
+      if (opts?.onError) {
+        opts.onError(message);
+      } else {
+        setError(message);
+      }
       return false;
     } finally {
       setIsLoading(false);

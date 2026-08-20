@@ -46,6 +46,21 @@ export const serverEnv = {
   get authRsaPublicKey() {
     return requireServerEnv("AUTH_RSA_PUBLIC_KEY");
   },
+  get sendonId() {
+    return requireServerEnv("SENDON_ID");
+  },
+  get sendonApiKey() {
+    return requireServerEnv("SENDON_API_KEY");
+  },
+  get sendonFrom() {
+    return requireServerEnv("SENDON_FROM");
+  },
+  get sendonProxyUrl() {
+    return process.env.SENDON_PROXY_URL || undefined;
+  },
+  get sendonAdminNotifyPhone() {
+    return requireServerEnv("SENDON_ADMIN_NOTIFY_PHONE");
+  },
 };
 
 /** 클라이언트에서 접근 가능한 공개 환경변수 (NEXT_PUBLIC_ 접두사) */

@@ -1,9 +1,24 @@
 import { BackButton } from "@/components/ui/back-button";
+import { PolicySectionNav } from "@/components/ui/policy-section-nav";
+
+const SECTIONS = [
+  { id: "purpose", label: "처리 목적" },
+  { id: "items", label: "수집 항목" },
+  { id: "retention", label: "보유 기간" },
+  { id: "third-party", label: "제3자 제공" },
+  { id: "outsourcing", label: "처리 위탁" },
+  { id: "rights", label: "정보주체 권리" },
+  { id: "cookies", label: "쿠키" },
+  { id: "security", label: "안전성 확보조치" },
+  { id: "officer", label: "보호책임자" },
+  { id: "remedy", label: "권익침해 구제" },
+];
 
 export default function PrivacyPage() {
   return (
     <div className="min-h-screen bg-background mx-auto max-w-[600px]">
       <BackButton label="개인정보 처리방침" />
+      <PolicySectionNav sections={SECTIONS} />
       <div className="px-6 py-8 space-y-6 text-sm text-foreground leading-relaxed">
         <p>
           &quot;(주)테크밋&quot;(이하 &quot;회사&quot;)은 테크밋 소속 프리랜서 개발자를 위한 프로젝트
@@ -12,7 +27,7 @@ export default function PrivacyPage() {
           다음과 같이 개인정보 처리방침을 수립·공개합니다.
         </p>
 
-        <section>
+        <section id="purpose" className="scroll-mt-28">
           <h2 className="font-semibold text-base mb-2">1. 개인정보의 처리 목적</h2>
           <p>회사는 다음의 목적을 위하여 개인정보를 처리하며, 목적이 변경되는 경우 별도의 동의를 받는 등 필요한 조치를 이행합니다.</p>
           <ul className="list-disc ml-4 mt-2 space-y-1">
@@ -27,7 +42,7 @@ export default function PrivacyPage() {
           </ul>
         </section>
 
-        <section>
+        <section id="items" className="scroll-mt-28">
           <h2 className="font-semibold text-base mb-2">2. 처리하는 개인정보 항목 및 수집 방법</h2>
           <div className="space-y-3">
             <div>
@@ -61,7 +76,7 @@ export default function PrivacyPage() {
           </div>
         </section>
 
-        <section>
+        <section id="retention" className="scroll-mt-28">
           <h2 className="font-semibold text-base mb-2">3. 개인정보의 처리 및 보유 기간</h2>
           <p>
             회사는 법령에 따른 개인정보 보유·이용 기간 또는 정보주체로부터 동의받은 기간 내에서
@@ -75,7 +90,7 @@ export default function PrivacyPage() {
           </ul>
         </section>
 
-        <section>
+        <section id="third-party" className="scroll-mt-28">
           <h2 className="font-semibold text-base mb-2">4. 개인정보의 제3자 제공</h2>
           <p>
             회사는 이용자의 개인정보를 &quot;1. 개인정보의 처리 목적&quot;에서 명시한 범위 내에서만
@@ -88,15 +103,15 @@ export default function PrivacyPage() {
           </ul>
         </section>
 
-        <section>
+        <section id="outsourcing" className="scroll-mt-28">
           <h2 className="font-semibold text-base mb-2">5. 개인정보 처리업무의 위탁</h2>
           <p>회사는 서비스 제공을 위하여 아래와 같이 개인정보 처리업무를 위탁하고 있으며, 위탁계약 체결 시 개인정보가 안전하게 관리될 수 있도록 필요한 사항을 규정하고 있습니다.</p>
           <div className="overflow-x-auto -mx-2 px-2 mt-2">
             <table className="w-full text-xs border-collapse border border-border">
               <thead>
                 <tr className="bg-muted/50">
-                  <th className="border border-border px-3 py-2 text-left">수탁업체</th>
-                  <th className="border border-border px-3 py-2 text-left">위탁 업무</th>
+                  <th scope="col" className="border border-border px-3 py-2 text-left">수탁업체</th>
+                  <th scope="col" className="border border-border px-3 py-2 text-left">위탁 업무</th>
                 </tr>
               </thead>
               <tbody>
@@ -117,7 +132,7 @@ export default function PrivacyPage() {
           </div>
         </section>
 
-        <section>
+        <section id="rights" className="scroll-mt-28">
           <h2 className="font-semibold text-base mb-2">6. 정보주체의 권리·의무 및 행사방법</h2>
           <p>이용자는 언제든지 다음 각 호의 개인정보 보호 관련 권리를 행사할 수 있습니다.</p>
           <ul className="list-disc ml-4 mt-2 space-y-1">
@@ -134,7 +149,7 @@ export default function PrivacyPage() {
           </p>
         </section>
 
-        <section>
+        <section id="cookies" className="scroll-mt-28">
           <h2 className="font-semibold text-base mb-2">7. 쿠키(Cookie) 등 자동 수집 장치의 설치·운영 및 거부</h2>
           <p>
             회사는 로그인 상태 유지 등을 위해 쿠키를 사용합니다. 회원가입 진행 중에는 카카오 계정
@@ -145,7 +160,7 @@ export default function PrivacyPage() {
           </p>
         </section>
 
-        <section>
+        <section id="security" className="scroll-mt-28">
           <h2 className="font-semibold text-base mb-2">8. 개인정보의 안전성 확보조치</h2>
           <p>회사는 개인정보의 안전성 확보를 위해 다음과 같은 조치를 취하고 있습니다.</p>
           <ul className="list-disc ml-4 mt-2 space-y-1">
@@ -156,7 +171,7 @@ export default function PrivacyPage() {
           </ul>
         </section>
 
-        <section>
+        <section id="officer" className="scroll-mt-28">
           <h2 className="font-semibold text-base mb-2">9. 개인정보 보호책임자</h2>
           <p>회사는 개인정보 처리에 관한 업무를 총괄해서 책임지고, 개인정보 처리와 관련한 이용자의 불만처리 및 피해구제 등을 위하여 아래와 같이 개인정보 보호책임자를 지정하고 있습니다.</p>
           <ul className="mt-2 space-y-1">
@@ -171,7 +186,7 @@ export default function PrivacyPage() {
           </p>
         </section>
 
-        <section>
+        <section id="remedy" className="scroll-mt-28">
           <h2 className="font-semibold text-base mb-2">10. 권익침해 구제방법</h2>
           <p>
             이용자는 개인정보침해로 인한 구제를 받기 위하여 아래 기관에 분쟁해결이나 상담 등을
@@ -187,6 +202,10 @@ export default function PrivacyPage() {
           본 개인정보 처리방침은 관련 법령 및 회사의 정책 변화에 따라 수시로 변경될 수 있으며,
           내용이 변경되는 경우 이 페이지를 통해 고지합니다. 변경사항에 의문이 있으실 때엔 언제든
           개인정보 보호책임자(lawzone.corp@gmail.com)에게 문의해 주십시오.
+        </p>
+
+        <p className="text-xs text-muted-foreground pt-4 border-t">
+          공고일: 2026년 7월 7일 &nbsp;|&nbsp; 시행일: 2026년 7월 7일
         </p>
       </div>
     </div>

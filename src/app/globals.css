@@ -57,12 +57,12 @@
   --border: oklch(0.92 0.004 286.32);
   --input: oklch(0.92 0.004 286.32);
   --ring: oklch(0.21 0.006 285.885);
-  --status-success: oklch(0.55 0.17 145);
-  --status-info: oklch(0.55 0.15 250);
-  --status-warning: oklch(0.75 0.15 80);
-  --status-danger: oklch(0.55 0.2 27);
+  --status-success: oklch(0.5 0.135 150);
+  --status-info: oklch(0.48 0.125 252);
+  --status-warning: oklch(0.56 0.15 72);
+  --status-danger: oklch(0.5 0.17 24);
   --status-neutral: oklch(0.55 0.01 286);
-  --status-purple: oklch(0.55 0.17 300);
+  --status-purple: oklch(0.5 0.13 300);
 }
 
 @layer base {

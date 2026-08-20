@@ -7,9 +7,13 @@ import type { ProfileResume } from "@/types";
 import { formatShortDate } from "@/lib/utils/format";
 import { ErrorMessage } from "@/components/ui/error-message";
 import { EmptyState } from "@/components/ui/empty-state";
+import { ConfirmSheet } from "@/components/ui/confirm-sheet";
+import { useToast } from "@/components/ui/toast";
 import { SectionHeader } from "./TabShared";
 import { profileApi } from "@/lib/api/profile";
 import { ApiError } from "@/lib/api/client";
+import { LIMITS } from "@/lib/constants/limits";
+import { RESUME_ALLOWED_MIME_TYPES } from "@/lib/constants/resume";
 
 const MAX_RESUME_COUNT = 10;
 
@@ -25,11 +29,13 @@ interface ResumeTabProps {
 
 export function ResumeTab({ resumes: initialResumes }: ResumeTabProps) {
   const router = useRouter();
+  const { showToast } = useToast();
   const inputRef = useRef<HTMLInputElement>(null);
   const [resumes, setResumes] = useState<ProfileResume[]>(initialResumes);
   const [isUploading, setIsUploading] = useState(false);
   const [uploadingName, setUploadingName] = useState("");
   const [deletingId, setDeletingId] = useState<string | null>(null);
+  const [confirmDeleteId, setConfirmDeleteId] = useState<string | null>(null);
   const [error, setError] = useState("");
 
   async function handleFileChange(e: React.ChangeEvent<HTMLInputElement>) {
@@ -38,12 +44,23 @@ export function ResumeTab({ resumes: initialResumes }: ResumeTabProps) {
     e.target.value = "";
 
     setError("");
+
+    if (!RESUME_ALLOWED_MIME_TYPES.has(file.type)) {
+      setError("PDF, DOC, DOCX, HWP 파일만 업로드할 수 있습니다");
+      return;
+    }
+    if (file.size > LIMITS.FILE_UPLOAD_MAX_SIZE) {
+      setError("파일 크기는 10MB 이하여야 합니다");
+      return;
+    }
+
     setIsUploading(true);
     setUploadingName(file.name);
 
     try {
       const { resume } = await profileApi.uploadResume(file);
       setResumes((prev) => [resume, ...prev]);
+      showToast("이력서가 업로드되었습니다");
       router.refresh();
     } catch (err) {
       setError(err instanceof ApiError ? err.message : "업로드에 실패했습니다");
@@ -59,11 +76,13 @@ export function ResumeTab({ resumes: initialResumes }: ResumeTabProps) {
     try {
       await profileApi.deleteResume(id);
       setResumes((prev) => prev.filter((r) => r.id !== id));
+      showToast("이력서가 삭제되었습니다");
       router.refresh();
     } catch (err) {
       setError(err instanceof ApiError ? err.message : "삭제에 실패했습니다");
     } finally {
       setDeletingId(null);
+      setConfirmDeleteId(null);
     }
   }
 
@@ -101,7 +120,7 @@ export function ResumeTab({ resumes: initialResumes }: ResumeTabProps) {
                 <FileText className="h-5 w-5 shrink-0 text-muted-foreground" />
                 <div className="flex-1 min-w-0">
                   <p className="text-sm text-foreground font-medium truncate">{resume.fileName}</p>
-                  <p className="text-[11px] text-muted-foreground mt-0.5">
+                  <p className="text-[10px] text-muted-foreground mt-0.5">
                     {formatFileSize(resume.fileSize)} · {formatShortDate(resume.createdAt)}
                   </p>
                 </div>
@@ -115,7 +134,7 @@ export function ResumeTab({ resumes: initialResumes }: ResumeTabProps) {
                 </a>
                 <button
                   type="button"
-                  onClick={() => handleDelete(resume.id)}
+                  onClick={() => setConfirmDeleteId(resume.id)}
                   disabled={deletingId === resume.id}
                   className="shrink-0 p-1.5 rounded-lg text-muted-foreground hover:text-destructive hover:bg-destructive/10 transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:opacity-40"
                   aria-label="이력서 삭제"
@@ -150,6 +169,15 @@ export function ResumeTab({ resumes: initialResumes }: ResumeTabProps) {
         <Plus className="h-4 w-4" />
         {resumes.length >= MAX_RESUME_COUNT ? `최대 ${MAX_RESUME_COUNT}개까지 업로드 가능` : "이력서 추가"}
       </button>
+
+      <ConfirmSheet
+        open={confirmDeleteId !== null}
+        title="이력서를 삭제할까요?"
+        description="삭제한 이력서는 복구할 수 없습니다."
+        isLoading={deletingId !== null}
+        onConfirm={() => confirmDeleteId && handleDelete(confirmDeleteId)}
+        onClose={() => setConfirmDeleteId(null)}
+      />
     </div>
   );
 }

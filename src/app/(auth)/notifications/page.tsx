@@ -1,4 +1,4 @@
-import { CheckCircle, XCircle, Clock, Megaphone, User, FolderOpen, Bell, ChevronRight } from "lucide-react";
+import { CheckCircle, XCircle, Clock, Megaphone, User, FolderOpen, History, ChevronRight } from "lucide-react";
 import { getAlimtalkLogs } from "@/lib/supabase/queries/notifications";
 import { EmptyState } from "@/components/ui/empty-state";
 import { NavLink } from "@/components/ui/nav-link";
@@ -14,7 +14,7 @@ const SERVICE_TYPE_CONFIG: Record<AlimtalkServiceType, { label: string; icon: Re
 function StatusBadge({ isSuccess }: { isSuccess: boolean | null }) {
   if (isSuccess === null) {
     return (
-      <span className="flex items-center gap-1 text-[10px] text-muted-foreground bg-muted px-2 py-0.5 rounded-full">
+      <span className="flex items-center gap-1 text-[10px] font-medium text-muted-foreground bg-muted px-2 py-0.5 rounded-full">
         <Clock className="h-3 w-3" />
         처리중
       </span>
@@ -22,14 +22,14 @@ function StatusBadge({ isSuccess }: { isSuccess: boolean | null }) {
   }
   if (isSuccess) {
     return (
-      <span className="flex items-center gap-1 text-[10px] text-status-success bg-status-success/10 px-2 py-0.5 rounded-full">
+      <span className="flex items-center gap-1 text-[10px] font-medium text-status-success bg-status-success/10 px-2 py-0.5 rounded-full">
         <CheckCircle className="h-3 w-3" />
         발송 완료
       </span>
     );
   }
   return (
-    <span className="flex items-center gap-1 text-[10px] text-status-danger bg-status-danger/10 px-2 py-0.5 rounded-full">
+    <span className="flex items-center gap-1 text-[10px] font-medium text-status-danger bg-status-danger/10 px-2 py-0.5 rounded-full">
       <XCircle className="h-3 w-3" />
       발송 실패
     </span>
@@ -37,7 +37,16 @@ function StatusBadge({ isSuccess }: { isSuccess: boolean | null }) {
 }
 
 export default async function NotificationsPage() {
-  const { data: logs, total } = await getAlimtalkLogs().catch(() => ({ data: [], total: 0 }));
+  let logs: Awaited<ReturnType<typeof getAlimtalkLogs>>["data"] = [];
+  let total = 0;
+  let loadFailed = false;
+  try {
+    const result = await getAlimtalkLogs();
+    logs = result.data;
+    total = result.total;
+  } catch {
+    loadFailed = true;
+  }
 
   return (
     <div className="pb-6">
@@ -47,10 +56,20 @@ export default async function NotificationsPage() {
         </p>
       </div>
 
-      {logs.length === 0 ? (
+      {loadFailed ? (
         <EmptyState
-          icon={Bell}
-          title="받은 알림이 없습니다"
+          icon={History}
+          title="발송 내역을 불러오지 못했습니다"
+          description="잠시 후 다시 시도해주세요"
+          iconShape="rounded"
+          iconSize="sm"
+          className="py-20"
+        />
+      ) : logs.length === 0 ? (
+        <EmptyState
+          icon={History}
+          title="발송된 알림이 없습니다"
+          description="지원 결과나 신규 프로젝트가 등록되면 카카오 알림톡으로 안내드려요"
           iconShape="rounded"
           iconSize="sm"
           className="py-20"
@@ -61,15 +80,25 @@ export default async function NotificationsPage() {
             const typeConfig = SERVICE_TYPE_CONFIG[log.serviceType] ?? SERVICE_TYPE_CONFIG[AlimtalkServiceType.Individual];
             const TypeIcon = typeConfig.icon;
             const displayTime = log.sentAt ?? log.createdAt;
-            // 프로젝트 알림은 프로젝트 목록으로 이동 (엔티티 레벨 딥링크는 DB 컬럼 필요 → 추후)
-            const href = log.serviceType === AlimtalkServiceType.Project ? "/projects" : null;
+            // 프로젝트 알림은 프로젝트 목록으로, 공지 알림은 공지사항 목록으로 이동
+            // (엔티티 레벨 딥링크는 DB 컬럼 필요 → 추후. 개별 알림은 대상을 특정할 수 없어 링크 없음)
+            const href =
+              log.serviceType === AlimtalkServiceType.Project
+                ? "/projects"
+                : log.serviceType === AlimtalkServiceType.Notice
+                ? "/notices"
+                : null;
 
             const cardInner = (
               <div className="flex items-start gap-3 px-4 py-3.5">
-                <div className="mt-0.5 flex h-8 w-8 shrink-0 items-center justify-center rounded-xl bg-muted">
+                <div
+                  className="mt-0.5 flex h-8 w-8 shrink-0 items-center justify-center rounded-xl bg-muted"
+                  aria-hidden="true"
+                >
                   <TypeIcon className="h-4 w-4 text-muted-foreground" />
                 </div>
                 <div className="flex-1 min-w-0">
+                  <span className="text-[10px] font-medium text-muted-foreground">{typeConfig.label}</span>
                   <p className="text-sm font-medium text-foreground leading-snug">{log.templateName}</p>
                   <div className="flex items-center justify-between mt-2 gap-2">
                     <span className="text-xs text-muted-foreground">{formatDate(displayTime)}</span>

@@ -1,5 +1,6 @@
 import { notFound } from "next/navigation";
 import { MapPin, Clock, Users, Calendar, Check, ChevronRight, Sparkles } from "lucide-react";
+import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { NavLink } from "@/components/ui/nav-link";
 import { PageHero } from "@/components/ui/page-hero";
@@ -42,6 +43,8 @@ export default async function ProjectDetailPage({ params }: ProjectDetailPagePro
   const isUrgent = isRecruiting && deadlineDays !== null && deadlineDays <= 7;
   const isExpired = deadlineText === "마감";
   const deadlinePassed = !!project.deadline && getDeadlineDays(project.deadline) === null;
+  // 모집중 상태인데 마감일이 지난 경우: "모집중" 배지와 "마감" 칩이 동시에 뜨는 모순을 피하기 위해 단일 상태로 합친다
+  const isRecruitingExpired = isRecruiting && isExpired;
 
   const appConfig = myApplication ? APPLICATION_STATUS_CONFIG[myApplication.status] : null;
   const isWithdrawn = myApplication?.status === ApplicationStatus.Withdrawn;
@@ -54,9 +57,15 @@ export default async function ProjectDetailPage({ params }: ProjectDetailPagePro
       {/* 히어로 */}
       <PageHero>
         <div className="flex items-center justify-between gap-2 mb-3">
-          <ProjectStatusBadge status={project.status} />
+          {isRecruitingExpired ? (
+            <Badge variant="outline" className="bg-primary-foreground/10 text-primary-foreground/60 border-primary-foreground/15">
+              지원마감
+            </Badge>
+          ) : (
+            <ProjectStatusBadge status={project.status} />
+          )}
           <div className="flex items-center gap-2">
-            {isRecruiting && deadlineText && (
+            {isRecruiting && !isRecruitingExpired && deadlineText && (
               <span
                 className={`text-xs font-semibold px-2.5 py-0.5 rounded-full ${
                   isUrgent

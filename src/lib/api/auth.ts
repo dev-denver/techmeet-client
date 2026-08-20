@@ -5,6 +5,7 @@ import type {
   ApiSuccessResponse,
   GetPublicKeyResponse,
   ChangePasswordRequest,
+  WithdrawRequest,
 } from "@/types";
 
 export const authApi = {
@@ -22,7 +23,11 @@ export const authApi = {
 
   logout: () => apiFetch<ApiSuccessResponse>("/api/auth/logout", { method: "POST" }),
 
-  withdraw: () => apiFetch<ApiSuccessResponse>("/api/auth/withdraw", { method: "POST" }),
+  withdraw: (data: WithdrawRequest) =>
+    apiFetch<ApiSuccessResponse>("/api/auth/withdraw", {
+      method: "POST",
+      body: JSON.stringify(data),
+    }),
 
   getPublicKey: () => apiFetch<GetPublicKeyResponse>("/api/auth/public-key"),
 

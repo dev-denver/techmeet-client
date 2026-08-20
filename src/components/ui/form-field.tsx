@@ -8,6 +8,12 @@ interface FormFieldProps {
   hint?: string;
   children: React.ReactNode;
   className?: string;
+  /**
+   * 지정 시 에러/힌트 문단에 `${id}-message` id가 붙는다.
+   * 내부 입력에 `aria-describedby={`${id}-message`}` / `aria-invalid={!!error}`를 함께 넘겨
+   * 스크린리더가 에러를 필드와 연결해 읽도록 한다 (FormField가 children을 자동으로 연결해주지 않음).
+   */
+  id?: string;
 }
 
 export function FormField({
@@ -18,7 +24,9 @@ export function FormField({
   hint,
   children,
   className,
+  id,
 }: FormFieldProps) {
+  const messageId = id ? `${id}-message` : undefined;
   return (
     <div className={cn("flex flex-col gap-1.5", className)}>
       {label && (
@@ -30,9 +38,9 @@ export function FormField({
       )}
       {children}
       {error ? (
-        <p className="text-xs text-destructive">{error}</p>
+        <p id={messageId} className="text-xs text-destructive">{error}</p>
       ) : hint ? (
-        <p className="text-xs text-muted-foreground">{hint}</p>
+        <p id={messageId} className="text-xs text-muted-foreground">{hint}</p>
       ) : null}
     </div>
   );

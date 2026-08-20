@@ -18,6 +18,7 @@ export type {
   LoginRequest,
   GetPublicKeyResponse,
   ChangePasswordRequest,
+  WithdrawRequest,
   GetProjectsParams,
   GetProjectsResponse,
   GetProjectByIdResponse,

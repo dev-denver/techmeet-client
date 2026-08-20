@@ -55,10 +55,7 @@ export async function getNotices(params?: GetNoticesParams): Promise<GetNoticesR
 
   const { data, count, error } = await query;
 
-  if (error) {
-    console.warn("[getNotices]", error);
-    return { data: [], total: 0, page, pageSize: pageSize ?? 20 };
-  }
+  if (error) throw error;
 
   return {
     data: (data as NoticeRow[]).map(mapRowToNotice),

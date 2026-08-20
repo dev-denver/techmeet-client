@@ -51,4 +51,6 @@ export const LIMITS = {
   BANK_ACCOUNT_MAX: 30,
   /** 추천인 메모 */
   REFERRER_NOTE_MAX: 100,
+  /** 파일 업로드 최대 용량 (bytes) — 이력서 / 계약 문서 공용 */
+  FILE_UPLOAD_MAX_SIZE: 10 * 1024 * 1024,
 } as const;

@@ -1,11 +1,24 @@
 import { BackButton } from "@/components/ui/back-button";
+import { PolicySectionNav } from "@/components/ui/policy-section-nav";
+
+const SECTIONS = [
+  { id: "purpose", label: "목적" },
+  { id: "definitions", label: "용어의 정의" },
+  { id: "usage", label: "서비스 이용" },
+  { id: "obligations", label: "회원의 의무" },
+  { id: "restriction", label: "이용 제한" },
+  { id: "withdrawal", label: "회원 탈퇴" },
+  { id: "liability", label: "책임 제한" },
+  { id: "jurisdiction", label: "준거법" },
+];
 
 export default function TermsPage() {
   return (
     <div className="min-h-screen bg-background mx-auto max-w-[600px]">
       <BackButton label="이용약관" />
+      <PolicySectionNav sections={SECTIONS} />
       <div className="px-6 py-8 space-y-6 text-sm text-foreground leading-relaxed">
-        <section>
+        <section id="purpose" className="scroll-mt-28">
           <h2 className="font-semibold text-base mb-2">1. 목적</h2>
           <p>
             이 약관은 테크밋(이하 &quot;회사&quot;)이 운영하는 테크밋 프리랜서 플랫폼(이하 &quot;서비스&quot;)의
@@ -13,7 +26,7 @@ export default function TermsPage() {
           </p>
         </section>
 
-        <section>
+        <section id="definitions" className="scroll-mt-28">
           <h2 className="font-semibold text-base mb-2">2. 용어의 정의</h2>
           <p>이 약관에서 사용하는 용어의 정의는 다음과 같습니다.</p>
           <div className="space-y-2 mt-2">
@@ -23,7 +36,7 @@ export default function TermsPage() {
           </div>
         </section>
 
-        <section>
+        <section id="usage" className="scroll-mt-28">
           <h2 className="font-semibold text-base mb-2">3. 서비스 이용</h2>
           <div className="space-y-2">
             <p>3-1. 서비스는 테크밋 소속 프리랜서 개발자만 이용할 수 있습니다.</p>
@@ -32,7 +45,7 @@ export default function TermsPage() {
           </div>
         </section>
 
-        <section>
+        <section id="obligations" className="scroll-mt-28">
           <h2 className="font-semibold text-base mb-2">4. 회원의 의무</h2>
           <div className="space-y-2">
             <p>4-1. 회원은 허위 정보를 등록해서는 안 됩니다.</p>
@@ -42,7 +55,7 @@ export default function TermsPage() {
           </div>
         </section>
 
-        <section>
+        <section id="restriction" className="scroll-mt-28">
           <h2 className="font-semibold text-base mb-2">5. 서비스 이용 제한</h2>
           <p>
             회사는 회원이 이 약관의 의무를 위반하거나, 서비스의 정상적인 운영을 방해한 경우
@@ -50,7 +63,7 @@ export default function TermsPage() {
           </p>
         </section>
 
-        <section>
+        <section id="withdrawal" className="scroll-mt-28">
           <h2 className="font-semibold text-base mb-2">6. 회원 탈퇴</h2>
           <p>
             회원은 언제든지 서비스 내 설정 메뉴를 통해 탈퇴를 신청할 수 있습니다.
@@ -58,7 +71,7 @@ export default function TermsPage() {
           </p>
         </section>
 
-        <section>
+        <section id="liability" className="scroll-mt-28">
           <h2 className="font-semibold text-base mb-2">7. 책임 제한</h2>
           <p>
             회사는 천재지변 또는 이에 준하는 불가항력으로 인하여 서비스를 제공할 수 없는 경우에는
@@ -66,7 +79,7 @@ export default function TermsPage() {
           </p>
         </section>
 
-        <section>
+        <section id="jurisdiction" className="scroll-mt-28">
           <h2 className="font-semibold text-base mb-2">8. 준거법 및 관할법원</h2>
           <p>
             이 약관에 관한 분쟁은 대한민국 법률에 따르며, 분쟁 발생 시 서울중앙지방법원을

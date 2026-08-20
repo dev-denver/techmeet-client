@@ -1,5 +1,6 @@
 import { MapPin, Clock, Users, CalendarRange, Layers, Sparkles } from "lucide-react";
 import { ProjectStatusBadge } from "./ProjectStatusBadge";
+import { Badge } from "@/components/ui/badge";
 import { NavLink } from "@/components/ui/nav-link";
 import { formatDeadlineDays, getDeadlineDays, formatWorkType, formatProjectType, formatProjectPeriod } from "@/lib/utils/format";
 import { countSkillMatches } from "@/lib/utils/skills";
@@ -39,8 +40,14 @@ export function ProjectCard({ project, mySkills }: ProjectCardProps) {
       <div className="px-4 pt-4 pb-4 space-y-3">
         {/* 상태 + 마감 */}
         <div className="flex items-center justify-between gap-2">
-          <ProjectStatusBadge status={project.status} />
-          {project.status === ProjectStatus.Recruiting && deadlineText && (
+          {isExpired ? (
+            <Badge variant="outline" className="bg-status-neutral/10 text-status-neutral border-status-neutral/20">
+              지원마감
+            </Badge>
+          ) : (
+            <ProjectStatusBadge status={project.status} />
+          )}
+          {project.status === ProjectStatus.Recruiting && !isExpired && deadlineText && (
             <span
               className={`text-xs font-semibold px-2.5 py-0.5 rounded-full ${
                 isUrgent
