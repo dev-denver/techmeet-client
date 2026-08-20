@@ -1,6 +1,7 @@
 import { Card, CardContent } from "@/components/ui/card";
-import { ProfileTabsClient, PROFILE_TABS } from "@/components/features/profile/ProfileTabsClient";
+import { ProfileTabsClient } from "@/components/features/profile/ProfileTabsClient";
 import { getProfile } from "@/lib/supabase/queries/profile";
+import { PROFILE_TABS } from "@/lib/constants";
 
 interface ProfilePageProps {
   searchParams: Promise<{ tab?: string }>;

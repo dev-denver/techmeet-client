@@ -5,3 +5,4 @@ export {
   AVAILABILITY_TOGGLE_CONFIG,
 } from "./status";
 export { LIMITS } from "./limits";
+export { PROFILE_TABS, type ProfileTab } from "./profileTabs";
