@@ -1,6 +1,6 @@
 import { ImageResponse } from "next/og";
 
-export const alt = "테크밋 | 프리랜서 개발자 프로젝트 매칭 플랫폼";
+export const alt = "테크밋";
 export const size = { width: 1200, height: 630 };
 export const contentType = "image/png";
 

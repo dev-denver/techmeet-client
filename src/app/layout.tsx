@@ -25,7 +25,7 @@ const SITE_DESCRIPTION =
 export const metadata: Metadata = {
   metadataBase: new URL(publicEnv.appUrl),
   title: {
-    default: "테크밋(TechMeet) | 프리랜서 개발자 프로젝트 매칭 플랫폼",
+    default: "테크밋(TechMeet)",
     template: "%s | 테크밋",
   },
   description: SITE_DESCRIPTION,
@@ -56,12 +56,12 @@ export const metadata: Metadata = {
     locale: "ko_KR",
     url: "/",
     siteName: SITE_NAME,
-    title: "테크밋(TechMeet) | 프리랜서 개발자 프로젝트 매칭 플랫폼",
+    title: "테크밋(TechMeet)",
     description: SITE_DESCRIPTION,
   },
   twitter: {
     card: "summary_large_image",
-    title: "테크밋(TechMeet) | 프리랜서 개발자 프로젝트 매칭 플랫폼",
+    title: "테크밋(TechMeet)",
     description: SITE_DESCRIPTION,
   },
   formatDetection: {
