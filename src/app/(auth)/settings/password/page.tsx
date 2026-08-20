@@ -81,6 +81,13 @@ export default function ChangePasswordPage() {
           showToast("비밀번호가 변경되었습니다");
           router.back();
         },
+        onError: (message) => {
+          if (message.includes("현재 비밀번호")) {
+            setCurrentError(message);
+          } else {
+            setError(message);
+          }
+        },
       }
     );
   }

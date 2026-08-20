@@ -12,7 +12,7 @@ export default async function SignupPage({ searchParams }: SignupPageProps) {
   const email = cookieStore.get("signup_email")?.value;
 
   if (!email) {
-    redirect("/login");
+    redirect("/login?error=signup_session_expired");
   }
 
   const params = await searchParams;

@@ -119,9 +119,11 @@ function PrivacyContent() {
           <p className="font-medium mt-2">② 서비스 이용 중 등록하는 항목 (선택)</p>
           <ul className="list-disc ml-4 space-y-1">
             <li>기본 정보: 자기소개, 기술 스택, 주소, 성별, 투입 가능 상태 및 투입 가능일, 추천인 메모</li>
-            <li>경력사항, 학력·자격증, 스킬 인벤토리(프로젝트 수행 경험)</li>
+            <li>경력사항: 회사명, 직무, 근무기간, 업무 내용, 사용 기술 스택</li>
+            <li>학력·자격증: 학교명, 학위, 전공, 재학기간, 졸업 여부, 자격증명, 취득일</li>
+            <li>스킬 인벤토리(프로젝트 수행 경험): 프로젝트명, 수행기간, 고객사, 산업군, 담당 역할, 사용 언어·DBMS·툴 등</li>
             <li>이력서 파일(PDF, DOC, DOCX, HWP)</li>
-            <li>계약·정산 정보: 계약 형태(사업자/개인/정규직), 사업자등록번호·사업자등록증 사본, 계좌번호·계좌 사본 이미지</li>
+            <li>계약·정산 정보: 계약 형태(사업자/개인/정규직), 사업자명·사업자등록번호·사업장 주소·사업자등록증 사본, 은행명·계좌번호·계좌 사본 이미지</li>
             <li>프로젝트 지원 시 희망 단가 및 참고사항</li>
           </ul>
           <p className="font-medium mt-2">③ 자동으로 수집되는 항목</p>
@@ -152,12 +154,13 @@ function PrivacyContent() {
       <section>
         <h3 className="font-semibold mb-2">제4조 (개인정보의 제3자 제공)</h3>
         <p>
-          회사는 이용자의 개인정보를 원칙적으로 외부에 제공하지 않습니다.
-          다만, 다음의 경우에는 예외로 합니다.
+          회사는 이용자의 개인정보를 &quot;제1조(개인정보의 처리 목적)&quot;에서 명시한 범위 내에서만
+          처리하며, 이용자의 동의 없이는 원칙적으로 제3자에게 제공하지 않습니다. 다만, 다음의
+          경우에는 예외로 합니다.
         </p>
         <ul className="list-disc ml-4 mt-2 space-y-1">
-          <li>이용자가 사전에 동의한 경우</li>
-          <li>법령의 규정에 의거하거나, 수사 목적으로 법령에 정해진 절차와 방법에 따라 수사기관의 요구가 있는 경우</li>
+          <li>이용자가 사전에 별도로 동의한 경우</li>
+          <li>법령의 규정에 의거하거나, 수사 목적으로 법령에서 정한 절차와 방법에 따라 수사기관의 요구가 있는 경우</li>
         </ul>
       </section>
 
@@ -167,8 +170,8 @@ function PrivacyContent() {
           <table className="w-full text-xs border-collapse border border-border mt-2">
             <thead>
               <tr className="bg-muted/50">
-                <th className="border border-border px-3 py-2 text-left">수탁업체</th>
-                <th className="border border-border px-3 py-2 text-left">위탁 업무</th>
+                <th scope="col" className="border border-border px-3 py-2 text-left">수탁업체</th>
+                <th scope="col" className="border border-border px-3 py-2 text-left">위탁 업무</th>
               </tr>
             </thead>
             <tbody>
@@ -200,7 +203,9 @@ function PrivacyContent() {
         </ul>
         <p className="mt-2">
           위 권리 행사는 서비스 내 &quot;내 정보&quot; 및 &quot;설정&quot; 메뉴를 통해 직접 열람·정정할
-          수 있으며, 계정 삭제는 &quot;설정 &gt; 회원 탈퇴&quot;를 통해 요청할 수 있습니다.
+          수 있으며, 계정 삭제는 &quot;설정 &gt; 회원 탈퇴&quot;를 통해 요청할 수 있습니다. 그 밖의
+          문의는 아래 개인정보 보호책임자에게 서면, 전화 또는 이메일로 연락하시면 지체 없이
+          조치하겠습니다.
         </p>
       </section>
 
@@ -221,6 +226,7 @@ function PrivacyContent() {
           <li>비밀번호는 클라이언트에서 암호화하여 전송받은 후 암호화된 형태로 저장하며, 회사를 포함해 어느 누구도 이용자의 비밀번호를 조회할 수 없습니다.</li>
           <li>데이터베이스 접근 제어(행 단위 보안 정책)를 통해 이용자 본인의 정보만 조회·수정할 수 있도록 제한합니다.</li>
           <li>이력서, 사업자등록증, 계좌 사본 등 첨부파일은 비공개(private) 저장소에 보관되며, 본인 확인된 요청에 한해 임시 접근 권한(서명된 URL)으로만 다운로드할 수 있습니다.</li>
+          <li>개인정보를 취급하는 임직원을 최소한으로 지정하고, 취급자를 대상으로 개인정보 보호 교육을 실시합니다.</li>
         </ul>
       </section>
 
@@ -231,6 +237,11 @@ function PrivacyContent() {
           <li>전화: 010-8497-5877</li>
           <li>이메일: lawzone.corp@gmail.com</li>
         </ul>
+        <p className="mt-2">
+          이용자는 회사의 서비스를 이용하며 발생한 모든 개인정보 보호 관련 문의, 불만처리, 피해구제
+          등에 관한 사항을 개인정보 보호책임자에게 문의할 수 있습니다. 회사는 이용자의 문의에 대해
+          지체 없이 답변 및 처리해 드릴 것입니다.
+        </p>
       </section>
 
       <section>
@@ -240,6 +251,12 @@ function PrivacyContent() {
           <li>개인정보침해신고센터: (국번없이) 118 / privacy.kisa.or.kr</li>
         </ul>
       </section>
+
+      <p>
+        본 개인정보 처리방침은 관련 법령 및 회사의 정책 변화에 따라 수시로 변경될 수 있으며,
+        내용이 변경되는 경우 이 페이지를 통해 고지합니다. 변경사항에 의문이 있으실 때엔 언제든
+        개인정보 보호책임자(lawzone.corp@gmail.com)에게 문의해 주십시오.
+      </p>
 
       <p className="text-xs text-muted-foreground pt-4 border-t">
         공고일: 2026년 7월 7일 &nbsp;|&nbsp; 시행일: 2026년 7월 7일
@@ -255,16 +272,38 @@ const TITLES = {
 
 export function PolicyModal({ type, onClose }: PolicyModalProps) {
   const mountedRef = useRef(false);
+  const triggerRef = useRef<Element | null>(null);
 
   useEffect(() => {
     mountedRef.current = true;
     return () => { mountedRef.current = false; };
   }, []);
 
+  // 열릴 때 포커스를 트리거로 되돌리기 위해 기억해두고, Esc로도 닫을 수 있게 한다
+  useEffect(() => {
+    if (!type) return;
+    triggerRef.current = document.activeElement;
+
+    function handleKeyDown(e: KeyboardEvent) {
+      if (e.key === "Escape") onClose();
+    }
+    document.addEventListener("keydown", handleKeyDown);
+    return () => {
+      document.removeEventListener("keydown", handleKeyDown);
+      if (triggerRef.current instanceof HTMLElement) triggerRef.current.focus();
+    };
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [type]);
+
   if (!type || typeof document === "undefined") return null;
 
   return createPortal(
-    <div className="fixed inset-0 z-[9999] bg-background flex flex-col">
+    <div
+      role="dialog"
+      aria-modal="true"
+      aria-labelledby="policy-modal-title"
+      className="fixed inset-0 z-[9999] bg-background flex flex-col"
+    >
       <div className="w-full max-w-[600px] mx-auto flex flex-col h-full">
         {/* 헤더 */}
         <div className="flex items-center gap-3 px-4 h-14 border-b border-border shrink-0">
@@ -276,7 +315,7 @@ export function PolicyModal({ type, onClose }: PolicyModalProps) {
           >
             <ArrowLeft className="h-5 w-5" />
           </button>
-          <h2 className="text-base font-semibold">{TITLES[type]}</h2>
+          <h2 id="policy-modal-title" className="text-base font-semibold">{TITLES[type]}</h2>
         </div>
 
         {/* 본문 */}

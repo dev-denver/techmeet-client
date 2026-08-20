@@ -29,6 +29,7 @@ export function ProjectFilters({ onFilterChange }: ProjectFiltersProps) {
         <button
           key={value}
           onClick={() => handleChange(value)}
+          aria-pressed={active === value}
           className={cn(
             "shrink-0 inline-flex items-center h-[30px] px-3 rounded-full text-xs font-medium transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2",
             active === value

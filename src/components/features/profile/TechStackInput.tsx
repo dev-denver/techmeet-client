@@ -38,7 +38,7 @@ export function TechStackInput({ value, onChange }: TechStackInputProps) {
         <button
           type="button"
           onClick={addTech}
-          className="px-3 py-2 rounded-lg bg-primary text-primary-foreground text-sm font-medium"
+          className="px-3 py-2 rounded-lg bg-primary text-primary-foreground text-sm font-medium focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2"
         >
           추가
         </button>
@@ -55,6 +55,7 @@ export function TechStackInput({ value, onChange }: TechStackInputProps) {
                 type="button"
                 onClick={() => onChange(value.filter((t) => t !== tech))}
                 aria-label={`${tech} 삭제`}
+                className="rounded focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2"
               >
                 <X className="h-3 w-3" />
               </button>

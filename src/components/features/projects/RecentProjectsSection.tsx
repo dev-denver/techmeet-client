@@ -59,7 +59,7 @@ export function RecentProjectsSection({ excludeId }: RecentProjectsSectionProps)
         <History className="h-4 w-4 text-muted-foreground" />
         <h3 className="font-semibold">최근 본 프로젝트</h3>
       </div>
-      <div className="flex gap-2.5 overflow-x-auto pb-2 scrollbar-none px-4">
+      <div className="flex gap-2.5 overflow-x-auto pb-2 scrollbar-none px-4 [mask-image:linear-gradient(to_right,black_calc(100%-28px),transparent)] [-webkit-mask-image:linear-gradient(to_right,black_calc(100%-28px),transparent)]">
         {items.map((p) => (
           <NavLink
             key={p.id}

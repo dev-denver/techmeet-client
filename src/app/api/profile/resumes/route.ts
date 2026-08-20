@@ -2,16 +2,10 @@ import { NextRequest, NextResponse } from "next/server";
 import { requireAuth } from "@/lib/api/server";
 import { createServerClient } from "@/lib/supabase/server";
 import { addProfileResume, getProfileResumes } from "@/lib/supabase/queries/profile";
+import { LIMITS } from "@/lib/constants/limits";
+import { RESUME_ALLOWED_MIME_TYPES } from "@/lib/constants/resume";
 
-const MAX_FILE_SIZE = 10 * 1024 * 1024; // 10MB
 const MAX_RESUME_COUNT = 10;
-const ALLOWED_MIME_TYPES = new Set([
-  "application/pdf",
-  "application/msword",
-  "application/vnd.openxmlformats-officedocument.wordprocessingml.document",
-  "application/x-hwp",
-  "application/haansofthwp",
-]);
 
 function getExtension(mimeType: string): string {
   const map: Record<string, string> = {
@@ -36,14 +30,14 @@ export async function POST(request: NextRequest) {
       return NextResponse.json({ error: "파일이 없습니다" }, { status: 400 });
     }
 
-    if (!ALLOWED_MIME_TYPES.has(file.type)) {
+    if (!RESUME_ALLOWED_MIME_TYPES.has(file.type)) {
       return NextResponse.json(
         { error: "PDF, DOC, DOCX, HWP 파일만 업로드할 수 있습니다" },
         { status: 400 }
       );
     }
 
-    if (file.size > MAX_FILE_SIZE) {
+    if (file.size > LIMITS.FILE_UPLOAD_MAX_SIZE) {
       return NextResponse.json({ error: "파일 크기는 10MB 이하여야 합니다" }, { status: 400 });
     }
 

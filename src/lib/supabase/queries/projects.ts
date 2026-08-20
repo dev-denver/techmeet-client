@@ -82,10 +82,7 @@ export async function getProjects(params?: GetProjectsParams): Promise<GetProjec
 
   const { data, count, error } = await query;
 
-  if (error) {
-    console.warn("[getProjects]", error);
-    return { data: [], total: 0, page, pageSize };
-  }
+  if (error) throw error;
 
   return {
     data: (data as ProjectRow[]).map(mapRowToProject),

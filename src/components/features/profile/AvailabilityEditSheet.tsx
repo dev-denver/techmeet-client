@@ -106,7 +106,7 @@ export function AvailabilityEditSheet({ open, onClose, status, availableFromDate
           </div>
         )}
 
-        <p className="text-[11px] text-muted-foreground">
+        <p className="text-[10px] text-muted-foreground">
           * 투입 상태는 담당 매니저에게 공유됩니다.
         </p>
       </div>

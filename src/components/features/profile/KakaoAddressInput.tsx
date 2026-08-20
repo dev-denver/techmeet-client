@@ -47,12 +47,15 @@ interface KakaoAddressInputProps {
 
 export function KakaoAddressInput({ base, detail, onBaseChange, onDetailChange }: KakaoAddressInputProps) {
   const [isOpen, setIsOpen] = useState(false);
+  const [scriptError, setScriptError] = useState(false);
+  const [retryKey, setRetryKey] = useState(0);
   const embedRef = useRef<HTMLDivElement>(null);
 
-  // 카카오 검색창 열릴 때 스크립트 로드 & embed
+  // 카카오 검색창 열릴 때 스크립트 로드 & embed (retryKey가 바뀌면 재시도)
   useEffect(() => {
     if (!isOpen || !embedRef.current) return;
     let stale = false;
+    setScriptError(false);
 
     loadScript()
       .then(() => {
@@ -69,12 +72,15 @@ export function KakaoAddressInput({ base, detail, onBaseChange, onDetailChange }
           height: "100%",
         }).embed(embedRef.current, { autoClose: false });
       })
-      .catch(console.error);
+      .catch((err) => {
+        console.error(err);
+        if (!stale) setScriptError(true);
+      });
 
     // cleanup: isOpen이 false로 바뀌거나 컴포넌트가 언마운트될 때
     // stale 플래그로 비동기 콜백이 이미 해제된 DOM에 접근하지 않도록 방어
     return () => { stale = true; };
-  }, [isOpen, onBaseChange, onDetailChange]);
+  }, [isOpen, retryKey, onBaseChange, onDetailChange]);
 
   return (
     <>
@@ -125,7 +131,22 @@ export function KakaoAddressInput({ base, detail, onBaseChange, onDetailChange }
               <X className="h-5 w-5" />
             </button>
           </div>
-          <div ref={embedRef} className="flex-1 w-full" />
+          {/* embedRef 컨테이너는 항상 렌더링 — scriptError일 때는 위에 에러 안내를 덮어씌운다 (재시도 시 ref가 항상 유효해야 하므로 조건부 언마운트하지 않음) */}
+          <div className="flex-1 w-full relative">
+            <div ref={embedRef} className="w-full h-full" />
+            {scriptError && (
+              <div className="absolute inset-0 flex flex-col items-center justify-center gap-3 px-4 text-center bg-background">
+                <p className="text-sm text-muted-foreground">주소 검색을 불러오지 못했습니다. 네트워크 연결을 확인해주세요.</p>
+                <button
+                  type="button"
+                  onClick={() => setRetryKey((k) => k + 1)}
+                  className="text-sm text-primary font-medium hover:underline underline-offset-2"
+                >
+                  다시 시도
+                </button>
+              </div>
+            )}
+          </div>
         </div>
       )}
     </>

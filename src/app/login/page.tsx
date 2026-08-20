@@ -18,6 +18,7 @@ const KAKAO_ERROR_MESSAGES: Record<string, string> = {
   kakao_api_error: "카카오 로그인 처리 중 오류가 발생했습니다",
   session_error: "로그인 세션 생성에 실패했습니다. 다시 시도해주세요",
   missing_code: "잘못된 접근입니다",
+  signup_session_expired: "회원가입 세션이 만료되었습니다. 카카오 로그인을 다시 진행해주세요.",
   [AccountStatus.Withdrawn]: "탈퇴한 계정입니다. 카카오 로그인으로 신규 가입해주세요.",
 };
 
@@ -107,7 +108,7 @@ function LoginForm() {
 
             {/* 카카오 로그인 버튼 */}
             <button
-              className="flex w-full items-center justify-center gap-3 rounded-xl px-6 py-4 text-[15px] font-semibold text-[#3C1E1E] transition-opacity hover:opacity-90 active:opacity-80 disabled:opacity-60 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2"
+              className="flex w-full items-center justify-center gap-3 rounded-xl px-6 py-4 text-base font-semibold text-[#3C1E1E] transition-opacity hover:opacity-90 active:opacity-80 disabled:opacity-60 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2"
               style={{ backgroundColor: "#FEE500" }}
               onClick={handleKakaoLogin}
               disabled={isKakaoLoading}
@@ -136,6 +137,7 @@ function LoginForm() {
                 required
                 maxLength={LIMITS.EMAIL_MAX}
                 placeholder="이메일"
+                autoComplete="email"
               />
               <div className="relative">
                 <Input
@@ -144,6 +146,7 @@ function LoginForm() {
                   onChange={(e) => setPassword(e.target.value)}
                   required
                   placeholder="비밀번호"
+                  autoComplete="current-password"
                   className="pr-10"
                 />
                 <button
@@ -168,7 +171,7 @@ function LoginForm() {
                 disabled={isLoading}
                 aria-busy={isLoading || undefined}
                 className={cn(
-                  "flex w-full items-center justify-center gap-2 rounded-xl bg-primary py-3.5 text-[15px] font-semibold text-primary-foreground transition-opacity hover:opacity-90 active:opacity-80 disabled:opacity-50",
+                  "flex w-full items-center justify-center gap-2 rounded-xl bg-primary py-3.5 text-base font-semibold text-primary-foreground transition-opacity hover:opacity-90 active:opacity-80 disabled:opacity-50",
                   "focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2"
                 )}
               >

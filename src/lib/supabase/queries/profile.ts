@@ -220,10 +220,7 @@ export async function getProfile(): Promise<GetProfileResponse | null> {
     getProfileResumes(user.id),
   ]);
 
-  if (profileResult.error) {
-    console.warn("[getProfile]", profileResult.error);
-    return null;
-  }
+  if (profileResult.error) throw profileResult.error;
 
   const row = profileResult.data as ProfileRow;
 

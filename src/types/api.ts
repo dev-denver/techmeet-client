@@ -43,6 +43,10 @@ export interface ChangePasswordRequest {
   encryptedNewPassword: string;
 }
 
+export interface WithdrawRequest {
+  encryptedPassword: string;
+}
+
 // ── Projects ──────────────────────────────────────────
 export interface GetProjectsParams {
   status?: ProjectFilterValue;

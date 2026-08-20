@@ -5,9 +5,12 @@ import { useRouter } from "next/navigation";
 import { FileText, Download, Trash2, Plus } from "lucide-react";
 import type { ContractDocument } from "@/types";
 import { ErrorMessage } from "@/components/ui/error-message";
+import { ConfirmSheet } from "@/components/ui/confirm-sheet";
+import { useToast } from "@/components/ui/toast";
 import { profileApi } from "@/lib/api/profile";
 import { ApiError } from "@/lib/api/client";
-import type { ContractDocumentType } from "@/lib/constants/contractDocuments";
+import { LIMITS } from "@/lib/constants/limits";
+import { CONTRACT_DOCUMENT_TYPES, type ContractDocumentType } from "@/lib/constants/contractDocuments";
 
 interface ContractDocumentFieldProps {
   documentType: ContractDocumentType;
@@ -18,10 +21,12 @@ interface ContractDocumentFieldProps {
 
 export function ContractDocumentField({ documentType, label, accept, initialDocument }: ContractDocumentFieldProps) {
   const router = useRouter();
+  const { showToast } = useToast();
   const inputRef = useRef<HTMLInputElement>(null);
   const [currentDocument, setCurrentDocument] = useState<ContractDocument | null>(initialDocument);
   const [isUploading, setIsUploading] = useState(false);
   const [isDeleting, setIsDeleting] = useState(false);
+  const [confirmDelete, setConfirmDelete] = useState(false);
   const [error, setError] = useState("");
 
   async function handleFileChange(e: React.ChangeEvent<HTMLInputElement>) {
@@ -30,10 +35,21 @@ export function ContractDocumentField({ documentType, label, accept, initialDocu
     e.target.value = "";
 
     setError("");
+
+    if (!CONTRACT_DOCUMENT_TYPES[documentType].allowedMimeTypes.has(file.type)) {
+      setError(`${label} 파일 형식이 올바르지 않습니다`);
+      return;
+    }
+    if (file.size > LIMITS.FILE_UPLOAD_MAX_SIZE) {
+      setError("파일 크기는 10MB 이하여야 합니다");
+      return;
+    }
+
     setIsUploading(true);
     try {
       const { document } = await profileApi.uploadContractDocument(documentType, file);
       setCurrentDocument(document);
+      showToast(`${label}이(가) 업로드되었습니다`);
       router.refresh();
     } catch (err) {
       setError(err instanceof ApiError ? err.message : "업로드에 실패했습니다");
@@ -48,11 +64,13 @@ export function ContractDocumentField({ documentType, label, accept, initialDocu
     try {
       await profileApi.deleteContractDocument(documentType);
       setCurrentDocument(null);
+      showToast(`${label}이(가) 삭제되었습니다`);
       router.refresh();
     } catch (err) {
       setError(err instanceof ApiError ? err.message : "삭제에 실패했습니다");
     } finally {
       setIsDeleting(false);
+      setConfirmDelete(false);
     }
   }
 
@@ -74,7 +92,7 @@ export function ContractDocumentField({ documentType, label, accept, initialDocu
           </a>
           <button
             type="button"
-            onClick={handleDelete}
+            onClick={() => setConfirmDelete(true)}
             disabled={isDeleting}
             className="shrink-0 p-1.5 rounded-lg text-muted-foreground hover:text-destructive hover:bg-destructive/10 transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:opacity-40"
             aria-label={`${label} 삭제`}
@@ -111,6 +129,15 @@ export function ContractDocumentField({ documentType, label, accept, initialDocu
           </button>
         </>
       )}
+
+      <ConfirmSheet
+        open={confirmDelete}
+        title={`${label}을(를) 삭제할까요?`}
+        description="삭제한 파일은 복구할 수 없습니다."
+        isLoading={isDeleting}
+        onConfirm={handleDelete}
+        onClose={() => setConfirmDelete(false)}
+      />
     </div>
   );
 }

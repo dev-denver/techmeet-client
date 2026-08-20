@@ -1,7 +1,7 @@
 import { notFound } from "next/navigation";
-import { Bell, CalendarDays, ChevronUp, ChevronDown, LayoutList, Paperclip, Download } from "lucide-react";
+import { Bell, CalendarDays, LayoutList, Paperclip, Download } from "lucide-react";
 import { NavLink } from "@/components/ui/nav-link";
-import { getNoticeById, getNotices } from "@/lib/supabase/queries/notices";
+import { getNoticeById } from "@/lib/supabase/queries/notices";
 import { formatDate } from "@/lib/utils/format";
 
 function formatFileSize(bytes: number): string {
@@ -16,18 +16,9 @@ interface NoticeDetailPageProps {
 
 export default async function NoticeDetailPage({ params }: NoticeDetailPageProps) {
   const { id } = await params;
-  const [notice, allNoticesResult] = await Promise.all([
-    getNoticeById(id),
-    getNotices(),
-  ]);
+  const notice = await getNoticeById(id);
 
   if (!notice) notFound();
-
-  const allNotices = allNoticesResult.data;
-  const currentIndex = allNotices.findIndex((n) => n.id === id);
-  // 목록은 최신순(desc) — index 낮을수록 최신
-  const newerNotice = currentIndex > 0 ? allNotices[currentIndex - 1] : null;
-  const olderNotice = currentIndex < allNotices.length - 1 ? allNotices[currentIndex + 1] : null;
 
   return (
     <div className="pb-6">
@@ -87,41 +78,16 @@ export default async function NoticeDetailPage({ params }: NoticeDetailPageProps
         </div>
       )}
 
-      {/* 이전 / 다음 / 목록 */}
-      <div className="border-t border-b divide-y divide-border">
-        {newerNotice && (
-          <NavLink
-            href={`/notices/${newerNotice.id}`}
-            className="flex items-center gap-3 px-4 py-3.5 hover:bg-muted/50 active:bg-muted transition-colors"
-          >
-            <span className="flex items-center gap-1 text-xs text-muted-foreground shrink-0 w-10">
-              <ChevronUp className="h-3.5 w-3.5" />
-              다음
-            </span>
-            <p className="text-sm text-foreground truncate flex-1">{newerNotice.title}</p>
-          </NavLink>
-        )}
-        {olderNotice && (
-          <NavLink
-            href={`/notices/${olderNotice.id}`}
-            className="flex items-center gap-3 px-4 py-3.5 hover:bg-muted/50 active:bg-muted transition-colors"
-          >
-            <span className="flex items-center gap-1 text-xs text-muted-foreground shrink-0 w-10">
-              <ChevronDown className="h-3.5 w-3.5" />
-              이전
-            </span>
-            <p className="text-sm text-foreground truncate flex-1">{olderNotice.title}</p>
-          </NavLink>
-        )}
+      {/* 목록으로 */}
+      <div className="px-4 pt-5">
+        <NavLink
+          href="/notices"
+          className="flex items-center justify-center gap-1.5 h-11 rounded-xl border border-border text-sm font-medium text-muted-foreground hover:bg-muted/50 active:bg-muted transition-colors"
+        >
+          <LayoutList className="h-4 w-4" />
+          목록으로
+        </NavLink>
       </div>
-
-      <NavLink
-        href="/notices"
-        className="flex items-center justify-center gap-1.5 px-4 py-4 hover:bg-muted/50 active:bg-muted transition-colors"
-      >
-        <LayoutList className="h-4 w-4 text-muted-foreground" />
-        <span className="text-sm text-muted-foreground">목록으로</span>
-      </NavLink>
     </div>
   );
 }

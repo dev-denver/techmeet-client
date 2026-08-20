@@ -3,8 +3,7 @@ import { requireAuth } from "@/lib/api/server";
 import { createServerClient } from "@/lib/supabase/server";
 import { getContractDocument, updateContractDocument } from "@/lib/supabase/queries/profile";
 import { CONTRACT_DOCUMENT_TYPES, isContractDocumentType } from "@/lib/constants/contractDocuments";
-
-const MAX_FILE_SIZE = 10 * 1024 * 1024; // 10MB
+import { LIMITS } from "@/lib/constants/limits";
 
 function getExtension(mimeType: string): string {
   const map: Record<string, string> = {
@@ -41,7 +40,7 @@ export async function POST(
       return NextResponse.json({ error: `${config.label} 파일 형식이 올바르지 않습니다` }, { status: 400 });
     }
 
-    if (file.size > MAX_FILE_SIZE) {
+    if (file.size > LIMITS.FILE_UPLOAD_MAX_SIZE) {
       return NextResponse.json({ error: "파일 크기는 10MB 이하여야 합니다" }, { status: 400 });
     }
 

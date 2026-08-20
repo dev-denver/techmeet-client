@@ -63,10 +63,7 @@ export async function getApplications(): Promise<GetApplicationsResponse> {
     .eq("freelancer_id", user.id)
     .order("applied_at", { ascending: false });
 
-  if (error) {
-    console.warn("[getApplications]", error);
-    return { data: [], total: 0, page: 1, pageSize: 20 };
-  }
+  if (error) throw error;
 
   const applications = (data as ApplicationRow[]).map(mapRowToApplication);
   applications.sort(
@@ -97,7 +94,8 @@ export async function getApplicationForProject(
     .eq("project_id", projectId)
     .maybeSingle();
 
-  if (error || !data) return null;
+  if (error) throw error;
+  if (!data) return null;
   return mapRowToApplication(data as ApplicationRow);
 }
 

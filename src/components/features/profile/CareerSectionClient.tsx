@@ -55,11 +55,15 @@ export function CareerSectionClient({ careers }: CareerSectionClientProps) {
     setServerError("");
   }
 
-  function updateForm(field: keyof CareerFormState, value: string | boolean) {
+  function updateForm(field: keyof Omit<CareerFormState, "techStack">, value: string | boolean) {
     setForm((prev) => ({ ...prev, [field]: value }));
     if (field in fieldErrors) {
       setFieldErrors((prev) => ({ ...prev, [field]: undefined }));
     }
+  }
+
+  function updateTechStack(value: string[]) {
+    setForm((prev) => ({ ...prev, techStack: value }));
   }
 
   function validate(): boolean {
@@ -83,11 +87,6 @@ export function CareerSectionClient({ careers }: CareerSectionClientProps) {
     e.preventDefault();
     if (!validate()) return;
 
-    const techStack = form.techStackInput
-      .split(",")
-      .map((t) => t.trim())
-      .filter(Boolean);
-
     const payload: AddCareerRequest = {
       company: form.company.trim(),
       role: form.role.trim(),
@@ -95,7 +94,7 @@ export function CareerSectionClient({ careers }: CareerSectionClientProps) {
       endDate: form.isCurrent ? undefined : form.endDate || undefined,
       isCurrent: form.isCurrent,
       description: form.description.trim(),
-      techStack,
+      techStack: form.techStack,
     };
 
     await submit(
@@ -161,6 +160,7 @@ export function CareerSectionClient({ careers }: CareerSectionClientProps) {
                   isSubmitting={isSubmitting}
                   isEdit
                   onUpdate={updateForm}
+                  onTechStackChange={updateTechStack}
                   onSubmit={handleSubmit}
                   onCancel={closeForm}
                 />
@@ -271,6 +271,7 @@ export function CareerSectionClient({ careers }: CareerSectionClientProps) {
           isSubmitting={isSubmitting}
           isEdit={false}
           onUpdate={updateForm}
+          onTechStackChange={updateTechStack}
           onSubmit={handleSubmit}
           onCancel={closeForm}
         />
