@@ -1,5 +1,21 @@
+import type { Metadata } from "next";
 import { BackButton } from "@/components/ui/back-button";
 import { PolicySectionNav } from "@/components/ui/policy-section-nav";
+
+export const metadata: Metadata = {
+  title: "이용약관",
+  description: "테크밋(TechMeet) 서비스 이용약관입니다.",
+  alternates: { canonical: "/terms" },
+  openGraph: {
+    type: "website",
+    locale: "ko_KR",
+    siteName: "테크밋",
+    url: "/terms",
+    title: "이용약관 | 테크밋",
+    description: "테크밋(TechMeet) 서비스 이용약관입니다.",
+    images: ["/opengraph-image"],
+  },
+};
 
 const SECTIONS = [
   { id: "purpose", label: "목적" },

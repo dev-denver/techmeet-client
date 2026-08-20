@@ -1,7 +1,13 @@
+import type { Metadata } from "next";
 import { cookies } from "next/headers";
 import { redirect } from "next/navigation";
 import { Suspense } from "react";
 import { SignupForm } from "./SignupForm";
+
+export const metadata: Metadata = {
+  title: "회원가입",
+  robots: { index: false, follow: false },
+};
 
 interface SignupPageProps {
   searchParams: Promise<{ name?: string; kakao_id?: string; birth_date?: string; phone?: string }>;
