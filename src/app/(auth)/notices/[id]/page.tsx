@@ -1,8 +1,12 @@
+import type { Metadata } from "next";
 import { notFound } from "next/navigation";
 import { Bell, CalendarDays, LayoutList, Paperclip, Download } from "lucide-react";
 import { NavLink } from "@/components/ui/nav-link";
 import { getNoticeById } from "@/lib/supabase/queries/notices";
+import { NOTICE_DETAIL_TITLE } from "@/lib/constants";
 import { formatDate } from "@/lib/utils/format";
+
+export const metadata: Metadata = { title: NOTICE_DETAIL_TITLE };
 
 function formatFileSize(bytes: number): string {
   if (bytes < 1024) return `${bytes} B`;

@@ -1,3 +1,4 @@
+import type { Metadata } from "next";
 import { notFound } from "next/navigation";
 import { MapPin, Clock, Users, Calendar, Check, ChevronRight, Sparkles } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
@@ -13,9 +14,11 @@ import { getApplicationForProject } from "@/lib/supabase/queries/applications";
 import { getProfile } from "@/lib/supabase/queries/profile";
 import { formatDate, formatDeadlineDays, getDeadlineDays, formatWorkType } from "@/lib/utils/format";
 import { getMySkills, getMatchedSkillSet } from "@/lib/utils/skills";
-import { APPLICATION_STATUS_CONFIG } from "@/lib/constants";
+import { APPLICATION_STATUS_CONFIG, PROJECT_DETAIL_TITLE } from "@/lib/constants";
 import { cn } from "@/lib/utils/cn";
 import { ApplicationStatus, ProjectStatus } from "@/types";
+
+export const metadata: Metadata = { title: PROJECT_DETAIL_TITLE };
 
 interface ProjectDetailPageProps {
   params: Promise<{ id: string }>;

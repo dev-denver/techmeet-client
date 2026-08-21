@@ -6,3 +6,4 @@ export {
 } from "./status";
 export { LIMITS } from "./limits";
 export { PROFILE_TABS, type ProfileTab } from "./profileTabs";
+export { PAGE_TITLES, PROJECT_DETAIL_TITLE, NOTICE_DETAIL_TITLE } from "./pageTitles";

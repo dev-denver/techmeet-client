@@ -1,3 +1,4 @@
+import type { Metadata } from "next";
 import { ChevronRight, Shield, Info, UserCog, UserX, KeyRound } from "lucide-react";
 import { NotificationSettings } from "@/components/features/settings/NotificationSettings";
 import { LogoutButton } from "@/components/features/settings/LogoutButton";
@@ -5,6 +6,9 @@ import { NavLink } from "@/components/ui/nav-link";
 import { PageHero } from "@/components/ui/page-hero";
 import { getProfile } from "@/lib/supabase/queries/profile";
 import { ReferrerSection } from "@/components/features/referrer/ReferrerSection";
+import { PAGE_TITLES } from "@/lib/constants";
+
+export const metadata: Metadata = { title: PAGE_TITLES["/settings"] };
 
 function SectionLabel({ children }: { children: React.ReactNode }) {
   return (

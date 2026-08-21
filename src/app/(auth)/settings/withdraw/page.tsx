@@ -1,6 +1,10 @@
+import type { Metadata } from "next";
 import { WithdrawForm } from "@/components/features/settings/WithdrawForm";
 import { getApplications } from "@/lib/supabase/queries/applications";
+import { PAGE_TITLES } from "@/lib/constants";
 import { ApplicationStatus } from "@/types";
+
+export const metadata: Metadata = { title: PAGE_TITLES["/settings/withdraw"] };
 
 const ACTIVE_STATUSES: Set<ApplicationStatus> = new Set([
   ApplicationStatus.Pending,

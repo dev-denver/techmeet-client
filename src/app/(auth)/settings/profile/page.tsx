@@ -1,6 +1,10 @@
+import type { Metadata } from "next";
 import { ErrorMessage } from "@/components/ui/error-message";
 import { EditProfileForm } from "@/components/features/settings/EditProfileForm";
 import { getProfile } from "@/lib/supabase/queries/profile";
+import { PAGE_TITLES } from "@/lib/constants";
+
+export const metadata: Metadata = { title: PAGE_TITLES["/settings/profile"] };
 
 export default async function EditProfilePage() {
   const result = await getProfile();
