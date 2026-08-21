@@ -1,3 +1,4 @@
+import type { Metadata } from "next";
 import { FolderOpen } from "lucide-react";
 import { ApplicationCard } from "@/components/features/projects/ApplicationCard";
 import { EmptyState } from "@/components/ui/empty-state";
@@ -5,7 +6,10 @@ import { NavLink } from "@/components/ui/nav-link";
 import { PageHero } from "@/components/ui/page-hero";
 import { StatsGrid } from "@/components/ui/stats-grid";
 import { getApplications } from "@/lib/supabase/queries/applications";
+import { PAGE_TITLES } from "@/lib/constants";
 import { ApplicationStatus } from "@/types";
+
+export const metadata: Metadata = { title: PAGE_TITLES["/projects/applications"] };
 
 export default async function ApplicationsPage() {
   const { data: applications, total } = await getApplications();

@@ -5,27 +5,15 @@ import { ArrowLeft, History } from "lucide-react";
 import { useScrolled } from "@/hooks/useScrolled";
 import { cn } from "@/lib/utils/cn";
 import { NavLink } from "@/components/ui/nav-link";
-
-const pageTitles: Record<string, string> = {
-  "/": "홈",
-  "/projects": "프로젝트",
-  "/projects/applications": "내 신청 내역",
-  "/profile": "내 정보",
-  "/settings": "설정",
-  "/settings/profile": "내 정보 수정",
-  "/settings/password": "비밀번호 변경",
-  "/settings/withdraw": "회원 탈퇴",
-  "/notifications": "알림 내역",
-  "/notices": "공지사항",
-};
+import { PAGE_TITLES, PROJECT_DETAIL_TITLE, NOTICE_DETAIL_TITLE } from "@/lib/constants";
 
 function getTitle(pathname: string): string {
-  if (pageTitles[pathname]) return pageTitles[pathname];
+  if (PAGE_TITLES[pathname]) return PAGE_TITLES[pathname];
   if (pathname.startsWith("/projects/") && pathname !== "/projects/applications") {
-    return "프로젝트 상세";
+    return PROJECT_DETAIL_TITLE;
   }
   if (pathname.startsWith("/notices/")) {
-    return "공지사항";
+    return NOTICE_DETAIL_TITLE;
   }
   return "테크밋";
 }

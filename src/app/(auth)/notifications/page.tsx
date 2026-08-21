@@ -1,9 +1,13 @@
+import type { Metadata } from "next";
 import { CheckCircle, XCircle, Clock, Megaphone, User, FolderOpen, History, ChevronRight } from "lucide-react";
 import { getAlimtalkLogs } from "@/lib/supabase/queries/notifications";
 import { EmptyState } from "@/components/ui/empty-state";
 import { NavLink } from "@/components/ui/nav-link";
+import { PAGE_TITLES } from "@/lib/constants";
 import { AlimtalkServiceType } from "@/types";
 import { formatDate } from "@/lib/utils/format";
+
+export const metadata: Metadata = { title: PAGE_TITLES["/notifications"] };
 
 const SERVICE_TYPE_CONFIG: Record<AlimtalkServiceType, { label: string; icon: React.ComponentType<{ className?: string }> }> = {
   [AlimtalkServiceType.Project]: { label: "프로젝트", icon: FolderOpen },

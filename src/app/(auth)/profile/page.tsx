@@ -1,7 +1,10 @@
+import type { Metadata } from "next";
 import { Card, CardContent } from "@/components/ui/card";
 import { ProfileTabsClient } from "@/components/features/profile/ProfileTabsClient";
 import { getProfile } from "@/lib/supabase/queries/profile";
-import { PROFILE_TABS } from "@/lib/constants";
+import { PROFILE_TABS, PAGE_TITLES } from "@/lib/constants";
+
+export const metadata: Metadata = { title: PAGE_TITLES["/profile"] };
 
 interface ProfilePageProps {
   searchParams: Promise<{ tab?: string }>;
