@@ -105,7 +105,7 @@ export function ApplicationCard({
 
   const content = (
     <>
-      <div className="px-4 pt-4 pb-3.5 space-y-2.5">
+      <div className="px-4 pt-4 pb-4 space-y-2.5">
         {/* 상태 + 날짜 */}
         <div className="flex items-center justify-between gap-2">
           <Badge variant="outline" shape="pill" className={config.className}>
