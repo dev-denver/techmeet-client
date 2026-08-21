@@ -101,7 +101,6 @@ export function ApplicationCard({
 
   /* ─── full ─── */
   const canCancel = application.status === ApplicationStatus.Pending;
-  const accent = config.borderLeft ?? "border-l-border";
 
   const content = (
     <>
@@ -184,13 +183,7 @@ export function ApplicationCard({
   if (application.isProjectDeleted) {
     return (
       <div className="relative">
-        <div
-          className={cn(
-            surfaceCardVariants({ padding: "none" }),
-            "border-l-4 opacity-60",
-            accent
-          )}
-        >
+        <div className={cn(surfaceCardVariants({ padding: "none" }), "opacity-60")}>
           {content}
         </div>
       </div>
@@ -201,7 +194,7 @@ export function ApplicationCard({
     <div className="relative">
       <NavLink
         href={`/projects/${application.projectId}`}
-        className={cn(surfaceCardVariants({ padding: "none" }), "block border-l-4", accent)}
+        className={cn(surfaceCardVariants({ padding: "none" }), "block hover:border-muted-foreground/40 transition-colors")}
       >
         {content}
       </NavLink>
