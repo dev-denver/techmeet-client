@@ -19,6 +19,12 @@ colors:
   status-neutral: "oklch(0.55 0.01 286)"
   status-purple: "oklch(0.5 0.13 300)"
 typography:
+  page-h1:
+    fontFamily: "Pretendard Variable, -apple-system, sans-serif"
+    fontSize: "1.25rem"
+    fontWeight: 700
+    lineHeight: 1.375
+    letterSpacing: "normal"
   title:
     fontFamily: "Pretendard Variable, -apple-system, sans-serif"
     fontSize: "1rem"
@@ -54,6 +60,7 @@ rounded:
   md: "8px"
   lg: "10px"
   xl: "14px"
+  2xl: "16px"
   full: "9999px"
 spacing:
   xs: "4px"
@@ -131,14 +138,15 @@ TechMeet client는 아무 정보나 쌓아 올린 게시판이 아니라, 테크
 **Character:** 한글 가변 폰트 하나로 본문부터 제목까지 모두 소화하는 단일 패밀리 전략. 위계는 폰트가 아니라 굵기(weight)와 크기 단계로만 만든다.
 
 ### Hierarchy
+- **Page H1** (700, `1.25rem`/20px, leading-snug): 콘텐츠 페이지의 최상위 제목 — 프로젝트 상세·공지 상세 본문 타이틀, 인증(로그인/회원가입) 폼 타이틀. `TopBar`의 라우트 타이틀(`text-base`)이나 카드/섹션의 `Title`(16px)과는 다른, 페이지 하나에 한 번만 등장하는 상위 계층.
 - **Title** (700, `1rem`/16px, leading-snug): 섹션 헤더("내 신청 현황"), 카드 제목(프로젝트명), 히어로 인사말.
 - **Body** (400, `0.875rem`/14px, leading-normal): 본문 설명, 목록 텍스트.
 - **Label** (500, `0.75rem`/12px): 배지, chip, 보조 라벨, 타임스탬프.
-- **Stat Value** (700, `1.25rem`/20px, mono, tabular-nums): 히어로 영역 통계 숫자(StatsGrid).
+- **Stat Value** (700, `1.25rem`/20px, mono, tabular-nums): 히어로 영역 통계 숫자(StatsGrid, 지원 내역 페이지 총 건수). `font-mono`(Geist Mono)를 실제로 적용한다 — Page H1과 크기는 같지만 폰트와 자간(tabular-nums)으로 구분되는 별도 역할.
 - **Micro** (500, `0.625rem`/10px): 필드 캡션(폼 소항목 라벨), 알림 타임스탬프, 초소형 배지 텍스트처럼 Label보다 한 단계 더 보조적인 텍스트. 앱 전역(BasicInfoTab, SkillTab, notifications, StatsGrid의 `labelSize="10px"` 등)에 이미 일관되게 쓰이던 5번째 스텝을 문서화한 것 — 새로 도입한 크기가 아니다. 본문 대비 대비가 낮은 자리(어두운 히어로 위 `/50` 텍스트 등)에서는 남용하지 않는다.
 
 ### Named Rules
-**The Two-Weight Rule.** 위계는 `text-xs`~`text-lg` 좁은 크기 범위 안에서 굵기(regular/semibold/bold) 차이로만 표현한다. 큰 디스플레이 사이즈(2xl 이상)는 쓰지 않는다.
+**The Two-Weight Rule.** 위계는 `text-xs`~`text-xl`(Page H1/Stat Value가 상한) 범위 안에서 굵기(regular/semibold/bold)와 크기 단계 차이로만 표현한다. `text-2xl` 이상의 디스플레이 사이즈는 어디에도 쓰지 않는다 — 로그인 화면의 로고/타이틀도 예외 없이 이 상한(`text-xl`)을 따른다(회원가입 화면과 동일 규격).
 
 ## Layout
 
@@ -146,14 +154,14 @@ TechMeet client는 아무 정보나 쌓아 올린 게시판이 아니라, 테크
 
 ## Elevation & Depth
 
-플랫 우선(flat-by-default) 시스템이다. 카드에 `shadow` 유틸리티가 존재하긴 하지만(shadcn 기본값) 실제 페이지에서는 `border` + 배경색 차이로 표면을 구분하는 방식이 압도적으로 많이 쓰인다. 별도의 layered/lifted 그림자 언어는 없다.
+플랫 우선(flat-by-default) 시스템이다. 카드·버튼·토글 등 페이지 내부 표면에는 `shadow` 유틸리티를 전혀 쓰지 않는다(shadcn 기본 `Card`의 `shadow`도 제거됨) — `border` + 배경색 차이로만 표면을 구분한다. 별도의 layered/lifted 그림자 언어는 없다.
 
 ### Named Rules
-**The Border-Over-Shadow Rule.** 표면 구분은 그림자가 아니라 hairline border(`border-border`)와 배경 대비(`bg-card` vs `bg-muted/50`)로 만든다. 그림자는 바텀시트/토스트처럼 화면 위로 떠오르는 오버레이에서만 의미가 있다.
+**The Border-Over-Shadow Rule.** 표면 구분은 그림자가 아니라 hairline border(`border-border`)와 배경 대비(`bg-card` vs `bg-muted/50`)로 만든다. 그림자는 바텀시트/토스트/PullToRefresh 인디케이터처럼 화면 위로 떠오르는 오버레이에서만 의미가 있다 — 이 셋 이외의 요소(카드, 버튼, 스위치 등)에는 그림자를 추가하지 않는다.
 
 ## Shapes
 
-라운드는 `--radius: 0.625rem`(10px)을 기준으로 한 4단계 스케일(`sm` 6px / `md` 8px / `lg` 10px / `xl` 14px)과, chip/pill에 쓰이는 `rounded-full`이 함께 쓰인다. 버튼·입력은 `md`, 카드는 `xl`, 배지/필은 `full`이 기본값이다. 보더는 항상 1px hairline.
+라운드는 `--radius: 0.625rem`(10px)을 기준으로 한 4단계 스케일(`sm` 6px / `md` 8px / `lg` 10px / `xl` 14px)에, 카드보다 큰 아이콘/로고 컨테이너 전용 5번째 단계 `2xl`(16px, `--radius-2xl` 토큰)과 chip/pill에 쓰이는 `rounded-full`이 함께 쓰인다. 버튼·입력은 `md`, 카드는 `xl`, 로고 박스·`StatsGrid`·`EmptyState`의 `iconShape="rounded"` 같은 대형 아이콘 컨테이너는 `2xl`, 배지/필은 `full`이 기본값이다. 보더는 항상 1px hairline.
 
 ## Components
 

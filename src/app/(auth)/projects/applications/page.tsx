@@ -32,7 +32,7 @@ export default async function ApplicationsPage() {
           <p className="text-primary-foreground/50 text-xs font-medium tracking-wide">총 지원 건수</p>
         </div>
         <p className="text-primary-foreground font-bold leading-none mt-0.5">
-          <span className="text-3xl tabular-nums">{total}</span>
+          <span className="text-xl font-mono tabular-nums">{total}</span>
           <span className="text-base font-medium text-primary-foreground/50 ml-1">건</span>
         </p>
 
