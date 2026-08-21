@@ -32,6 +32,7 @@ export function ConfirmSheet({
 }: ConfirmSheetProps) {
   return (
     <BottomSheet open={open} onClose={isLoading ? () => {} : onClose}>
+      {/* 바텀시트 콘텐츠는 px-5 — 카드 px-4보다 한 단계 넓은, 시트 전용 여백 */}
       <div className="px-5 pt-2 pb-6">
         <h2 className="text-base font-bold text-foreground">{title}</h2>
         {description && <p className="mt-1.5 text-sm text-muted-foreground">{description}</p>}

@@ -106,10 +106,9 @@ function LoginForm() {
               </p>
             )}
 
-            {/* 카카오 로그인 버튼 */}
+            {/* 카카오 로그인 버튼 — 카카오 브랜드 색상 예외 (CLAUDE.md 허용), --brand-kakao 토큰으로 표현 */}
             <button
-              className="flex w-full items-center justify-center gap-3 rounded-xl px-6 py-4 text-base font-semibold text-[#3C1E1E] transition-opacity hover:opacity-90 active:opacity-80 disabled:opacity-60 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2"
-              style={{ backgroundColor: "#FEE500" }}
+              className="flex w-full items-center justify-center gap-3 rounded-xl px-6 py-4 text-base font-semibold text-brand-kakao-ink bg-brand-kakao transition-opacity hover:opacity-90 active:opacity-80 disabled:opacity-60 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2"
               onClick={handleKakaoLogin}
               disabled={isKakaoLoading}
             >

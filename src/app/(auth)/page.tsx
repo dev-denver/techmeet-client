@@ -4,6 +4,10 @@ import { Badge } from "@/components/ui/badge";
 import { WelcomeToast } from "@/components/features/home/WelcomeToast";
 import { NavLink } from "@/components/ui/nav-link";
 import { StatsGrid } from "@/components/ui/stats-grid";
+import { PageHero } from "@/components/ui/page-hero";
+import { EmptyState } from "@/components/ui/empty-state";
+import { surfaceCardVariants } from "@/components/ui/surface-card";
+import { cn } from "@/lib/utils/cn";
 import { ProjectCard } from "@/components/features/projects/ProjectCard";
 import { ApplicationCard } from "@/components/features/projects/ApplicationCard";
 import { HomeProfileCompletionPrompt } from "@/components/features/profile/HomeProfileCompletionPrompt";
@@ -59,7 +63,7 @@ export default async function HomePage() {
       </Suspense>
 
       {/* 히어로 배너 */}
-      <section className="px-5 pt-4 pb-3 bg-primary">
+      <PageHero as="section" className="pt-4 pb-3">
         <div className="flex items-center justify-between">
           <div>
             <p className="text-primary-foreground/50 text-xs font-medium tracking-wide">안녕하세요</p>
@@ -95,7 +99,7 @@ export default async function HomePage() {
             { label: "합격", value: applicationsFailed ? "–" : acceptedCount },
           ]}
         />
-      </section>
+      </PageHero>
 
       {/* 프로필 완성도 넛지 (미완성일 때만) */}
       {completion && completion.percent < 100 && (
@@ -123,25 +127,31 @@ export default async function HomePage() {
             ))}
           </div>
         ) : applicationsFailed ? (
-          <div className="mx-4 rounded-xl bg-muted/50 border border-dashed border-border px-4 py-5 text-center">
-            <p className="text-sm text-muted-foreground">신청 현황을 불러오지 못했습니다.</p>
-            <NavLink
-              href="/"
-              className="inline-block text-xs text-primary mt-1.5 hover:underline underline-offset-2 font-medium"
-            >
-              다시 시도
-            </NavLink>
-          </div>
+          <EmptyState
+            variant="inline"
+            title="신청 현황을 불러오지 못했습니다."
+            action={
+              <NavLink
+                href="/"
+                className="inline-block text-xs text-primary mt-1.5 hover:underline underline-offset-2 font-medium"
+              >
+                다시 시도
+              </NavLink>
+            }
+          />
         ) : (
-          <div className="mx-4 rounded-xl bg-muted/50 border border-dashed border-border px-4 py-5 text-center">
-            <p className="text-sm text-muted-foreground">아직 지원한 프로젝트가 없습니다.</p>
-            <NavLink
-              href="/projects"
-              className="inline-block text-xs text-primary mt-1.5 hover:underline underline-offset-2 font-medium"
-            >
-              프로젝트 보러가기 →
-            </NavLink>
-          </div>
+          <EmptyState
+            variant="inline"
+            title="아직 지원한 프로젝트가 없습니다."
+            action={
+              <NavLink
+                href="/projects"
+                className="inline-block text-xs text-primary mt-1.5 hover:underline underline-offset-2 font-medium"
+              >
+                프로젝트 보러가기 →
+              </NavLink>
+            }
+          />
         )}
       </section>
 
@@ -167,38 +177,43 @@ export default async function HomePage() {
             ))}
           </div>
         ) : projectsFailed ? (
-          <div className="mx-4 rounded-xl bg-muted/50 border border-dashed border-border px-4 py-5 text-center">
-            <p className="text-sm text-muted-foreground">프로젝트를 불러오지 못했습니다.</p>
-            <NavLink
-              href="/"
-              className="inline-block text-xs text-primary mt-1.5 hover:underline underline-offset-2 font-medium"
-            >
-              다시 시도
-            </NavLink>
-          </div>
+          <EmptyState
+            variant="inline"
+            title="프로젝트를 불러오지 못했습니다."
+            action={
+              <NavLink
+                href="/"
+                className="inline-block text-xs text-primary mt-1.5 hover:underline underline-offset-2 font-medium"
+              >
+                다시 시도
+              </NavLink>
+            }
+          />
         ) : (
-          <div className="mx-4 rounded-xl bg-muted/50 border border-dashed border-border px-4 py-5 text-center">
-            <p className="text-sm text-muted-foreground">현재 모집 중인 프로젝트가 없습니다.</p>
-          </div>
+          <EmptyState variant="inline" title="현재 모집 중인 프로젝트가 없습니다." />
         )}
       </section>
 
       {/* 공지사항 */}
       {noticesFailed ? (
         <section className="pt-4 pb-6 px-4">
-          <div className="rounded-xl bg-muted/50 border border-dashed border-border px-4 py-5 text-center">
-            <p className="text-sm text-muted-foreground">공지사항을 불러오지 못했습니다.</p>
-            <NavLink
-              href="/"
-              className="inline-block text-xs text-primary mt-1.5 hover:underline underline-offset-2 font-medium"
-            >
-              다시 시도
-            </NavLink>
-          </div>
+          <EmptyState
+            variant="inline"
+            className="mx-0"
+            title="공지사항을 불러오지 못했습니다."
+            action={
+              <NavLink
+                href="/"
+                className="inline-block text-xs text-primary mt-1.5 hover:underline underline-offset-2 font-medium"
+              >
+                다시 시도
+              </NavLink>
+            }
+          />
         </section>
       ) : notices.length > 0 && (
         <section className="pt-4 pb-6 px-4">
-          <div className="rounded-xl border border-border bg-muted/40 overflow-hidden">
+          <div className={cn(surfaceCardVariants({ padding: "none" }), "bg-muted/40")}>
             <div className="flex items-center justify-between px-4 py-3 border-b border-border">
               <span className="text-xs font-medium text-muted-foreground flex items-center gap-1.5">
                 <Megaphone className="h-3.5 w-3.5" />

@@ -27,7 +27,7 @@ export function Switch({ checked, onChange, disabled, ...props }: SwitchProps) {
       <span
         suppressHydrationWarning
         className={cn(
-          "inline-block h-5 w-5 transform rounded-full bg-white shadow ring-0 transition duration-200",
+          "inline-block h-5 w-5 transform rounded-full bg-primary-foreground shadow-sm ring-0 transition duration-200",
           checked ? "translate-x-5" : "translate-x-0"
         )}
       />

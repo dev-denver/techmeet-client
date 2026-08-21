@@ -4,6 +4,8 @@ import { NotificationSettings } from "@/components/features/settings/Notificatio
 import { LogoutButton } from "@/components/features/settings/LogoutButton";
 import { NavLink } from "@/components/ui/nav-link";
 import { PageHero } from "@/components/ui/page-hero";
+import { surfaceCardVariants } from "@/components/ui/surface-card";
+import { cn } from "@/lib/utils/cn";
 import { getProfile } from "@/lib/supabase/queries/profile";
 import { ReferrerSection } from "@/components/features/referrer/ReferrerSection";
 import { PAGE_TITLES } from "@/lib/constants";
@@ -67,7 +69,7 @@ export default async function SettingsPage() {
         {/* 계정 */}
         <div>
           <SectionLabel>계정</SectionLabel>
-          <div className="rounded-xl border bg-card overflow-hidden divide-y divide-border">
+          <div className={cn(surfaceCardVariants({ padding: "none" }), "divide-y divide-border")}>
             {profile?.phone && <InfoRow label="전화번호" value={profile.phone} />}
             <ReferrerSection currentReferrerNote={profile?.referrerNote} />
             <LinkRow href="/settings/profile" icon={<UserCog className="h-4 w-4" />} label="내 정보 수정" />
@@ -78,7 +80,7 @@ export default async function SettingsPage() {
         {/* 알림 설정 */}
         <div>
           <SectionLabel>알림 설정</SectionLabel>
-          <div className="rounded-xl border bg-card overflow-hidden">
+          <div className={surfaceCardVariants({ padding: "none" })}>
             <NotificationSettings />
           </div>
         </div>
@@ -86,7 +88,7 @@ export default async function SettingsPage() {
         {/* 앱 정보 */}
         <div>
           <SectionLabel>앱 정보</SectionLabel>
-          <div className="rounded-xl border bg-card overflow-hidden divide-y divide-border">
+          <div className={cn(surfaceCardVariants({ padding: "none" }), "divide-y divide-border")}>
             <LinkRow href="/privacy" icon={<Shield className="h-4 w-4" />} label="개인정보 처리방침" />
             <LinkRow href="/terms" icon={<Info className="h-4 w-4" />} label="이용약관" />
             <InfoRow label="앱 버전" value="v1.0.0" />

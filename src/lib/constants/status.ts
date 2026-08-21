@@ -72,15 +72,15 @@ export const AVAILABILITY_STATUS_CONFIG: Record<AvailabilityStatus, StatusConfig
 export const AVAILABILITY_TOGGLE_CONFIG: Record<AvailabilityStatus, StatusConfig> = {
   [AvailabilityStatus.Available]: {
     label: "투입 가능",
-    className: "bg-status-success text-white",
+    className: "bg-status-success text-status-on-fill",
   },
   [AvailabilityStatus.Partial]: {
     label: "투입 가능 예정",
-    className: "bg-status-info text-white",
+    className: "bg-status-info text-status-on-fill",
   },
   [AvailabilityStatus.Unavailable]: {
     label: "투입 불가",
-    className: "bg-status-danger text-white",
+    className: "bg-status-danger text-status-on-fill",
   },
 };
 

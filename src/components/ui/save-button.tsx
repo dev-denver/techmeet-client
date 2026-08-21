@@ -32,7 +32,7 @@ export function SaveButton({
         "w-full rounded-xl py-3.5 text-base font-semibold transition-all flex items-center justify-center gap-2",
         "focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2",
         isSuccess
-          ? "bg-status-success text-white cursor-default"
+          ? "bg-status-success text-status-on-fill cursor-default"
           : "bg-primary text-primary-foreground hover:opacity-90 active:opacity-80 disabled:opacity-50",
         className
       )}
@@ -45,7 +45,7 @@ export function SaveButton({
         </>
       ) : isLoading ? (
         <>
-          <span className="w-4 h-4 border-2 border-white/30 border-t-white rounded-full animate-spin shrink-0" />
+          <span className="w-4 h-4 border-2 border-status-on-fill/30 border-t-status-on-fill rounded-full animate-spin shrink-0" />
           {loadingLabel}
         </>
       ) : (

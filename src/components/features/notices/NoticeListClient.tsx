@@ -4,6 +4,8 @@ import { useState } from "react";
 import { Bell, Loader2, Megaphone } from "lucide-react";
 import { EmptyState } from "@/components/ui/empty-state";
 import { NavLink } from "@/components/ui/nav-link";
+import { surfaceCardVariants } from "@/components/ui/surface-card";
+import { cn } from "@/lib/utils/cn";
 import { noticesApi } from "@/lib/api/notices";
 import { formatDate } from "@/lib/utils/format";
 import type { Notice } from "@/types";
@@ -53,7 +55,7 @@ export function NoticeListClient({ initialNotices, initialTotal }: NoticeListCli
         총 <span className="font-semibold text-foreground">{total}</span>개 공지
       </p>
 
-      <div className="rounded-xl border border-border divide-y divide-border overflow-hidden">
+      <div className={cn(surfaceCardVariants({ padding: "none" }), "divide-y divide-border")}>
         {notices.map((notice) => (
           <NavLink
             key={notice.id}

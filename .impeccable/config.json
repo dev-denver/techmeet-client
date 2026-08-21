@@ -17,6 +17,15 @@
         ],
         "createdAt": "2026-08-20T06:31:35.052Z",
         "reason": "next/og ImageResponse (Satori) requires literal inline style values, cannot consume Tailwind/DESIGN.md tokens"
+      },
+      {
+        "rule": "side-tab",
+        "value": "*",
+        "files": [
+          "src/components/features/projects/ApplicationCard.tsx"
+        ],
+        "createdAt": "2026-08-21T13:17:18.387Z",
+        "reason": "pre-existing app design: border-l-4 accent driven by APPLICATION_STATUS_CONFIG[status].borderLeft, predates this session's edits (only wrapper refactored to SurfaceCard, accent border untouched)"
       }
     ]
   }

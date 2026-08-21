@@ -2,6 +2,7 @@ import { MapPin, Clock, Users, CalendarRange, Layers, Sparkles } from "lucide-re
 import { ProjectStatusBadge } from "./ProjectStatusBadge";
 import { Badge } from "@/components/ui/badge";
 import { NavLink } from "@/components/ui/nav-link";
+import { surfaceCardVariants } from "@/components/ui/surface-card";
 import { formatDeadlineDays, getDeadlineDays, formatWorkType, formatProjectType, formatProjectPeriod } from "@/lib/utils/format";
 import { countSkillMatches } from "@/lib/utils/skills";
 import { cn } from "@/lib/utils/cn";
@@ -33,7 +34,8 @@ export function ProjectCard({ project, mySkills }: ProjectCardProps) {
     <NavLink
       href={`/projects/${project.id}`}
       className={cn(
-        "block rounded-xl border bg-card hover:border-muted-foreground/40 transition-colors overflow-hidden",
+        "block hover:border-muted-foreground/40 transition-colors",
+        surfaceCardVariants({ padding: "none" }),
         isExpired && "opacity-60"
       )}
     >
@@ -48,15 +50,17 @@ export function ProjectCard({ project, mySkills }: ProjectCardProps) {
             <ProjectStatusBadge status={project.status} />
           )}
           {project.status === ProjectStatus.Recruiting && !isExpired && deadlineText && (
-            <span
-              className={`text-xs font-semibold px-2.5 py-0.5 rounded-full ${
+            <Badge
+              variant="outline"
+              shape="pill"
+              className={
                 isUrgent
-                  ? "bg-status-danger/10 text-status-danger"
-                  : "bg-muted text-muted-foreground"
-              }`}
+                  ? "bg-status-danger/10 text-status-danger border-transparent"
+                  : "bg-muted text-muted-foreground border-transparent"
+              }
             >
               {deadlineText}
-            </span>
+            </Badge>
           )}
         </div>
 

@@ -27,12 +27,19 @@
   --color-status-danger: var(--status-danger);
   --color-status-neutral: var(--status-neutral);
   --color-status-purple: var(--status-purple);
+  --color-status-on-fill: var(--status-on-fill);
+  --color-overlay: var(--overlay);
+  --color-brand-kakao: var(--brand-kakao);
+  --color-brand-kakao-ink: var(--brand-kakao-ink);
   --font-sans: var(--font-pretendard);
   --font-mono: var(--font-geist-mono);
   --radius-sm: calc(var(--radius) - 4px);
   --radius-md: calc(var(--radius) - 2px);
   --radius-lg: var(--radius);
   --radius-xl: calc(var(--radius) + 4px);
+  --radius-2xl: 1rem;
+  --shadow-sm: 0 1px 2px rgba(0, 0, 0, 0.06);
+  --shadow-md: 0 4px 12px rgba(0, 0, 0, 0.1);
 }
 
 :root {
@@ -63,6 +70,10 @@
   --status-danger: oklch(0.5 0.17 24);
   --status-neutral: oklch(0.55 0.01 286);
   --status-purple: oklch(0.5 0.13 300);
+  --status-on-fill: oklch(0.985 0 0);
+  --overlay: oklch(0 0 0 / 0.5);
+  --brand-kakao: oklch(0.968 0.211 100.65);
+  --brand-kakao-ink: oklch(0.267 0.03 30);
 }
 
 @layer base {
@@ -70,7 +81,8 @@
     @apply border-border;
   }
   body {
-    @apply bg-background text-foreground;
+    /* 앱 셸 배경은 page-bg("책상" 표면) — background는 흰 표면(모달/시트) 전용 */
+    @apply bg-page-bg text-foreground;
   }
   .scrollbar-none {
     -ms-overflow-style: none;
