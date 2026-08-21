@@ -187,7 +187,7 @@ export function ApplicationCard({
         <div
           className={cn(
             surfaceCardVariants({ padding: "none" }),
-            "border-l-4 border-l-0 opacity-60",
+            "border-l-4 opacity-60",
             accent
           )}
         >
@@ -201,7 +201,7 @@ export function ApplicationCard({
     <div className="relative">
       <NavLink
         href={`/projects/${application.projectId}`}
-        className={cn(surfaceCardVariants({ padding: "none" }), "block border-l-4 border-l-0", accent)}
+        className={cn(surfaceCardVariants({ padding: "none" }), "block border-l-4", accent)}
       >
         {content}
       </NavLink>
