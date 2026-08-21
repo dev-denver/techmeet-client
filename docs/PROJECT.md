@@ -24,7 +24,8 @@
 | Styling   | Tailwind CSS v4 + shadcn/ui  | New York 스타일, Zinc 색상  |
 | Database  | Supabase (PostgreSQL)        | RLS 적용                    |
 | Auth      | Supabase Auth + 카카오 OAuth | magic link 방식 세션 생성   |
-| 알림      | 카카오 알림톡                | stub 상태 (제공업체 계약 후 구현) |
+| 알림(프리랜서 대상) | 카카오 알림톡          | stub 상태 (제공업체 계약 후 구현) |
+| 알림(관리자 대상)   | 센드온(Sendon) SMS      | 구현 완료 — 신규 지원 발생 시 발송 |
 
 ---
 
@@ -34,8 +35,12 @@
 
 ```
 src/
-├── proxy.ts                        # 개발 환경 카카오 OAuth 콜백 프록시
+├── proxy.ts                        # Next.js proxy 컨벤션 파일 (구 middleware.ts)
+│                                    # Supabase 세션 갱신 + 인증 가드 + 탈퇴 회원 차단 (전체 환경)
 ├── app/
+│   ├── opengraph-image.tsx         # OG 이미지 생성 (동적)
+│   ├── robots.ts                   # robots.txt 생성
+│   ├── sitemap.ts                  # sitemap.xml 생성
 │   ├── api/
 │   │   ├── auth/
 │   │   │   ├── public-key/         # RSA 공개키 발급 (GET)
@@ -56,7 +61,7 @@ src/
 │   │   │   │   └── [id]/           # 학력 수정/삭제 (PUT, DELETE)
 │   │   │   ├── certifications/     # 자격증 추가 (POST)
 │   │   │   │   └── [id]/           # 자격증 삭제 (DELETE)
-│   │   │   ├── skill-inventories/  # 스킬 인벤토리 추가 (POST)
+│   │   │   ├── skill-inventories/  # 스킬 인벤토리 추가 (POST), validate.ts(검증 헬퍼, 라우트 아님)
 │   │   │   │   └── [id]/           # 스킬 수정/삭제 (PUT, DELETE)
 │   │   │   ├── resumes/            # 이력서 업로드 (POST)
 │   │   │   │   └── [id]/           # 이력서 삭제/다운로드 (DELETE, GET /download)
@@ -82,32 +87,36 @@ src/
 │   │   └── settings/
 │   │       ├── page.tsx            # 설정
 │   │       ├── profile/page.tsx    # 내 정보 수정
-│   │       ├── password/page.tsx   # 비밀번호 변경
-│   │       └── withdraw/page.tsx   # 회원 탈퇴
-│   ├── login/page.tsx
+│   │       ├── password/           # layout.tsx(타이틀 메타데이터), page.tsx (비밀번호 변경)
+│   │       └── withdraw/page.tsx   # 회원 탈퇴 (비밀번호 재확인 필요)
+│   │   # (auth) 그룹 각 라우트에 loading.tsx 병행 배치 (Skeleton 기반 로딩 UI)
+│   ├── login/                      # layout.tsx(메타데이터), page.tsx
 │   ├── signup/page.tsx
 │   ├── terms/page.tsx              # 이용약관 (공개)
 │   └── privacy/page.tsx            # 개인정보 처리방침 (공개)
 ├── components/
 │   ├── ui/                         # badge, bottom-sheet, button, card, confirm-sheet,
 │   │                               # date-select-picker, empty-state, error-message, form-field,
-│   │                               # input, month-year-picker, nav-link, page-hero, save-button,
-│   │                               # separator, skeleton, skeleton-patterns, stats-grid,
+│   │                               # input, month-year-picker, nav-link, page-hero,
+│   │                               # policy-section-nav, save-button, separator, skeleton,
+│   │                               # skeleton-patterns, stats-grid, surface-card,
 │   │                               # switch, textarea, toast, back-button
 │   ├── layout/                     # TopBar, BottomNavigation, PullToRefresh
 │   └── features/
+│       ├── home/                   # WelcomeToast (가입 완료 토스트, ?welcome=1)
 │       ├── projects/               # ProjectCard, ProjectStatusBadge, ApplicationCard,
 │       │                           # ProjectListClient, ProjectFilters, ApplyButton,
-│       │                           # ShareButton, RecentProjectsSection, RecordRecentProject
-│       ├── profile/                # ProfileHeader, ProfileCompletionBar, ProfileTabsClient,
-│       │                           # BasicInfoTab, ProfileBasicForm, AvailabilityEditSheet,
-│       │                           # TechStackInput, TechStackSection, CareerSection,
-│       │                           # CareerSectionClient, CareerForm, CareerTimelineDot,
+│       │                           # ShareButton, RecentProjectsSection(미사용, 홈 노출 제거됨),
+│       │                           # RecordRecentProject
+│       ├── profile/                # ProfileHeader, ProfileCompletionBar, HomeProfileCompletionPrompt,
+│       │                           # ProfileTabsClient, BasicInfoTab, ProfileBasicForm,
+│       │                           # AvailabilityEditSheet, TechStackInput, TechStackSection,
+│       │                           # CareerSection, CareerSectionClient, CareerForm, CareerTimelineDot,
 │       │                           # ContractDocumentField, KakaoAddressInput
-│       │   └── tabs/               # EducationTab, SkillTab, ResumeTab, TabShared
+│       │   └── tabs/               # EducationTab(학력+자격증), SkillTab, ResumeTab, TabShared
 │       ├── notices/                # NoticeListClient
 │       ├── referrer/               # ReferrerSection
-│       ├── settings/               # NotificationSettings, LogoutButton
+│       ├── settings/               # EditProfileForm, WithdrawForm, NotificationSettings, LogoutButton
 │       └── signup/                 # SignupForm, PasswordStrength, PolicyModal
 ├── lib/
 │   ├── api/                        # apiFetch, ApiError (client.ts)
@@ -117,9 +126,11 @@ src/
 │   ├── supabase/                   # createClient (browser), createServerClient, createAdminClient
 │   │   └── queries/                # projects, applications, profile, notices, notifications, resume
 │   ├── kakao/                      # oauth.ts (구현), alimtalk.ts (stub)
+│   ├── sms/sendon.ts               # 센드온 SMS 발송 (구현) — 신규 지원 시 관리자 알림
 │   ├── crypto/                     # client.ts (RSA 암호화), rsa.ts (RSA 복호화)
 │   ├── config/env.ts               # 환경변수 타입 안전 접근
-│   ├── constants/                  # status.ts, limits.ts, contractDocuments.ts
+│   ├── constants/                  # status.ts, limits.ts, contractDocuments.ts,
+│   │                               # pageTitles.ts, profileTabs.ts, resume.ts
 │   └── utils/                      # cn, format, validation, skills, profile-completion, recent-projects
 ├── hooks/
 │   ├── useSubmit.ts                # 폼 제출 공통 (isLoading/error/try-catch)
@@ -176,6 +187,8 @@ src/
 - 모집중(`recruiting`) + 마감일 이전일 때만 지원 버튼 활성화
 - 지원 상태 플로우: `pending → reviewing → interview → accepted / rejected`
 - `pending` 상태에서만 프리랜서가 직접 취소 가능 (`pending → withdrawn`)
+- 지원 접수 시 관리자에게 센드온 SMS 발송 (`notifyAdminOfNewApplication`, `lib/sms/sendon.ts`)
+  - 발송 실패는 지원 자체를 막지 않도록 별도 try-catch로 격리
 
 ### 페이지네이션
 
@@ -184,11 +197,15 @@ src/
 
 ### 최근 본 프로젝트
 
-- localStorage 기반, 서버에서 존재 여부 검증 후 오래된 항목 자동 제거
-- `useSyncExternalStore`로 탭 간 동기화
+- localStorage 기반, `useSyncExternalStore`로 탭 간 동기화
+- 기록(`RecordRecentProject`, 프로젝트 상세 진입 시)만 현재 활성 상태
+- "서버 존재 여부 검증 후 삭제된 항목 자동 제거" 로직은 `RecentProjectsSection` 내부에만 있는데,
+  현재 이 컴포넌트를 렌더링하는 화면이 없어(홈 노출 제거 이후) 사실상 미실행 상태
 
 ### 회원 탈퇴
 
+- 비밀번호 재확인 필수: RSA 암호화된 비밀번호를 `signInWithPassword`로 검증 후 진행
+  (`persistSession: false` admin 클라이언트 사용, 현재 세션에 영향 없음)
 - 소프트 탈퇴: `profiles.account_status = 'withdrawn'` + `withdrawn_at` 기록
 - Supabase Auth 계정은 유지 (물리 삭제 아님)
 - 탈퇴 후 30일 데이터 보관 (개인정보 처리방침)
@@ -212,17 +229,22 @@ src/
 - 약관 인라인 모달 (`PolicyModal`)
 - 비밀번호 변경 (`/settings/password`, RSA 암호화, `PasswordStrength` 공유)
 - Supabase Auth 미들웨어 (보호된 라우트 + 탈퇴 회원 차단)
-- 로그아웃, 회원 탈퇴 (소프트 탈퇴)
+- 로그아웃, 회원 탈퇴 (비밀번호 재확인 + 소프트 탈퇴, `WithdrawForm`)
 - 이용약관 (/terms), 개인정보 처리방침 (/privacy)
 
 ### 홈
 
+- 가입 완료 토스트 (`WelcomeToast`, `?welcome=1`로 진입 시 1회 표시 후 쿼리 제거)
 - 인사 배너 (이름, 투입 가능 상태 배지, 예정일)
 - 지원 현황 통계 (전체/검토 중/면접/합격)
+- 프로필 완성도 넛지 (`HomeProfileCompletionPrompt`, 완성도 100% 미만일 때만 노출, 선택 시 `/profile?tab=` 딥링크)
 - 내 신청 현황 (최근 3건 가로 스크롤, 전체보기)
 - 모집 중인 프로젝트 (최신 3건, 기술 매칭 표시)
 - 공지사항 미리보기 (최신 2건, 중요 공지 강조)
-- 최근 본 프로젝트 (localStorage 기반, 서버 존재 검증)
+- 섹션별 `Promise.allSettled` 병렬 로드 — 개별 섹션 실패가 전체 홈 렌더를 막지 않음
+
+> 최근 본 프로젝트 홈 노출은 제거됨(`53bafb1`). `RecordRecentProject`가 프로젝트 상세 진입 시
+> localStorage에 계속 기록은 하지만, 현재 이를 보여주는 화면은 없음(`RecentProjectsSection` 미사용).
 
 ### 프로젝트
 
@@ -260,7 +282,7 @@ src/
 - 타임라인 UI (`CareerTimelineDot`)
 - 경력 CRUD (BottomSheet): 회사명, 직무, 기간, 현재 재직 여부, 설명, 기술 스택
 
-**탭 4: 스킬 인벤토리**
+**탭 4: 프로젝트** (내부적으로는 스킬 인벤토리 `skill_inventories`/`SkillTab`으로 지칭, UI 라벨만 "프로젝트")
 - 프로젝트 단위 스킬 기록 CRUD (BottomSheet)
 - 필드: 프로젝트명, 기간, 고객사, 소속회사, 산업분야, 응용분야, 역할
 - 개발환경: 기종, OS, 개발언어(태그), DBMS, TOOL(태그), 기타
@@ -302,6 +324,14 @@ src/
 - 설정 페이지에서 미등록 시 등록 가능
 - 1명 제한, 등록 후 프리랜서 변경 불가 (관리자만 가능)
 - 전화번호 마스킹 표시
+
+### SEO / 메타데이터
+
+- 루트 레이아웃: 공통 메타데이터(title 템플릿, description, keywords), OpenGraph/Twitter 카드, JSON-LD(Organization)
+- 라우트별 메타데이터: `/login`, `/settings/password` 등 개별 `layout.tsx`에서 `PAGE_TITLES` 상수를 title로 사용 (TopBar h1과 동일 소스)
+- `app/opengraph-image.tsx`: 동적 OG 이미지 생성
+- `app/robots.ts`, `app/sitemap.ts`: robots.txt / sitemap.xml 생성
+- 구글 서치 콘솔 소유권 확인용 정적 HTML 파일 (public/)
 
 ---
 
@@ -399,14 +429,20 @@ src/
 | `KAKAO_ALIMTALK_SENDER_KEY` | 카카오 알림톡 발신 키 |
 | `AUTH_RSA_PUBLIC_KEY` | RSA 공개키 (비밀번호 암호화) |
 | `AUTH_RSA_PRIVATE_KEY` | RSA 개인키 (서버 복호화) |
+| `SENDON_ID` | 센드온 SMS API 계정 ID |
+| `SENDON_API_KEY` | 센드온 SMS API 키 |
+| `SENDON_FROM` | 센드온 SMS 발신번호 |
+| `SENDON_ADMIN_NOTIFY_PHONE` | 신규 지원 알림을 받을 관리자 전화번호 |
+| `SENDON_PROXY_URL` | 센드온 발신 IP 화이트리스트용 고정 IP 프록시 URL (선택) |
 
 ---
 
 ## TODO
 
-- **카카오 알림톡 실제 연동**: `lib/kakao/alimtalk.ts` 현재 console.log stub 상태
+- **카카오 알림톡 실제 연동**: `lib/kakao/alimtalk.ts` 현재 console.log stub 상태 (프리랜서 대상 알림)
   - 제공업체(NHN Cloud, 솔라피 등) 계약 필요
   - 연동 후 구현할 기능: 신규 프로젝트 등록 시 대상 프리랜서 전체 발송, 지원 상태 변경 시 해당 프리랜서 발송
+  - 참고: 관리자 대상 SMS 알림(신규 지원 발생)은 센드온으로 이미 구현·연동 완료 (`lib/sms/sendon.ts`)
 
 ---
 
