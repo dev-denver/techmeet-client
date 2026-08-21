@@ -81,10 +81,10 @@ function LoginForm() {
           {/* 로고 */}
           <div className="flex flex-col items-center gap-3">
             <div className="w-16 h-16 rounded-2xl bg-primary flex items-center justify-center">
-              <span className="text-primary-foreground text-2xl font-bold">T</span>
+              <span className="text-primary-foreground text-xl font-bold">T</span>
             </div>
             <div className="text-center">
-              <h1 className="text-2xl font-bold tracking-tight">TechMeet</h1>
+              <h1 className="text-xl font-bold tracking-tight">TechMeet</h1>
               <p className="text-sm text-muted-foreground mt-1">테크밋</p>
             </div>
           </div>
