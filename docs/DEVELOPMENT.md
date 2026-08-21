@@ -57,9 +57,20 @@
 ## RSA 암호화 패턴
 
 - 비밀번호는 클라이언트에서 RSA 공개키로 암호화 후 전송, 서버에서 복호화
-- 적용 범위: 로그인 (`/api/auth/login`), 회원가입 (`/api/auth/signup`), 비밀번호 변경 (`/api/auth/password`)
+- 적용 범위: 로그인 (`/api/auth/login`), 회원가입 (`/api/auth/signup`), 비밀번호 변경 (`/api/auth/password`),
+  회원 탈퇴 시 비밀번호 재확인 (`/api/auth/withdraw`)
 - 공개키 발급: `GET /api/auth/public-key` → 클라이언트 `lib/crypto/client.ts`의 `encryptPassword()`로 암호화
 - 복호화: 서버 `lib/crypto/rsa.ts`의 `decryptPassword()`
+- 탈퇴처럼 "재확인"이 목적일 때는 복호화한 비밀번호를 `persistSession: false` admin 클라이언트로
+  `signInWithPassword()` 검증에만 사용하고 현재 세션에는 영향을 주지 않는다
+
+## SMS 발송 패턴 (센드온)
+
+- 관리자 알림(신규 지원 발생)은 `lib/sms/sendon.ts`의 `notifyAdminOfNewApplication()` 사용
+- 발송 실패가 원래 요청(지원 신청)을 막지 않도록 별도 try-catch로 격리하고 `console.error`만 남긴다
+- 센드온은 발신 IP 화이트리스트를 요구 — `SENDON_PROXY_URL` 지정 시 `https-proxy-agent`로 고정 IP 프록시를
+  경유하며, 모듈이 실제로 쓰이는 런타임 시점에만 적용해 빌드 단계 네트워크 요청에는 영향을 주지 않는다
+- 카카오 알림톡(`lib/kakao/alimtalk.ts`, 프리랜서 대상)과는 별개 채널이며 알림톡은 아직 stub 상태
 
 ## 에러 처리 패턴
 
@@ -87,6 +98,17 @@
 - `src/app/(auth)/error.tsx` — (auth) 그룹 글로벌 폴백 (AlertCircle 아이콘 + 재시도 버튼)
 - Server Component에서 throw 발생 시 자동으로 error.tsx 표시
 - 개별 섹션 실패가 전체 페이지를 중단시키지 않아야 할 때는 `Promise.allSettled` 사용
+
+## 페이지 타이틀 패턴
+
+- `(auth)` 그룹 라우트의 타이틀은 `lib/constants/pageTitles.ts`의 `PAGE_TITLES` 상수를 단일 소스로 사용
+- TopBar 헤더(h1)와 각 라우트 `layout.tsx`/`page.tsx`의 `metadata.title`이 동일 값을 참조하도록 동기화
+- 라우트를 추가/변경할 때는 `PAGE_TITLES`에 항목을 먼저 추가한 뒤 TopBar와 metadata 양쪽에서 이를 참조
+
+## 로딩 상태 패턴
+
+- `(auth)` 그룹 라우트마다 `loading.tsx`를 병행 배치해 Suspense 로딩 UI 제공
+- `Skeleton` / `SkeletonCard` / `SkeletonBadgeRow` / `SkeletonSectionHeader` 조합으로 실제 레이아웃과 유사한 스켈레톤 구성
 
 ## BottomSheet 패턴
 
@@ -152,6 +174,8 @@
 - `PageHero` (`components/ui/`): 상단 다크 헤더 배경 래퍼 (`bg-primary px-5 pt-6 pb-5`, className으로 pb 오버라이드)
 - `StatsGrid` (`components/ui/`): 통계 그리드 (stats 배열, valueSize, labelSize)
 - `SkeletonCard` / `SkeletonBadgeRow` / `SkeletonSectionHeader` (`components/ui/skeleton-patterns.tsx`): 로딩 스켈레톤 조각
+- `SurfaceCard` / `surfaceCardVariants` (`components/ui/surface-card.tsx`): 카드 표면 스타일 (`rounded-xl border bg-card`), padding variant(`md`/`compact`/`none`)
+- `PolicySectionNav` (`components/ui/policy-section-nav.tsx`): 약관/개인정보처리방침처럼 섹션이 많은 정적 문서용 앵커 칩 내비게이션
 - `Switch` (`components/ui/switch.tsx`): 토글 스위치 (`{ checked, onChange, disabled?, "aria-label"? }`, `role="switch"`)
 - `PasswordStrength` (`components/features/signup/`): 비밀번호 강도 표시 (회원가입/비밀번호 변경에서 공유)
 - `NavLink` (`components/ui/nav-link.tsx`): 내부 페이지 이동용 `next/link` 대체. `<a href>`는 모바일에서 블루투스 마우스 호버 시 하단에 주소가 노출되므로, `role="link"` + `router.push`로 이동 처리 — 내부 네비게이션(카드/리스트 아이템/아이콘 버튼 등)에는 `Link` 대신 반드시 이 컴포넌트 사용. 다운로드용 `<a download>`는 예외. 기본 태그는 `div`(`as="div"`)이며, `<p>` 등 phrasing content 내부의 인라인 텍스트 링크는 `as="span"` 필수 (div는 p의 자식으로 올 수 없어 하이드레이션 에러 발생)
