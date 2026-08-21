@@ -105,7 +105,7 @@ export function ApplicationCard({
 
   const content = (
     <>
-      <div className="px-4 pt-4 pb-3.5 space-y-2.5">
+      <div className="px-4 pt-4 pb-4 space-y-2.5">
         {/* 상태 + 날짜 */}
         <div className="flex items-center justify-between gap-2">
           <Badge variant="outline" shape="pill" className={config.className}>
@@ -187,7 +187,7 @@ export function ApplicationCard({
         <div
           className={cn(
             surfaceCardVariants({ padding: "none" }),
-            "border-l-4 border-l-0 opacity-60",
+            "border-l-4 opacity-60",
             accent
           )}
         >
@@ -201,7 +201,7 @@ export function ApplicationCard({
     <div className="relative">
       <NavLink
         href={`/projects/${application.projectId}`}
-        className={cn(surfaceCardVariants({ padding: "none" }), "block border-l-4 border-l-0", accent)}
+        className={cn(surfaceCardVariants({ padding: "none" }), "block border-l-4", accent)}
       >
         {content}
       </NavLink>
