@@ -3,7 +3,10 @@
 import { useState } from "react";
 import { useRouter } from "next/navigation";
 import { Button } from "@/components/ui/button";
+import { Badge } from "@/components/ui/badge";
 import { NavLink } from "@/components/ui/nav-link";
+import { surfaceCardVariants } from "@/components/ui/surface-card";
+import { cn } from "@/lib/utils/cn";
 import { useToast } from "@/components/ui/toast";
 import { applicationsApi } from "@/lib/api/applications";
 import { formatDate } from "@/lib/utils/format";
@@ -58,9 +61,9 @@ export function ApplicationCard({
   if (compact) {
     const content = (
       <>
-        <span className={`text-xs font-semibold px-2 py-0.5 rounded-full w-fit inline-block ${config.className}`}>
+        <Badge variant="outline" shape="pill" className={cn("w-fit", config.className)}>
           {config.label}
-        </span>
+        </Badge>
         <p className="text-sm font-semibold leading-snug line-clamp-2">
           {application.isProjectDeleted ? "삭제된 프로젝트" : application.projectTitle}
         </p>
@@ -72,7 +75,12 @@ export function ApplicationCard({
 
     if (application.isProjectDeleted) {
       return (
-        <div className="block rounded-xl bg-card border border-border opacity-60 min-w-[180px] max-w-[200px] p-3.5 space-y-2.5">
+        <div
+          className={cn(
+            surfaceCardVariants({ padding: "compact" }),
+            "opacity-60 min-w-[180px] max-w-[200px] space-y-2.5"
+          )}
+        >
           {content}
         </div>
       );
@@ -81,7 +89,10 @@ export function ApplicationCard({
     return (
       <NavLink
         href={`/projects/${application.projectId}`}
-        className="block rounded-xl bg-card border border-border hover:border-muted-foreground/40 transition-colors min-w-[180px] max-w-[200px] p-3.5 space-y-2.5"
+        className={cn(
+          surfaceCardVariants({ padding: "compact" }),
+          "hover:border-muted-foreground/40 transition-colors min-w-[180px] max-w-[200px] space-y-2.5"
+        )}
       >
         {content}
       </NavLink>
@@ -97,9 +108,9 @@ export function ApplicationCard({
       <div className="px-4 pt-4 pb-3.5 space-y-2.5">
         {/* 상태 + 날짜 */}
         <div className="flex items-center justify-between gap-2">
-          <span className={`text-xs font-semibold px-2.5 py-0.5 rounded-full ${config.className}`}>
+          <Badge variant="outline" shape="pill" className={config.className}>
             {config.label}
-          </span>
+          </Badge>
           <span className="text-xs text-muted-foreground">
             {formatDate(application.appliedAt)} 지원
           </span>
@@ -173,7 +184,13 @@ export function ApplicationCard({
   if (application.isProjectDeleted) {
     return (
       <div className="relative">
-        <div className={`rounded-xl border-l-4 border border-l-0 bg-card overflow-hidden opacity-60 ${accent}`}>
+        <div
+          className={cn(
+            surfaceCardVariants({ padding: "none" }),
+            "border-l-4 border-l-0 opacity-60",
+            accent
+          )}
+        >
           {content}
         </div>
       </div>
@@ -184,7 +201,7 @@ export function ApplicationCard({
     <div className="relative">
       <NavLink
         href={`/projects/${application.projectId}`}
-        className={`block rounded-xl border-l-4 border border-l-0 bg-card overflow-hidden ${accent}`}
+        className={cn(surfaceCardVariants({ padding: "none" }), "block border-l-4 border-l-0", accent)}
       >
         {content}
       </NavLink>

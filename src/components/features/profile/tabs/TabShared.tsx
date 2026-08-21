@@ -6,6 +6,8 @@ export { Plus, Pencil, Trash2, ChevronDown, ChevronUp };
 import { SaveButton } from "@/components/ui/save-button";
 import { ErrorMessage } from "@/components/ui/error-message";
 import { BottomSheet } from "@/components/ui/bottom-sheet";
+import { surfaceCardVariants } from "@/components/ui/surface-card";
+import { cn } from "@/lib/utils/cn";
 
 export function Tag({ children }: { children: React.ReactNode }) {
   return (
@@ -17,7 +19,7 @@ export function Tag({ children }: { children: React.ReactNode }) {
 
 export function CardWrap({ children, className }: { children: React.ReactNode; className?: string }) {
   return (
-    <div className={`rounded-xl border border-border bg-card overflow-hidden ${className ?? ""}`}>
+    <div className={cn(surfaceCardVariants({ padding: "none" }), className)}>
       {children}
     </div>
   );

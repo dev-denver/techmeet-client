@@ -14,12 +14,13 @@ export function BottomSheet({ open, onClose, header, footer, children }: BottomS
 
   return (
     <div
-      className="fixed inset-0 bg-black/50 z-[60] flex items-end justify-center animate-in fade-in duration-200"
+      className="fixed inset-0 bg-overlay z-[60] flex items-end justify-center animate-in fade-in duration-200"
       onClick={(e) => {
         if (e.target === e.currentTarget) onClose();
       }}
     >
       <div
+        // 위로 뜨는 방향성 그림자 — 공유 shadow-sm/md 스케일과 다른 별도 값이라 인라인 유지
         className="w-full max-w-[600px] max-h-[85vh] rounded-t-2xl bg-card flex flex-col overflow-hidden shadow-[0_-8px_30px_rgba(0,0,0,0.12)] animate-in slide-in-from-bottom duration-300"
         onClick={(e) => e.stopPropagation()}
       >

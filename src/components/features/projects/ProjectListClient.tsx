@@ -190,7 +190,7 @@ export function ProjectListClient({ initialProjects, initialTotal, mySkills }: P
           />
         ) : (
           <>
-            <div className={cn("space-y-4 transition-opacity", isLoading && "opacity-50")}>
+            <div className={cn("space-y-3 transition-opacity", isLoading && "opacity-50")}>
               {displayedProjects.map((project) => (
                 <ProjectCard key={project.id} project={project} mySkills={mySkills} />
               ))}

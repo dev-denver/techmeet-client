@@ -9,6 +9,8 @@ import { ErrorMessage } from "@/components/ui/error-message";
 import { EmptyState } from "@/components/ui/empty-state";
 import { ConfirmSheet } from "@/components/ui/confirm-sheet";
 import { useToast } from "@/components/ui/toast";
+import { surfaceCardVariants } from "@/components/ui/surface-card";
+import { cn } from "@/lib/utils/cn";
 import { SectionHeader } from "./TabShared";
 import { profileApi } from "@/lib/api/profile";
 import { ApiError } from "@/lib/api/client";
@@ -105,7 +107,7 @@ export function ResumeTab({ resumes: initialResumes }: ResumeTabProps) {
           <ul className="space-y-2.5">
             {/* 업로드 중인 항목 */}
             {isUploading && (
-              <li className="flex items-center gap-3 rounded-xl border border-border bg-card px-4 py-3.5 opacity-60">
+              <li className={cn(surfaceCardVariants({ padding: "none" }), "flex items-center gap-3 px-4 py-3.5 opacity-60")}>
                 <FileText className="h-5 w-5 shrink-0 text-muted-foreground" />
                 <span className="flex-1 text-sm text-foreground truncate">{uploadingName}</span>
                 <span className="w-4 h-4 border-2 border-muted-foreground/30 border-t-muted-foreground rounded-full animate-spin shrink-0" />
@@ -115,7 +117,7 @@ export function ResumeTab({ resumes: initialResumes }: ResumeTabProps) {
             {resumes.map((resume) => (
               <li
                 key={resume.id}
-                className="flex items-center gap-3 rounded-xl border border-border bg-card px-4 py-3.5"
+                className={cn(surfaceCardVariants({ padding: "none" }), "flex items-center gap-3 px-4 py-3.5")}
               >
                 <FileText className="h-5 w-5 shrink-0 text-muted-foreground" />
                 <div className="flex-1 min-w-0">

@@ -1,6 +1,7 @@
 "use client";
 
 import { cn } from "@/lib/utils/cn";
+import { surfaceCardVariants } from "@/components/ui/surface-card";
 import type { CompletionItem, ProfileTabKey } from "@/lib/utils/profile-completion";
 
 interface ProfileCompletionBarProps {
@@ -14,7 +15,7 @@ export function ProfileCompletionBar({ percent, missing, onSelect, className }: 
   const complete = percent >= 100;
 
   return (
-    <div className={cn("rounded-xl border border-border bg-card px-4 py-3.5", className)}>
+    <div className={cn(surfaceCardVariants({ padding: "none" }), "px-4 py-3.5", className)}>
       <div className="flex items-center justify-between mb-2">
         <span className="text-sm font-semibold">프로필 완성도</span>
         <span className={cn("text-sm font-bold tabular-nums", complete ? "text-status-success" : "text-foreground")}>

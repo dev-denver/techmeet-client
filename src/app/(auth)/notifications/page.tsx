@@ -3,6 +3,8 @@ import { CheckCircle, XCircle, Clock, Megaphone, User, FolderOpen, History, Chev
 import { getAlimtalkLogs } from "@/lib/supabase/queries/notifications";
 import { EmptyState } from "@/components/ui/empty-state";
 import { NavLink } from "@/components/ui/nav-link";
+import { surfaceCardVariants } from "@/components/ui/surface-card";
+import { cn } from "@/lib/utils/cn";
 import { PAGE_TITLES } from "@/lib/constants";
 import { AlimtalkServiceType } from "@/types";
 import { formatDate } from "@/lib/utils/format";
@@ -117,12 +119,15 @@ export default async function NotificationsPage() {
               <NavLink
                 key={log.id}
                 href={href}
-                className="block rounded-xl border border-border bg-card overflow-hidden hover:bg-muted/40 active:bg-muted transition-colors"
+                className={cn(
+                  surfaceCardVariants({ padding: "none" }),
+                  "block hover:bg-muted/40 active:bg-muted transition-colors"
+                )}
               >
                 {cardInner}
               </NavLink>
             ) : (
-              <div key={log.id} className="rounded-xl border border-border bg-card overflow-hidden">
+              <div key={log.id} className={surfaceCardVariants({ padding: "none" })}>
                 {cardInner}
               </div>
             );

@@ -3,6 +3,8 @@
 import { useEffect, useSyncExternalStore } from "react";
 import { History } from "lucide-react";
 import { NavLink } from "@/components/ui/nav-link";
+import { surfaceCardVariants } from "@/components/ui/surface-card";
+import { cn } from "@/lib/utils/cn";
 import { projectsApi } from "@/lib/api/projects";
 import { ApiError } from "@/lib/api/client";
 import {
@@ -64,7 +66,10 @@ export function RecentProjectsSection({ excludeId }: RecentProjectsSectionProps)
           <NavLink
             key={p.id}
             href={`/projects/${p.id}`}
-            className="block shrink-0 min-w-[160px] max-w-[200px] rounded-xl border border-border bg-card px-3.5 py-3 hover:border-muted-foreground/40 transition-colors"
+            className={cn(
+              surfaceCardVariants({ padding: "compact" }),
+              "block shrink-0 min-w-[160px] max-w-[200px] hover:border-muted-foreground/40 transition-colors"
+            )}
           >
             <p className="text-sm font-semibold leading-snug line-clamp-2">{p.title}</p>
           </NavLink>
