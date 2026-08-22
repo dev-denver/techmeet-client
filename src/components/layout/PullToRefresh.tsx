@@ -92,7 +92,7 @@ export function PullToRefresh() {
   return (
     <div
       aria-hidden={!refreshing}
-      className="pointer-events-none absolute left-1/2 top-16 z-40 flex -translate-x-1/2 items-center justify-center transition-opacity"
+      className="pointer-events-none absolute left-1/2 top-[calc(4rem+env(safe-area-inset-top))] z-40 flex -translate-x-1/2 items-center justify-center transition-opacity"
       style={{ transform: `translate(-50%, ${pull}px)`, opacity: visible ? 1 : 0 }}
     >
       <div className="flex h-9 w-9 items-center justify-center rounded-full border border-border bg-background shadow-md">

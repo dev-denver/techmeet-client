@@ -2,6 +2,8 @@
 
 import { useState } from "react";
 import { Share2, Check } from "lucide-react";
+import { Capacitor } from "@capacitor/core";
+import { Share } from "@capacitor/share";
 import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/utils/cn";
 
@@ -15,6 +17,15 @@ export function ShareButton({ projectId, className }: ShareButtonProps) {
 
   async function handleShare() {
     const url = `${window.location.origin}/projects/${projectId}`;
+
+    if (Capacitor.isNativePlatform()) {
+      try {
+        await Share.share({ url });
+        return;
+      } catch {
+        // 사용자 취소 등 → clipboard fallback
+      }
+    }
 
     if (navigator.share) {
       try {

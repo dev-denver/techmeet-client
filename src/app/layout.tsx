@@ -4,6 +4,7 @@ import localFont from "next/font/local";
 import { SpeedInsights } from "@vercel/speed-insights/next";
 import { Analytics } from "@vercel/analytics/next";
 import { publicEnv } from "@/lib/config/env";
+import { NativeBootstrap } from "@/components/native/NativeBootstrap";
 import "./globals.css";
 
 const pretendard = localFont({
@@ -102,6 +103,7 @@ export default function RootLayout({
           dangerouslySetInnerHTML={{ __html: JSON.stringify(organizationJsonLd) }}
         />
         {children}
+        <NativeBootstrap />
         <SpeedInsights />
         <Analytics />
       </body>

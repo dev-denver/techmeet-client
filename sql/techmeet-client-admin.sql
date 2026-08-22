@@ -21,6 +21,8 @@
 --            12. alimtalk_logs     — 카카오 알림톡 발송 이력
 --            13. admin_audit_logs  — 관리자 감사 로그
 --
+--   [CLIENT] 14. push_tokens       — 푸시 알림 디바이스 토큰 (Capacitor 네이티브 앱) / client CRUD
+--
 -- 설계 원칙:
 --   - profiles.id = auth.users.id (client 코드 호환)
 --   - admin_users는 별도 UUID PK + auth_user_id FK 구조
@@ -421,6 +423,35 @@ create policy "본인 이력서 삭제" on public.profile_resumes
   for delete using (profile_id = auth.uid());
 
 create index if not exists idx_profile_resumes_profile_id on public.profile_resumes(profile_id);
+
+
+-- ------------------------------------------------------------
+-- 14. push_tokens (푸시 알림 디바이스 토큰) [CLIENT]
+-- ------------------------------------------------------------
+create table if not exists public.push_tokens (
+  id          uuid        default gen_random_uuid() primary key,
+  profile_id  uuid        references public.profiles(id) on delete cascade not null,
+  platform    text        not null,
+  token       text        not null,
+  created_at  timestamptz not null default now(),
+  updated_at  timestamptz not null default now(),
+  unique (profile_id, token)
+);
+
+alter table public.push_tokens enable row level security;
+
+create policy "push_tokens_select_own" on public.push_tokens
+  for select using (auth.uid() = profile_id);
+
+create policy "push_tokens_insert_own" on public.push_tokens
+  for insert with check (auth.uid() = profile_id);
+
+create policy "push_tokens_delete_own" on public.push_tokens
+  for delete using (auth.uid() = profile_id);
+
+create trigger push_tokens_updated_at
+  before update on public.push_tokens
+  for each row execute function public.set_updated_at();
 
 
 -- ============================================================

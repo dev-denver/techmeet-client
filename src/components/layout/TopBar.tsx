@@ -48,11 +48,11 @@ export function TopBar() {
   return (
     <header
       className={cn(
-        "fixed top-0 left-1/2 -translate-x-1/2 w-full max-w-[600px] h-14 bg-background z-50 flex items-center px-4 transition-colors border-b",
+        "fixed top-0 left-1/2 -translate-x-1/2 w-full max-w-[600px] bg-background z-50 transition-colors border-b pt-[env(safe-area-inset-top)]",
         scrolled ? "border-border" : "border-transparent"
       )}
     >
-      <div className="flex items-center w-full gap-3">
+      <div className="flex items-center w-full h-14 px-4 gap-3">
         {showBackButton && (
           <button
             onClick={() => router.back()}

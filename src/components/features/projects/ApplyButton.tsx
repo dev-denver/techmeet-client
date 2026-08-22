@@ -2,6 +2,8 @@
 
 import { useState } from "react";
 import { useRouter } from "next/navigation";
+import { Capacitor } from "@capacitor/core";
+import { Haptics, ImpactStyle } from "@capacitor/haptics";
 import { Button } from "@/components/ui/button";
 import { BottomSheet } from "@/components/ui/bottom-sheet";
 import { ErrorMessage } from "@/components/ui/error-message";
@@ -61,6 +63,9 @@ export function ApplyButton({ projectId }: ApplyButtonProps) {
         }),
       {
         onSuccess: () => {
+          if (Capacitor.isNativePlatform()) {
+            void Haptics.impact({ style: ImpactStyle.Light });
+          }
           setOpen(false);
           setNote("");
           setExpectedRate("");

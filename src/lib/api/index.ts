@@ -5,4 +5,5 @@ export { noticesApi } from "./notices";
 export { authApi } from "./auth";
 export { settingsApi } from "./settings";
 export { notificationsApi } from "./notifications";
+export { pushApi } from "./push";
 export { apiFetch, ApiError } from "./client";
