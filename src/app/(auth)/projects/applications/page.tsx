@@ -3,6 +3,7 @@ import { FolderOpen } from "lucide-react";
 import { ApplicationCard } from "@/components/features/projects/ApplicationCard";
 import { EmptyState } from "@/components/ui/empty-state";
 import { NavLink } from "@/components/ui/nav-link";
+import { PageHero } from "@/components/ui/page-hero";
 import { getApplications } from "@/lib/supabase/queries/applications";
 import { PAGE_TITLES } from "@/lib/constants";
 import { ApplicationStatus } from "@/types";
@@ -56,13 +57,15 @@ export default async function ApplicationsPage() {
 
   return (
     <div>
-      {/* 요약 바 */}
-      <p className="px-4 pt-4 pb-2 text-xs text-muted-foreground">
-        전체 {total}건 · 검토중 {reviewingCount} · 면접예정 {interviewCount} · 합격 {acceptedCount}
-      </p>
+      {/* 요약 히어로 */}
+      <PageHero className="py-4">
+        <p className="text-primary-foreground/70 text-xs">
+          전체 {total}건 · 검토중 {reviewingCount} · 면접예정 {interviewCount} · 합격 {acceptedCount}
+        </p>
+      </PageHero>
 
       {/* 카드 리스트 */}
-      <div className="p-4 pt-2 space-y-4">
+      <div className="p-4 space-y-4">
         {applications.length > 0 ? (
           <>
             <ApplicationGroup title="진행중" applications={inProgress} />
