@@ -1,0 +1,29 @@
+{
+  "project_info": {
+    "project_number": "414385806376",
+    "project_id": "techmeet-client",
+    "storage_bucket": "techmeet-client.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:414385806376:android:93688020d67d0ffd7ce91d",
+        "android_client_info": {
+          "package_name": "app.techmeet.client"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyDk4WjFqieav0d-0OH0iuskUPb-Q49i-8s"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
