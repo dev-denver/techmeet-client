@@ -22,8 +22,8 @@ export function BottomNavigation() {
   }, [router]);
 
   return (
-    <nav className="fixed bottom-0 left-1/2 -translate-x-1/2 w-full max-w-[600px] h-16 bg-background border-t border-border z-50">
-      <div className="flex h-full">
+    <nav className="fixed bottom-0 left-1/2 -translate-x-1/2 w-full max-w-[600px] bg-background border-t border-border z-50 pb-[env(safe-area-inset-bottom)]">
+      <div className="flex h-16">
         {navItems.map(({ href, label, icon: Icon }) => {
           const isActive =
             href === "/"

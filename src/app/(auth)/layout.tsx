@@ -2,6 +2,7 @@ import { TopBar } from "@/components/layout/TopBar";
 import { BottomNavigation } from "@/components/layout/BottomNavigation";
 import { PullToRefresh } from "@/components/layout/PullToRefresh";
 import { ToastProvider } from "@/components/ui/toast";
+import { PushRegistration } from "@/components/native/PushRegistration";
 
 export default function AuthLayout({
   children,
@@ -13,7 +14,8 @@ export default function AuthLayout({
       <ToastProvider>
         <TopBar />
         <PullToRefresh />
-        <main className="overflow-y-auto h-screen pt-14 pb-16">
+        <PushRegistration />
+        <main className="overflow-y-auto h-screen pt-[calc(3.5rem+env(safe-area-inset-top))] pb-[calc(4rem+env(safe-area-inset-bottom))]">
           {children}
         </main>
         <BottomNavigation />
