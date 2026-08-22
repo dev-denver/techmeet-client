@@ -3,13 +3,40 @@ import { FolderOpen } from "lucide-react";
 import { ApplicationCard } from "@/components/features/projects/ApplicationCard";
 import { EmptyState } from "@/components/ui/empty-state";
 import { NavLink } from "@/components/ui/nav-link";
-import { PageHero } from "@/components/ui/page-hero";
-import { StatsGrid } from "@/components/ui/stats-grid";
 import { getApplications } from "@/lib/supabase/queries/applications";
 import { PAGE_TITLES } from "@/lib/constants";
 import { ApplicationStatus } from "@/types";
+import type { Application } from "@/types";
 
 export const metadata: Metadata = { title: PAGE_TITLES["/projects/applications"] };
+
+const IN_PROGRESS_STATUSES: ApplicationStatus[] = [
+  ApplicationStatus.Interview,
+  ApplicationStatus.Reviewing,
+  ApplicationStatus.Pending,
+];
+const ENDED_STATUSES: ApplicationStatus[] = [
+  ApplicationStatus.Accepted,
+  ApplicationStatus.Rejected,
+  ApplicationStatus.Withdrawn,
+];
+
+function ApplicationGroup({ title, applications }: { title: string; applications: Application[] }) {
+  if (applications.length === 0) return null;
+
+  return (
+    <div>
+      <p className="text-xs font-semibold text-muted-foreground uppercase tracking-wider mb-2">
+        {title}
+      </p>
+      <div className="space-y-3">
+        {applications.map((app) => (
+          <ApplicationCard key={app.id} application={app} />
+        ))}
+      </div>
+    </div>
+  );
+}
 
 export default async function ApplicationsPage() {
   const { data: applications, total } = await getApplications();
@@ -24,37 +51,23 @@ export default async function ApplicationsPage() {
     (a) => a.status === ApplicationStatus.Accepted
   ).length;
 
+  const inProgress = applications.filter((a) => IN_PROGRESS_STATUSES.includes(a.status));
+  const ended = applications.filter((a) => ENDED_STATUSES.includes(a.status));
+
   return (
     <div>
-      {/* 히어로 */}
-      <PageHero>
-        <div className="flex items-baseline gap-2">
-          <p className="text-primary-foreground/50 text-xs font-medium tracking-wide">총 지원 건수</p>
-        </div>
-        <p className="text-primary-foreground font-bold leading-none mt-0.5">
-          <span className="text-xl font-mono tabular-nums">{total}</span>
-          <span className="text-base font-medium text-primary-foreground/50 ml-1">건</span>
-        </p>
-
-        <StatsGrid
-          className="mt-5"
-          compact
-          valueSize="lg"
-          labelSize="10px"
-          stats={[
-            { label: "검토 중", value: reviewingCount },
-            { label: "면접 예정", value: interviewCount },
-            { label: "합격", value: acceptedCount },
-          ]}
-        />
-      </PageHero>
+      {/* 요약 바 */}
+      <p className="px-4 pt-4 pb-2 text-xs text-muted-foreground">
+        전체 {total}건 · 검토중 {reviewingCount} · 면접예정 {interviewCount} · 합격 {acceptedCount}
+      </p>
 
       {/* 카드 리스트 */}
-      <div className="p-4 space-y-3">
+      <div className="p-4 pt-2 space-y-4">
         {applications.length > 0 ? (
-          applications.map((app) => (
-            <ApplicationCard key={app.id} application={app} />
-          ))
+          <>
+            <ApplicationGroup title="진행중" applications={inProgress} />
+            <ApplicationGroup title="종료됨" applications={ended} />
+          </>
         ) : (
           <EmptyState
             icon={FolderOpen}
